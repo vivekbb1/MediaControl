@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>TV Remotes</title>
+  <style>
+    :root {
+      --bg: #0f1117; --panel: #1a1d27; --panel2: #232735; --border: #2e3344;
+      --text: #e8ecf4; --muted: #8b93a7; --accent: #4f8cff; --danger: #f2555a;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: radial-gradient(1200px 600px at 10% -10%, #1a2744 0%, var(--bg) 55%);
+      color: var(--text); min-height: 100vh; padding: max(16px, env(safe-area-inset-top)) 16px 24px;
+    }
+    .wrap { max-width: 900px; margin: 0 auto; }
+    .top {
+      display: flex; align-items: center; gap: 12px; margin-bottom: 20px; flex-wrap: wrap;
+    }
+    h1 { font-size: clamp(1.3rem, 4vw, 1.8rem); flex: 1; min-width: 140px; }
+    .top-actions { display: flex; gap: 8px; align-items: center; position: relative; }
+    .badge { font-size: 0.72rem; background: #2a3550; color: var(--accent); padding: 4px 10px; border-radius: 999px; }
+    button.icon-btn, a.icon-btn {
+      width: 44px; height: 44px; border-radius: 12px;
+      display: inline-flex; align-items: center; justify-content: center;
+      text-decoration: none; cursor: pointer; padding: 0; border: 1px solid var(--border);
+      background: var(--panel2); color: var(--text);
+    }
+    button.icon-btn svg, a.icon-btn svg { width: 22px; height: 22px; display: block; }
+    button.icon-btn.primary { background: var(--accent); color: #fff; border-color: transparent; }
+    .menu {
+      position: absolute; top: calc(100% + 6px); right: 0; min-width: 210px;
+      background: var(--panel); border: 1px solid var(--border); border-radius: 12px;
+      box-shadow: 0 12px 40px rgba(0,0,0,.35); padding: 6px; z-index: 20;
+    }
+    .menu[hidden] { display: none; }
+    .menu a, .menu button {
+      display: flex; width: 100%; align-items: center; gap: 10px;
+      text-align: left; border: none; background: transparent; color: var(--text);
+      text-decoration: none; padding: 10px 12px; border-radius: 8px; font-size: 0.9rem;
+      cursor: pointer; min-height: 42px;
+    }
+    .menu a:hover, .menu button:hover { background: var(--panel2); }
+    .menu .hint { font-size: 0.75rem; color: var(--muted); padding: 4px 12px 8px; }
+    p.lead { color: var(--muted); margin-bottom: 20px; font-size: 0.9rem; }
+    .quick-remote {
+      display: flex; align-items: center; justify-content: space-between; gap: 12px;
+      flex-wrap: wrap; margin-bottom: 20px;
+    }
+    .quick-remote p { color: var(--muted); font-size: 0.85rem; margin: 0; }
+    .grid { display: grid; gap: 12px; }
+    .card {
+      background: var(--panel); border: 1px solid var(--border);
+      border-radius: 14px; padding: 16px 18px;
+    }
+    .room-card { display: flex; flex-direction: column; gap: 12px; }
+    .room-main { display: flex; gap: 10px; align-items: flex-start; flex: 1; }
+    .reorder { display: flex; flex-direction: column; gap: 4px; }
+    .reorder button {
+      width: 36px; height: 36px; min-height: 36px; padding: 0; border-radius: 8px;
+      background: var(--panel2); border: 1px solid var(--border); color: var(--text);
+      cursor: pointer; font-size: 0.9rem;
+    }
+    .reorder button:disabled { opacity: 0.35; cursor: default; }
+    @media (min-width: 560px) {
+      .room-card { flex-direction: row; align-items: center; justify-content: space-between; }
+    }
+    .meta { color: var(--muted); font-size: 0.82rem; margin-top: 4px; word-break: break-all; }
+    .links { display: flex; gap: 8px; flex-wrap: wrap; }
+    a.btn, button.btn {
+      text-decoration: none; color: var(--text); background: var(--panel2);
+      border: 1px solid var(--border); border-radius: 10px; padding: 10px 14px;
+      font-size: 0.85rem; font-weight: 600; cursor: pointer; min-height: 44px;
+      display: inline-flex; align-items: center;
+    }
+    a.btn.primary { background: var(--accent); border-color: transparent; color: #fff; }
+    button.btn.danger { color: var(--danger); border-color: rgba(242,85,90,.35); }
+    .empty { color: var(--muted); padding: 24px; text-align: center; }
+    .loc-section { margin-bottom: 20px; }
+    .loc-head {
+      display: flex; align-items: baseline; justify-content: space-between; gap: 10px;
+      margin-bottom: 10px; flex-wrap: wrap;
+    }
+    .loc-head h2 { font-size: 0.95rem; font-weight: 700; }
+    .loc-meta { font-size: 0.78rem; color: var(--muted); }
+    .loc-meta a { color: var(--accent); }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <a href="/app/" id="lovablePreview" style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px;padding:12px 16px;border-radius:12px;border:1px solid rgba(79,140,255,.4);background:rgba(79,140,255,.08);color:var(--text);text-decoration:none;font-size:.88rem;">
+      <span><strong style="color:var(--accent)">New UI preview</strong> — Lovable-ready React app at <code>/app/</code></span>
+      <span style="flex-shrink:0;background:var(--accent);color:#fff;padding:6px 12px;border-radius:8px;font-size:.75rem;font-weight:600;">Try it →</span>
+    </a>
+    <div class="top">
+      <h1 id="pageTitle">TV Remotes</h1>
+      <div class="top-actions">
+        <span class="badge" id="roleBadge" hidden></span>
+        <div class="menu-wrap" id="addWrap" hidden>
+          <button type="button" class="icon-btn primary" id="addMenuBtn" title="Add" aria-label="Add" aria-expanded="false" aria-haspopup="true">+</button>
+          <div class="menu" id="addMenu" hidden>
+            <div class="hint">Create</div>
+            <a href="/locations?new=1" id="addLocationLink">Add location</a>
+            <a href="/add" id="addRoomLink">Add room</a>
+          </div>
+        </div>
+        <div class="menu-wrap" id="settingsWrap" hidden>
+          <button type="button" class="icon-btn" id="settingsMenuBtn" title="Settings" aria-label="Settings" aria-expanded="false" aria-haspopup="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+          </button>
+          <div class="menu" id="settingsMenu" hidden>
+            <div class="hint">Settings</div>
+            <a href="/settings">All settings</a>
+            <a href="/settings#account">Account &amp; password</a>
+            <a href="/settings#locations" id="settingsLocationsLink">Locations</a>
+            <a href="/settings#templates">Layout templates</a>
+            <a href="/settings#ui">Homepage &amp; UI</a>
+          </div>
+        </div>
+        <button type="button" class="icon-btn" id="logoutBtn" title="Sign out" aria-label="Sign out">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
+        </button>
+      </div>
+    </div>
+    <p class="lead" id="lead">Locations group rooms by site. Each room has its own display IP for local control.</p>
+    <div class="card quick-remote" id="defaultRemoteCard" hidden>
+      <div>
+        <strong>Default remote</strong>
+        <p id="defaultRemoteLabel">Open your primary room remote.</p>
+      </div>
+      <a class="btn primary" id="defaultRemoteLink" href="#">Open remote</a>
+    </div>
+    <div id="list"></div>
+  </div>
+  <script>
+    let me = null;
+    let rooms = [];
+    let locations = [];
+    let site = {};
+    let defaultRemoteUrl = null;
+
+    function esc(s) {
+      return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
+    }
+
+    function roomPath(d) {
+      if (d.remote_url) return d.remote_url;
+      const loc = d.location || locations[0]?.id || 'main';
+      return `/d/${loc}/${d.id}`;
+    }
+
+    function setupPath(d) {
+      if (d.setup_url) return d.setup_url;
+      return `${roomPath(d)}/setup`;
+    }
+
+    function bindMenu(btnId, menuId) {
+      const btn = document.getElementById(btnId);
+      const menu = document.getElementById(menuId);
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const open = menu.hidden;
+        closeAllMenus();
+        menu.hidden = !open;
+        btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+      });
+    }
+
+    function closeAllMenus() {
+      document.querySelectorAll('.menu').forEach(m => { m.hidden = true; });
+      document.querySelectorAll('[aria-haspopup="true"]').forEach(b => b.setAttribute('aria-expanded', 'false'));
+    }
+
+    document.addEventListener('click', closeAllMenus);
+
+    function roomCard(d, i, canManage) {
+      const remote = roomPath(d);
+      const setup = setupPath(d);
+      return `
+        <div class="card room-card" data-id="${esc(d.id)}">
+          <div class="room-main">
+            ${canManage ? `<div class="reorder">
+              <button type="button" aria-label="Move up" ${i === 0 ? 'disabled' : ''} data-up="${i}">↑</button>
+              <button type="button" aria-label="Move down" ${i === rooms.length - 1 ? 'disabled' : ''} data-down="${i}">↓</button>
+            </div>` : ''}
+            <div>
+              <strong>${esc(d.title)}</strong>
+              <div class="meta">TV ${esc(d.ip)}:${d.port} · device ${d.device_id}<br><code>${esc(remote)}</code></div>
+            </div>
+          </div>
+          <div class="links">
+            <a class="btn primary" href="${esc(remote)}">Remote</a>
+            ${canManage ? `<a class="btn" href="${esc(setup)}">Setup</a>` : ''}
+            ${canManage && me?.is_master ? `<button type="button" class="btn danger" data-delete="${esc(d.id)}">Delete</button>` : ''}
+          </div>
+        </div>`;
+    }
+
+    function renderList() {
+      const list = document.getElementById('list');
+      const canManage = me?.role === 'admin' || me?.role === 'location_admin';
+      if (!rooms.length) {
+        list.innerHTML = '<div class="card empty">No rooms yet. Use <strong>+</strong> to add a location or room.</div>';
+        return;
+      }
+      const byLoc = {};
+      for (const loc of locations) byLoc[loc.id] = [];
+      const fallback = locations[0]?.id || 'main';
+      for (const d of rooms) {
+        const lid = d.location || fallback;
+        if (!byLoc[lid]) byLoc[lid] = [];
+        byLoc[lid].push(d);
+      }
+      const order = locations.length ? locations.map(l => l.id) : [fallback];
+      list.innerHTML = order.map(lid => {
+        const loc = locations.find(l => l.id === lid);
+        const items = byLoc[lid] || [];
+        if (!items.length && !loc) return '';
+        const remote = loc?.remote_url ? `<a href="${esc(loc.remote_url)}" target="_blank" rel="noopener">${esc(loc.remote_url)}</a>` : 'site server not configured';
+        const roomsHtml = items.map((d) => {
+          const idx = rooms.findIndex(r => r.id === d.id);
+          return roomCard(d, idx, canManage);
+        }).join('');
+        return `<section class="loc-section">
+          <div class="loc-head">
+            <h2>${esc(loc?.title || lid)}</h2>
+            <div class="loc-meta">${items.length} room${items.length === 1 ? '' : 's'} · ${remote}</div>
+          </div>
+          <div class="grid">${roomsHtml || '<div class="card empty">No rooms in this location.</div>'}</div>
+        </section>`;
+      }).join('');
+      list.querySelectorAll('[data-delete]').forEach(btn => {
+        btn.addEventListener('click', () => deleteRoom(btn.dataset.delete));
+      });
+      list.querySelectorAll('[data-up]').forEach(btn => {
+        btn.addEventListener('click', () => moveRoom(Number(btn.dataset.up), -1));
+      });
+      list.querySelectorAll('[data-down]').forEach(btn => {
+        btn.addEventListener('click', () => moveRoom(Number(btn.dataset.down), 1));
+      });
+    }
+
+    function applySiteUi() {
+      if (site.homepage_title) {
+        document.getElementById('pageTitle').textContent = site.homepage_title;
+        document.title = site.homepage_title;
+      }
+      if (site.homepage_lead) {
+        document.getElementById('lead').textContent = site.homepage_lead;
+      }
+      const card = document.getElementById('defaultRemoteCard');
+      if (me?.is_master && site.show_default_remote && defaultRemoteUrl) {
+        card.hidden = false;
+        document.getElementById('defaultRemoteLink').href = defaultRemoteUrl;
+        const room = rooms.find(r => defaultRemoteUrl.endsWith(`/${r.id}`));
+        document.getElementById('defaultRemoteLabel').textContent = room
+          ? `Quick open: ${room.title}`
+          : 'Open your primary room remote.';
+      } else {
+        card.hidden = true;
+      }
+    }
+
+    function moveRoom(idx, dir) {
+      const j = idx + dir;
+      if (j < 0 || j >= rooms.length) return;
+      [rooms[idx], rooms[j]] = [rooms[j], rooms[idx]];
+      renderList();
+      if (me?.is_master) saveOrder();
+    }
+
+    async function saveOrder() {
+      const res = await fetch('/api/displays/order', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ order: rooms.map(r => r.id) }),
+      });
+      const data = await res.json();
+      if (!data.ok) console.warn('Order save failed', data.error);
+    }
+
+    async function loadMe() {
+      const res = await fetch('/api/auth/me');
+      const data = await res.json();
+      if (!data.ok || !data.user) {
+        location.href = '/login';
+        return null;
+      }
+      me = data.user;
+      const badge = document.getElementById('roleBadge');
+      if (me.role === 'room') {
+        location.href = me.remote_url || '/';
+        return me;
+      }
+      badge.hidden = false;
+      badge.textContent = me.is_master ? 'Master admin' : 'Location admin';
+      document.getElementById('addWrap').hidden = false;
+      document.getElementById('settingsWrap').hidden = false;
+      if (!me.is_master) {
+        document.getElementById('addLocationLink').hidden = true;
+        document.getElementById('settingsLocationsLink').hidden = true;
+        const addRoom = document.getElementById('addRoomLink');
+        if (me.location_id) addRoom.href = `/add?location=${encodeURIComponent(me.location_id)}`;
+      }
+      bindMenu('addMenuBtn', 'addMenu');
+      bindMenu('settingsMenuBtn', 'settingsMenu');
+      return me;
+    }
+
+    async function load() {
+      try {
+        const res = await fetch('/api/displays');
+        const data = await res.json();
+        if (res.status === 401) { location.href = '/login'; return; }
+        rooms = data.displays || [];
+        locations = data.locations || [];
+        site = data.site || {};
+        defaultRemoteUrl = data.default_remote_url || null;
+        applySiteUi();
+        renderList();
+      } catch (err) {
+        document.getElementById('list').innerHTML = `<div class="card empty">${err.message}</div>`;
+      }
+    }
+
+    async function deleteRoom(id) {
+      const item = rooms.find(r => r.id === id);
+      const title = item?.title || id;
+      if (!confirm(`Delete room "${title}" (${id})? This cannot be undone.`)) return;
+      const res = await fetch(`/api/displays/${id}`, { method: 'DELETE' });
+      const data = await res.json();
+      if (!data.ok) alert(data.error || 'Delete failed');
+      else load();
+    }
+
+    document.getElementById('logoutBtn').addEventListener('click', async () => {
+      await fetch('/api/auth/logout', { method: 'POST' });
+      location.href = '/login';
+    });
+
+    loadMe().then(u => { if (u && u.role !== 'room') load(); });
+  </script>
+</body>
+</html>

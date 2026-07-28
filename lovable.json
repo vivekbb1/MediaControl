@@ -1,0 +1,28 @@
+{
+  "name": "flip-remote-ui",
+  "description": "Multimedia room remote — Lovable UI refresh targeting React/Vite frontend",
+  "workingDirectory": "frontend",
+  "stack": ["react", "typescript", "vite", "tailwindcss", "react-router"],
+  "backend": {
+    "type": "rest",
+    "baseUrl": "",
+    "auth": "cookie",
+    "cookieName": "flip_session",
+    "docs": "docs/LOVABLE_UI_SCOPE.md"
+  },
+  "routes": [
+    { "path": "/app/", "page": "Home", "roles": ["admin", "location_admin"] },
+    { "path": "/app/login", "page": "Login", "roles": ["public"] },
+    { "path": "/app/d/:location/:room", "page": "Remote", "roles": ["admin", "location_admin", "room"] },
+    { "path": "/app/d/:location/:room/setup", "page": "Setup", "roles": ["admin", "location_admin"] },
+    { "path": "/app/settings", "page": "Settings", "roles": ["admin", "location_admin"] },
+    { "path": "/app/locations", "page": "Locations", "roles": ["admin"] },
+    { "path": "/app/add", "page": "AddRoom", "roles": ["admin", "location_admin"] }
+  ],
+  "designTokens": {
+    "background": "#0f1117",
+    "panel": "#1a1d27",
+    "accent": "#4f8cff",
+    "danger": "#f2555a"
+  }
+}

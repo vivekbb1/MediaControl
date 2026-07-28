@@ -1,0 +1,90 @@
+# Known Samsung MDC input source codes (cmd 0x14)
+# default_category: sources | wireless | builtin | other
+# Flip Pro WM55B may NAK some codes — use Discover to see which ACK on your unit.
+
+categories:
+  sources: Sources
+  wireless: Screen Sharing
+  builtin: Built-in
+  other: Other
+
+catalog:
+  - code: "0x0F"
+    id: dp
+    title: DisplayPort
+    default_category: sources
+  - code: "0x14"
+    id: pc
+    title: PC
+    default_category: sources
+  - code: "0x18"
+    id: dvi
+    title: DVI
+    default_category: sources
+  - code: "0x20"
+    id: magicinfo_legacy
+    title: MagicInfo
+    default_category: builtin
+  - code: "0x21"
+    id: hdmi1
+    title: HDMI 1 / Teams
+    default_category: sources
+  - code: "0x22"
+    id: hdmi1_pc
+    title: HDMI 1 PC
+    default_category: sources
+  - code: "0x23"
+    id: hdmi2
+    title: HDMI 2 / STB
+    default_category: sources
+  - code: "0x24"
+    id: hdmi2_pc
+    title: HDMI 2 PC
+    default_category: sources
+  - code: "0x25"
+    id: usb_c
+    title: USB-C / Apple
+    default_category: sources
+  - code: "0x31"
+    id: hdmi3
+    title: HDMI 3
+    default_category: sources
+    note: WM55B has no HDMI 3 port — may fall back to Home
+  - code: "0x60"
+    id: magicinfo
+    title: MagicInfo S
+    default_category: builtin
+  - code: "0x61"
+    id: screen_mirror
+    title: AirPlay / SmartView+
+    default_category: wireless
+    note: Opens wireless cast screen (MDC 0x61). Same destination as AirPlay on WM55B; query may report 0x64
+  - code: "0x62"
+    id: internal_usb
+    title: Internal USB
+    default_category: sources
+  - code: "0x63"
+    id: url_launcher
+    title: URL Launcher
+    default_category: other
+  - code: "0x64"
+    id: touchscreen
+    title: Touchscreen / IWB
+    default_category: builtin
+  - code: "0x65"
+    id: browser
+    title: Browser
+    default_category: builtin
+  - code: "0x66"
+    id: web_workspace
+    title: Web Workspace
+    default_category: builtin
+  - code: "0x69"
+    id: usb_c2
+    title: USB-C 2
+    default_category: sources
+  - code: "0x6A"
+    id: airplay
+    title: AirPlay / SmartView+
+    default_category: wireless
+    note: Flip Pro WM55B — use 0x61 (0x6A NAKs). Same wireless screen as SmartView+

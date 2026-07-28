@@ -1,0 +1,1428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TV Setup</title>
+  <style>
+    :root {
+      --bg: #0f1117; --panel: #1a1d27; --panel2: #232735; --border: #2e3344;
+      --text: #e8ecf4; --muted: #8b93a7; --accent: #4f8cff; --ok: #3dd68c; --warn: #f5a524;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg); color: var(--text); min-height: 100vh; padding: 24px;
+    }
+    .wrap { max-width: 960px; margin: 0 auto; }
+    header { margin-bottom: 22px; }
+    h1 { font-size: 1.5rem; }
+    .sub { color: var(--muted); font-size: 0.9rem; margin-top: 6px; }
+    .header-top {
+      display: flex; align-items: flex-start; justify-content: space-between; gap: 12px;
+    }
+    .header-top > div { min-width: 0; flex: 1; }
+    .header-icons {
+      display: flex; align-items: center; gap: 8px; flex-shrink: 0;
+    }
+    .header-icon-btn {
+      width: 44px; height: 44px; border-radius: 12px;
+      background: var(--panel2); border: 1px solid var(--border); color: var(--text);
+      display: inline-flex; align-items: center; justify-content: center;
+      text-decoration: none; cursor: pointer; padding: 0;
+    }
+    .header-icon-btn:hover, .header-icon-btn:focus-visible {
+      background: #2c3142; border-color: #3d4458; outline: none;
+    }
+    .header-icon-btn svg { width: 22px; height: 22px; display: block; }
+    .card {
+      background: var(--panel); border: 1px solid var(--border);
+      border-radius: 14px; padding: 18px; margin-bottom: 16px;
+    }
+    .card h2 { font-size: 0.78rem; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin-bottom: 12px; }
+    .row { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; }
+    label { display: block; font-size: 0.78rem; color: var(--muted); margin-bottom: 4px; }
+    input[type=text], input[type=number], select {
+      width: 100%; background: var(--panel2); border: 1px solid var(--border);
+      color: var(--text); border-radius: 10px; padding: 10px 12px;
+    }
+    select { cursor: pointer; }
+    .filters { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+    .filters button.active { border-color: var(--accent); color: #fff; }
+    tr.hidden-row { opacity: 0.45; }
+    .sort-item.is-hidden { opacity: 0.45; }
+    .sort-item .vis-toggle {
+      display: inline-flex; align-items: center; gap: 4px; font-size: 0.72rem; color: var(--muted);
+      white-space: nowrap; cursor: pointer; user-select: none;
+    }
+    .sort-item .vis-toggle input { accent-color: var(--accent); }
+    tr.nak-hint td:first-child { border-left: 3px solid var(--border); }
+    tr.ack-hint td:first-child { border-left: 3px solid var(--ok); }
+    button {
+      background: var(--panel2); border: 1px solid var(--border); color: var(--text);
+      border-radius: 10px; padding: 10px 14px; font-weight: 600; cursor: pointer;
+    }
+    button.primary { background: var(--accent); border-color: transparent; }
+    button:disabled { opacity: .5; cursor: wait; }
+    .toolbar { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 12px; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
+    th, td { text-align: left; padding: 10px 8px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+    th { color: var(--muted); font-size: 0.75rem; text-transform: uppercase; }
+    .tag { font-size: 0.72rem; padding: 3px 8px; border-radius: 999px; background: #2a3144; color: var(--muted); }
+    .tag.ok { color: var(--ok); }
+    .tag.warn { color: var(--warn); }
+    .tag.prov { color: #9eb6ff; }
+    .title-input { min-width: 140px; }
+    .log {
+      margin-top: 16px; background: #0b0d12; border: 1px solid var(--border);
+      border-radius: 12px; padding: 12px; font-family: ui-monospace, monospace;
+      font-size: 0.76rem; color: #b8c0d4; white-space: pre-wrap; min-height: 80px;
+    }
+    a { color: var(--accent); }
+    .sort-list { list-style: none; display: grid; gap: 8px; }
+    .sort-item {
+      display: flex; align-items: center; gap: 8px; background: var(--panel2);
+      border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px;
+      flex-wrap: wrap; row-gap: 8px;
+    }
+    .sort-item span { flex: 1; font-size: 0.88rem; }
+    .sort-item button { padding: 6px 10px; min-width: 36px; }
+    .sort-item input.title-input {
+      flex: 1 1 140px;
+      min-width: 0;
+      width: auto;
+      max-width: 100%;
+    }
+    .grid-panels input.title-input {
+      flex: 1 1 160px;
+      min-width: 0;
+      width: auto;
+      max-width: 100%;
+    }
+    .grid-panels { display: grid; gap: 14px; margin-top: 14px; }
+    .grid-panel {
+      background: var(--panel2); border: 1px solid var(--border);
+      border-radius: 12px; padding: 14px;
+    }
+    .grid-panel h3 { font-size: 0.82rem; margin-bottom: 10px; color: var(--text); }
+    .grid-panel .hint { color: var(--muted); font-size: 0.78rem; margin-bottom: 10px; }
+    .panel-layouts { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 12px; }
+    .panel-layouts label { margin: 0; font-size: 0.75rem; }
+    .panel-layouts input[type=number] {
+      width: 72px; min-width: 72px; padding: 8px 10px; font-size: 0.82rem;
+    }
+    .sort-item select.icon-select {
+      width: 110px; min-width: 110px; padding: 8px 6px; font-size: 0.78rem;
+    }
+    .icon-preview {
+      width: 32px; height: 32px; flex-shrink: 0; display: inline-flex;
+      align-items: center; justify-content: center; color: var(--text);
+      background: #2a3144; border-radius: 8px; border: 1px solid var(--border);
+    }
+    .icon-preview svg, .icon-preview .brand-icon-img { width: 20px; height: 20px; display: block; }
+    .icon-preview .brand-icon-img { object-fit: contain; opacity: 0.92; }
+    .icon-guide {
+      color: var(--muted); font-size: 0.82rem; margin-bottom: 12px; line-height: 1.5;
+    }
+    .icon-guide code { color: var(--text); font-size: 0.78rem; }
+    @media (max-width: 720px) {
+      body { padding: 14px; }
+      table { font-size: 0.8rem; }
+      th, td { padding: 8px 4px; }
+      .title-input { min-width: 100px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="header-top">
+        <div>
+          <h1 id="pageTitle">TV Setup</h1>
+          <div class="sub" id="pageSub">—</div>
+        </div>
+        <nav class="header-icons" aria-label="Navigation">
+          <a id="remoteLink" href="#" class="header-icon-btn" title="Back to remote" aria-label="Back to remote">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M8 10h8M8 14h5"/></svg>
+          </a>
+          <a href="/" class="header-icon-btn" title="All rooms" aria-label="All rooms">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="m4 10 8-6 8 6"/><path d="M6 10v9h12v-9"/></svg>
+          </a>
+          <button type="button" id="logoutBtn" class="header-icon-btn" title="Sign out" aria-label="Sign out">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
+          </button>
+        </nav>
+      </div>
+    </header>
+
+    <section class="card">
+      <h2>Connection</h2>
+      <div class="row">
+        <div>
+          <label>Location</label>
+          <select id="fLocation"></select>
+        </div>
+        <div><label>Room title</label><input id="fTitle" type="text" /></div>
+        <div>
+          <label>Room id (URL)</label>
+          <input id="fRoomId" type="text" pattern="[a-z0-9][a-z0-9_-]*" />
+          <div id="roomIdHint" style="color:var(--muted);font-size:0.82rem;margin-top:4px">/d/<span id="locSlug">main</span>/<span id="roomSlug"></span></div>
+        </div>
+        <div><label>TV IP address</label><input id="fIp" type="text" /></div>
+        <div><label>MDC port</label><input id="fPort" type="number" value="1515" /></div>
+        <div><label>Device ID</label><input id="fDeviceId" type="number" value="0" /></div>
+      </div>
+      <p id="locRemoteHint" style="color:var(--muted);font-size:0.82rem;margin-top:8px"></p>
+      <div class="toolbar">
+        <button class="primary" id="saveConnBtn">Save connection</button>
+        <button id="discoverBtn">Discover active codes</button>
+        <button id="discoverQuickBtn">Quick scan</button>
+      </div>
+      <h2 style="margin-top:18px">Room login credentials</h2>
+      <p style="color:var(--muted);font-size:0.85rem;margin-bottom:10px">Users sign in with this to access this room's remote only.</p>
+      <div class="row" id="credRow">
+        <div><label>Username</label><input id="fRoomUser" type="text" /></div>
+        <div><label>New password</label><input id="fRoomPass" type="password" autocomplete="new-password" placeholder="Leave blank to keep" /></div>
+      </div>
+      <div class="toolbar">
+        <button id="saveCredBtn">Update credentials</button>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Layout templates</h2>
+      <p style="color:var(--muted);font-size:0.85rem;margin-bottom:12px">
+        Save this room's remote layout as a reusable template, or apply a template to this room.
+        IP address and TV connection are never copied — only grid order, buttons, icons, and source visibility.
+        After applying, tweak anything here and save; changes stay room-specific.
+      </p>
+      <div class="row" style="margin-bottom:12px">
+        <div>
+          <label>Template</label>
+          <select id="fTemplate"></select>
+        </div>
+        <div style="display:flex;align-items:flex-end;padding-bottom:2px">
+          <label style="display:flex;align-items:center;gap:8px;margin:0;font-size:0.85rem;color:var(--text)">
+            <input type="checkbox" id="fTemplateSources" checked />
+            Include source show/hide &amp; order
+          </label>
+        </div>
+      </div>
+      <div class="toolbar" style="margin-top:0;margin-bottom:4px">
+        <button type="button" id="applyTemplateBtn">Apply template to this room</button>
+        <button type="button" id="saveTemplateBtn">Save current as template</button>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Remote layout — grid order &amp; buttons</h2>
+      <p style="color:var(--muted);font-size:0.85rem;margin-bottom:12px">
+        <strong>Grid order</strong> controls section position (Master, Sources, Screen Sharing, Volume presets, etc.).
+        <strong>Button order</strong> within each grid is separate — reorder, rename, and set an exact <strong>columns × rows</strong> grid for consistent button placement.
+        Click <strong>Save remote layout</strong> after changes.
+      </p>
+      <p class="icon-guide">
+        <strong>Icons:</strong> Each button row has an <strong>Icon</strong> dropdown.
+        <strong>Auto</strong> uses the default for that source (e.g. Apple → apple, AirPlay → airplay).
+        Set per-grid <strong>Display</strong> to <em>Icon only</em> for a clean icon grid.
+        See defaults: Apple, Teams, Browser, Whiteboard, AirPlay, SmartView, Flip, Power, Mute/Unmute, Reboot.
+      </p>
+      <div class="row" style="margin-bottom:14px">
+        <div>
+          <label>Button size</label>
+          <select id="fBtnSize">
+            <option value="sm">Small</option>
+            <option value="md" selected>Medium</option>
+            <option value="lg">Large (touch-friendly)</option>
+          </select>
+        </div>
+        <div>
+          <label>Default source grid columns</label>
+          <select id="fColumns">
+            <option value="1">1 column</option>
+            <option value="2" selected>2 columns</option>
+            <option value="3">3 columns</option>
+            <option value="4">4 columns</option>
+            <option value="5">5 columns</option>
+            <option value="6">6 columns</option>
+          </select>
+        </div>
+        <div>
+          <label>Default button display</label>
+          <select id="fDefaultStyle">
+            <option value="both">Icon + label</option>
+            <option value="icon">Icon only</option>
+            <option value="text">Text only</option>
+          </select>
+        </div>
+        <div>
+          <label>Power buttons</label>
+          <select id="fPowerMode">
+            <option value="split">On + Off (separate)</option>
+            <option value="toggle">Single toggle</option>
+          </select>
+        </div>
+        <div>
+          <label>Mute buttons</label>
+          <select id="fMuteMode">
+            <option value="split">Mute + Unmute (separate)</option>
+            <option value="toggle">Single toggle</option>
+          </select>
+        </div>
+      </div>
+      <label>Grid order on remote</label>
+      <ul class="sort-list" id="sectionOrderList"></ul>
+      <div class="grid-panels" id="gridButtonPanels"></div>
+      <div class="toolbar">
+        <button class="primary" id="saveLayoutBtn">Save remote layout</button>
+        <a class="btn" id="previewRemote" href="#" style="display:inline-flex;align-items:center;text-decoration:none;color:var(--text);background:var(--panel2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;font-weight:600">Preview remote</a>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>All input sources — test, rename, show/hide, category</h2>
+      <p style="color:var(--muted);font-size:0.85rem;margin-bottom:12px">
+        Full MDC source list for Samsung Flip Pro. <strong>Discover</strong> marks which codes ACK on your TV.
+        Toggle <strong>Show</strong> to hide/unhide on the remote. Pick <strong>Category</strong> for which section it appears under.
+      </p>
+      <div class="filters" id="filters">
+        <button type="button" class="active" data-filter="all">All</button>
+        <button type="button" data-filter="discovered">Discovered only</button>
+        <button type="button" data-filter="enabled">Shown on remote</button>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>Code</th><th>TV response</th><th>Title</th><th>Category</th><th>Show</th><th>Provision</th><th></th>
+          </tr>
+        </thead>
+        <tbody id="sourcesBody"></tbody>
+      </table>
+      <div class="toolbar">
+        <button class="primary" id="saveSourcesBtn">Save layout</button>
+        <button id="addCodeBtn">+ Custom code</button>
+      </div>
+    </section>
+
+    <div class="log" id="log">Ready.</div>
+  </div>
+
+  <script src="/brand_icons.js"></script>
+  <script>
+    const logEl = document.getElementById('log');
+    const roomPathMatch = location.pathname.match(/^\/d\/([^/]+)\/([^/]+)/);
+    let locationId = roomPathMatch?.[1];
+    let displayId = roomPathMatch?.[2];
+    let candidates = [];
+    let categories = {};
+    let activeFilter = 'all';
+    let sectionOrder = [];
+    let buttonOrder = {};
+    let buttonLabels = {};
+    let gridSize = {};
+    let buttonStyle = { default: 'both' };
+    let buttonIcons = {};
+    let hiddenButtons = new Set();
+    let powerMode = 'split';
+    let muteMode = 'split';
+    let layoutTemplates = [];
+    let locationsList = [];
+    let roomIdOk = true;
+    let roomIdTimer = null;
+    let iconCatalog = [];
+    let defaultIcons = {};
+    let staticCatalog = {};
+    let sectionLabels = {};
+    let isAdmin = false;
+    if (locationId && displayId) {
+      document.getElementById('remoteLink').href = `/d/${locationId}/${displayId}`;
+    }
+
+    const DEFAULT_ICON_CATALOG = [
+      { id: 'apple', label: 'Apple' },
+      { id: 'teams', label: 'Teams' },
+      { id: 'browser', label: 'Browser' },
+      { id: 'airplay', label: 'AirPlay' },
+      { id: 'smartview', label: 'SmartView' },
+      { id: 'whiteboard', label: 'Whiteboard / markers' },
+      { id: 'stb', label: 'Set-top box' },
+      { id: 'hdmi', label: 'HDMI' },
+      { id: 'usb_c', label: 'USB-C' },
+      { id: 'flip', label: 'Flip' },
+      { id: 'usb', label: 'USB-A' },
+      { id: 'pc', label: 'PC' },
+      { id: 'power', label: 'Power' },
+      { id: 'reboot', label: 'Reboot' },
+      { id: 'mute', label: 'Mute' },
+      { id: 'unmute', label: 'Unmute' },
+      { id: 'volume', label: 'Volume' },
+      { id: 'volume_up', label: 'Volume up' },
+      { id: 'volume_down', label: 'Volume down' },
+      { id: 'home', label: 'Home' },
+      { id: 'settings', label: 'Settings' },
+      { id: 'info', label: 'Info' },
+      { id: 'back', label: 'Back' },
+      { id: 'exit', label: 'Exit' },
+      { id: 'screen_fit', label: 'Fit to screen' },
+      { id: 'aspect_16_9', label: '16:9' },
+      { id: 'aspect_4_3', label: '4:3' },
+      { id: 'refresh', label: 'Refresh' },
+      { id: 'menu', label: 'Menu (gear)' },
+      { id: 'source', label: 'Generic source' },
+    ];
+
+    const DEFAULT_GRID_SIZE = {
+      master: { cols: 4, rows: 1 },
+      power: { cols: 3, rows: 1 },
+      volume: { cols: 4, rows: 1 },
+      volume_presets: { cols: 5, rows: 1 },
+      navigation_actions: { cols: 5, rows: 1 },
+      picture: { cols: 3, rows: 1 },
+      status: { cols: 4, rows: 1 },
+    };
+
+    function legacyLayoutToGrid(value, fallbackCols = 2) {
+      const mode = String(value || '').toLowerCase();
+      if (mode === 'stack' || mode === 'cols-1') return { cols: 1, rows: 0 };
+      if (mode === 'row') return { cols: Number(fallbackCols) || 2, rows: 1 };
+      if (mode.startsWith('cols-')) return { cols: Number(mode.split('-')[1]) || fallbackCols, rows: 0 };
+      return { cols: Number(fallbackCols) || 2, rows: 0 };
+    }
+
+    function normalizeGridEntry(raw, section) {
+      if (raw && typeof raw === 'object' && !Array.isArray(raw)) {
+        return {
+          cols: Math.max(1, Math.min(6, Number(raw.cols) || 2)),
+          rows: Math.max(0, Math.min(12, Number(raw.rows) || 0)),
+        };
+      }
+      if (typeof raw === 'string') {
+        return legacyLayoutToGrid(raw, defaultGridCols(section));
+      }
+      return { ...(DEFAULT_GRID_SIZE[section] || { cols: defaultGridCols(section), rows: 0 }) };
+    }
+
+    function defaultGridCols(section) {
+      if (DEFAULT_GRID_SIZE[section]) return DEFAULT_GRID_SIZE[section].cols;
+      return Number(document.getElementById('fColumns')?.value || 2);
+    }
+
+    function gridSpec(section) {
+      return normalizeGridEntry(gridSize[section], section);
+    }
+
+    function gridSizeInputs(section, label = 'Grid') {
+      const g = gridSpec(section);
+      return `<div class="panel-layouts">
+        <div><label>${label} cols</label>
+          <input type="number" min="1" max="6" value="${g.cols}" data-grid-section="${section}" data-grid-field="cols" />
+        </div>
+        <div><label>${label} rows</label>
+          <input type="number" min="0" max="12" value="${g.rows}" data-grid-section="${section}" data-grid-field="rows" title="0 = auto-fit to button count" />
+        </div>
+        <div class="hint" style="margin:0;align-self:flex-end">${g.rows === 0 ? 'Auto rows' : `${g.cols}×${g.rows} grid`}</div>
+      </div>`;
+    }
+
+    function styleOptionsHtml(section) {
+      const current = buttonStyle[section] || buttonStyle.default || 'both';
+      return [
+        ['both', 'Icon + label'],
+        ['icon', 'Icon only'],
+        ['text', 'Text only'],
+      ].map(([value, label]) =>
+        `<option value="${value}" ${value === current ? 'selected' : ''}>${label}</option>`
+      ).join('');
+    }
+
+    const ICON_ALIASES = { menu: 'settings' };
+
+    const BRAND_ICON_KEYS = new Set([
+      'apple', 'teams', 'browser', 'airplay', 'smartview', 'stb', 'usb_c', 'whiteboard',
+    ]);
+
+    const ICON_SVGS = {
+      apple: '<img class="brand-icon-img" src="/assets/apple-brand.svg" alt="" />',
+      teams: '<img class="brand-icon-img" src="/assets/teams-brand.svg" alt="" />',
+      browser: '<img class="brand-icon-img" src="/assets/browser-brand.svg" alt="" />',
+      airplay: '<img class="brand-icon-img" src="/assets/airplay-brand.svg" alt="" />',
+      smartview: '<img class="brand-icon-img" src="/assets/smartview-brand.svg" alt="" />',
+      stb: '<img class="brand-icon-img" src="/assets/stb-brand.png" alt="" />',
+      usb_c: '<img class="brand-icon-img" src="/assets/usb-c-brand.png" alt="" />',
+      whiteboard: '<img class="brand-icon-img" src="/assets/whiteboard-brand.png" alt="" />',
+    };
+
+    function applyUtilityIconSvgs(iconSvgs) {
+      if (!iconSvgs) return;
+      for (const [key, val] of Object.entries(iconSvgs)) {
+        if (!BRAND_ICON_KEYS.has(key)) ICON_SVGS[key] = val;
+      }
+    }
+
+    function normalizeIconKey(key) {
+      if (!key) return 'source';
+      const text = String(key).trim();
+      return ICON_ALIASES[text] || text;
+    }
+
+    function resolvedIconKey(buttonId) {
+      const key = buttonIcons[buttonId] || defaultIcons[buttonId] || 'source';
+      return normalizeIconKey(key);
+    }
+
+    function iconPreviewHtml(buttonId) {
+      const key = resolvedIconKey(buttonId);
+      const auto = !buttonIcons[buttonId] && defaultIcons[buttonId];
+      const title = auto ? `Auto: ${defaultIcons[buttonId]}` : (buttonIcons[buttonId] || 'Generic');
+      return `<span class="icon-preview" data-preview-id="${buttonId}" title="${title}">${ICON_SVGS[key] || ICON_SVGS.source}</span>`;
+    }
+
+    function updateIconPreview(buttonId) {
+      const el = document.querySelector(`[data-preview-id="${buttonId}"]`);
+      if (!el) return;
+      const key = resolvedIconKey(buttonId);
+      el.innerHTML = ICON_SVGS[key] || ICON_SVGS.source;
+      const auto = !buttonIcons[buttonId] && defaultIcons[buttonId];
+      el.title = auto ? `Auto: ${defaultIcons[buttonId]}` : (iconCatalog.find(i => i.id === key)?.label || key);
+    }
+
+    function sortedIconCatalog(catalog) {
+      return catalog.slice().sort((a, b) => a.label.localeCompare(b.label, undefined, { sensitivity: 'base' }));
+    }
+
+    function iconOptionsHtml(buttonId) {
+      const current = buttonIcons[buttonId] || '';
+      const opts = ['<option value="">Auto</option>'].concat(
+        sortedIconCatalog(iconCatalog).map(i => `<option value="${i.id}" ${i.id === current ? 'selected' : ''}>${i.label}</option>`)
+      );
+      return opts.join('');
+    }
+
+    function panelLayoutControls(section) {
+      let html = gridSizeInputs(section, 'Grid');
+      html += `<div class="panel-layouts"><div><label>Display</label>
+        <select data-style-section="${section}">${styleOptionsHtml(section)}</select></div></div>`;
+      if (section === 'volume') html += gridSizeInputs('volume_presets', 'Presets');
+      if (section === 'navigation') {
+        html += gridSizeInputs('navigation_actions', 'Menu');
+        html += `<div class="hint" style="margin-bottom:10px">D-pad stays fixed · menu buttons use the grid above</div>`;
+      }
+      return html;
+    }
+
+    function masterInLayout() {
+      return sectionOrder.includes('master');
+    }
+
+    function masterOrderIds() {
+      let ids = [...(buttonOrder.master || defaultStaticOrder('master'))];
+      ids = ids.filter(id => !['power_on', 'power_off', 'mute_on', 'mute_off'].includes(id));
+      if (!ids.includes('power_toggle')) ids.unshift('power_toggle');
+      if (!ids.includes('mute_toggle')) {
+        const upIdx = ids.indexOf('vol_up');
+        if (upIdx >= 0) ids.splice(upIdx, 0, 'mute_toggle');
+        else ids.push('mute_toggle');
+      }
+      return ids;
+    }
+
+    function powerOrderIds() {
+      let ids = [...(buttonOrder.power || defaultStaticOrder('power'))];
+      if (powerMode === 'toggle') {
+        ids = ids.filter(id => id !== 'power_on' && id !== 'power_off');
+        if (!ids.includes('power_toggle')) ids.unshift('power_toggle');
+      } else {
+        ids = ids.filter(id => id !== 'power_toggle');
+      }
+      return ids;
+    }
+
+    function volumeOrderIds() {
+      let ids = [...(buttonOrder.volume || defaultStaticOrder('volume'))];
+      ids = ids.filter(id => id !== 'mute_on' && id !== 'mute_off');
+      if (muteMode === 'toggle' && !masterInLayout()) {
+        if (!ids.includes('mute_toggle')) {
+          const upIdx = ids.indexOf('vol_up');
+          if (upIdx >= 0) ids.splice(upIdx, 0, 'mute_toggle');
+          else ids.unshift('mute_toggle');
+        }
+      } else {
+        ids = ids.filter(id => id !== 'mute_toggle');
+      }
+      return ids;
+    }
+
+    function staticOrderIds(section) {
+      if (section === 'master') return masterOrderIds();
+      if (section === 'power') return powerOrderIds();
+      if (section === 'volume') return volumeOrderIds();
+      return buttonOrder[section] || [];
+    }
+
+    function buttonRowHtml(section, id, label, codeHint, { source = false, showToggle = false } = {}) {
+      const titleAttr = source
+        ? `data-source-id="${id}"`
+        : `data-label-id="${id}"`;
+      const hidden = showToggle && hiddenButtons.has(id);
+      const rowClass = hidden ? 'sort-item is-hidden' : 'sort-item';
+      const visToggle = showToggle
+        ? `<label class="vis-toggle" title="Show on remote"><input type="checkbox" data-visible-id="${id}" ${hidden ? '' : 'checked'} />Show</label>`
+        : '';
+      return `<li class="${rowClass}" data-section="${section}" data-id="${id}">
+        ${iconPreviewHtml(id)}
+        <input class="title-input" type="text" value="${label.replace(/"/g, '&quot;')}" ${titleAttr} />
+        <select class="icon-select" data-icon-id="${id}" title="Icon">${iconOptionsHtml(id)}</select>
+        ${visToggle}
+        <code style="color:var(--muted);font-size:0.75rem">${codeHint || id}</code>
+        <button type="button" data-grid-move="up" aria-label="Move up">↑</button>
+        <button type="button" data-grid-move="down" aria-label="Move down">↓</button>
+      </li>`;
+    }
+
+    function log(msg) {
+      const ts = new Date().toLocaleTimeString();
+      logEl.textContent = `[${ts}] ${msg}\n` + logEl.textContent;
+    }
+
+    function slugify(text, code) {
+      return (text || code).toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '') || code.replace('0x','');
+    }
+
+    function statusTags(c) {
+      const tags = [];
+      if (c.discovered) {
+        tags.push(c.stable ? '<span class="tag ok">ACK stable</span>' : '<span class="tag warn">ACK unstable</span>');
+        if (c.set_value && c.query_value) tags.push(`<span class="tag">${c.set_value}→${c.query_value}</span>`);
+      } else if (c.catalog) {
+        tags.push('<span class="tag">not tested</span>');
+      } else {
+        tags.push('<span class="tag">custom</span>');
+      }
+      if (c.provision) tags.push('<span class="tag prov">provision</span>');
+      if (c.note) tags.push(`<span class="tag" title="${c.note}">ℹ</span>`);
+      return tags.join(' ');
+    }
+
+    function rowClass(c) {
+      const parts = [];
+      if (!c.enabled) parts.push('hidden-row');
+      if (c.discovered) parts.push(c.stable ? 'ack-hint' : 'ack-hint');
+      else if (!c.catalog) parts.push('nak-hint');
+      return parts.join(' ');
+    }
+
+    function categoryOptions(selected) {
+      return Object.entries(categories).map(([k, label]) =>
+        `<option value="${k}" ${k === selected ? 'selected' : ''}>${label}</option>`
+      ).join('');
+    }
+
+    function passesFilter(c) {
+      if (activeFilter === 'discovered') return c.discovered;
+      if (activeFilter === 'enabled') return c.enabled;
+      return true;
+    }
+
+    function moveItem(arr, idx, dir) {
+      const j = idx + dir;
+      if (j < 0 || j >= arr.length) return;
+      [arr[idx], arr[j]] = [arr[j], arr[idx]];
+    }
+
+    function defaultStaticOrder(section) {
+      return (staticCatalog[section] || []).map(b => b.id);
+    }
+
+    function defaultStaticTitle(section, id) {
+      const btn = (staticCatalog[section] || []).find(b => b.id === id);
+      return btn?.title || id;
+    }
+
+    function enabledSourcesForCategory(cat) {
+      return candidates.filter(c => c.enabled && (c.category || 'sources') === cat);
+    }
+
+    function ensureButtonOrder(section) {
+      if (staticCatalog[section]) {
+        const defaults = defaultStaticOrder(section);
+        const current = [...(buttonOrder[section] || [])];
+        const kept = current.filter(id => defaults.includes(id));
+        for (const id of defaults) {
+          if (!kept.includes(id)) kept.push(id);
+        }
+        buttonOrder[section] = kept;
+        return;
+      }
+      if (categories[section]) {
+        const enabled = enabledSourcesForCategory(section);
+        const byId = Object.fromEntries(enabled.map(c => [c.id, c]));
+        const current = [...(buttonOrder[section] || [])];
+        const kept = current.filter(id => byId[id]);
+        for (const c of enabled) {
+          if (!kept.includes(c.id)) kept.push(c.id);
+        }
+        buttonOrder[section] = kept;
+      }
+    }
+
+    function collectGridSizes() {
+      document.querySelectorAll('[data-grid-section]').forEach(input => {
+        const section = input.dataset.gridSection;
+        const field = input.dataset.gridField;
+        if (!section || !field) return;
+        const current = gridSpec(section);
+        const value = Math.max(field === 'cols' ? 1 : 0, Number(input.value) || 0);
+        gridSize[section] = { ...current, [field]: value };
+      });
+    }
+
+    function collectButtonIcons() {
+      document.querySelectorAll('[data-icon-id]').forEach(sel => {
+        const id = sel.dataset.iconId;
+        if (sel.value) buttonIcons[id] = sel.value;
+        else delete buttonIcons[id];
+      });
+    }
+
+    function collectButtonStyles() {
+      document.querySelectorAll('[data-style-section]').forEach(sel => {
+        buttonStyle[sel.dataset.styleSection] = sel.value;
+      });
+      buttonStyle.default = document.getElementById('fDefaultStyle').value;
+      powerMode = document.getElementById('fPowerMode').value;
+    }
+
+    function collectHiddenButtons() {
+      document.querySelectorAll('[data-visible-id]').forEach(input => {
+        const id = input.dataset.visibleId;
+        if (!id) return;
+        if (input.checked) hiddenButtons.delete(id);
+        else hiddenButtons.add(id);
+      });
+    }
+
+    function collectPanelState() {
+      collectLayoutLabels();
+      collectSourceTitlesFromPanels();
+      collectGridSizes();
+      collectButtonIcons();
+      collectButtonStyles();
+      collectHiddenButtons();
+    }
+
+    function renderGridButtonPanels() {
+      collectPanelState();
+      const host = document.getElementById('gridButtonPanels');
+      const panels = [];
+      for (const section of sectionOrder) {
+        ensureButtonOrder(section);
+        const ids = buttonOrder[section];
+        if (!ids?.length) continue;
+
+        if (staticCatalog[section]) {
+          const byId = Object.fromEntries((staticCatalog[section] || []).map(b => [b.id, b]));
+          if (section === 'power') {
+            byId.power_toggle = { id: 'power_toggle', title: 'Power' };
+          }
+          if (section === 'volume' || section === 'master') {
+            byId.mute_toggle = { id: 'mute_toggle', title: 'Mute' };
+          }
+          if (section === 'master') {
+            byId.power_toggle = { id: 'power_toggle', title: 'Power' };
+          }
+          const orderIds = staticOrderIds(section);
+          if (!orderIds?.length) continue;
+          const items = orderIds.map((id) => {
+            const base = byId[id];
+            if (!base) return '';
+            const label = buttonLabels[id] ?? base.title;
+            return buttonRowHtml(section, id, label, id, { showToggle: true });
+          }).join('');
+          panels.push(`<div class="grid-panel" data-grid="${section}">
+            <h3>${sectionLabels[section] || section}</h3>
+            ${panelLayoutControls(section)}
+            <div class="hint">Buttons within this grid · uncheck <strong>Show</strong> to hide a button on the remote</div>
+            <ul class="sort-list">${items}</ul>
+          </div>`);
+          continue;
+        }
+
+        if (categories[section]) {
+          const enabled = enabledSourcesForCategory(section);
+          if (!enabled.length) continue;
+          const byId = Object.fromEntries(enabled.map(c => [c.id, c]));
+          const items = ids.filter(id => byId[id]).map((id) => {
+            const c = byId[id];
+            return buttonRowHtml(section, id, c.title || '', c.code, { source: true });
+          }).join('');
+          if (!items) continue;
+          panels.push(`<div class="grid-panel" data-grid="${section}">
+            <h3>${sectionLabels[section] || section}</h3>
+            ${panelLayoutControls(section)}
+            <div class="hint">Source buttons within this grid (also editable in the table below)</div>
+            <ul class="sort-list">${items}</ul>
+          </div>`);
+        }
+      }
+      host.innerHTML = panels.join('');
+      if (!host.dataset.bound) {
+        host.dataset.bound = '1';
+        host.addEventListener('input', (e) => {
+          const t = e.target;
+          if (!(t instanceof HTMLInputElement)) return;
+          if (t.dataset.labelId) buttonLabels[t.dataset.labelId] = t.value;
+          if (t.dataset.sourceId) {
+            const src = candidates.find(c => c.id === t.dataset.sourceId);
+            if (src) src.title = t.value;
+          }
+        });
+        host.addEventListener('change', (e) => {
+          const t = e.target;
+          if (t instanceof HTMLInputElement && t.dataset.visibleId) {
+            const id = t.dataset.visibleId;
+            if (t.checked) hiddenButtons.delete(id);
+            else hiddenButtons.add(id);
+            const li = t.closest('.sort-item');
+            if (li) li.classList.toggle('is-hidden', !t.checked);
+          }
+          if (t instanceof HTMLSelectElement && t.dataset.iconId) {
+            if (t.value) buttonIcons[t.dataset.iconId] = t.value;
+            else delete buttonIcons[t.dataset.iconId];
+            updateIconPreview(t.dataset.iconId);
+          }
+          if (t instanceof HTMLSelectElement && t.dataset.styleSection) {
+            buttonStyle[t.dataset.styleSection] = t.value;
+          }
+        });
+      }
+      host.querySelectorAll('button[data-grid-move]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const li = btn.closest('.sort-item');
+          const section = li.dataset.section;
+          const id = li.dataset.id;
+          const list = staticOrderIds(section);
+          const idx = list.indexOf(id);
+          if (idx < 0) return;
+          moveItem(list, idx, btn.dataset.gridMove === 'up' ? -1 : 1);
+          if (section === 'power') buttonOrder.power = list;
+          else if (section === 'volume') buttonOrder.volume = list;
+          else if (section === 'master') buttonOrder.master = list;
+          else buttonOrder[section] = list;
+          renderGridButtonPanels();
+        });
+      });
+      host.querySelectorAll('[data-grid-section]').forEach(input => {
+        input.addEventListener('change', () => {
+          const section = input.dataset.gridSection;
+          const field = input.dataset.gridField;
+          const current = gridSpec(section);
+          const value = Math.max(field === 'cols' ? 1 : 0, Number(input.value) || 0);
+          gridSize[section] = { ...current, [field]: value };
+        });
+      });
+    }
+
+    function normalizeMuteOrders() {
+      buttonOrder.master = masterOrderIds();
+      if (muteMode === 'toggle') buttonOrder.volume = volumeOrderIds();
+      else buttonOrder.volume = (buttonOrder.volume || []).filter(id => id !== 'mute_toggle');
+    }
+
+    document.getElementById('fPowerMode').addEventListener('change', () => {
+      powerMode = document.getElementById('fPowerMode').value;
+      renderGridButtonPanels();
+    });
+    document.getElementById('fMuteMode').addEventListener('change', () => {
+      muteMode = document.getElementById('fMuteMode').value;
+      normalizeMuteOrders();
+      renderGridButtonPanels();
+    });
+
+    function renderSectionOrder() {
+      const ul = document.getElementById('sectionOrderList');
+      ul.innerHTML = sectionOrder.map((key, i) => `
+        <li class="sort-item" data-idx="${i}">
+          <span>${sectionLabels[key] || key}</span>
+          <button type="button" data-move="up" aria-label="Move up">↑</button>
+          <button type="button" data-move="down" aria-label="Move down">↓</button>
+        </li>
+      `).join('');
+      ul.querySelectorAll('button[data-move]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const idx = Number(btn.closest('.sort-item').dataset.idx);
+          moveItem(sectionOrder, idx, btn.dataset.move === 'up' ? -1 : 1);
+          normalizeMuteOrders();
+          renderSectionOrder();
+          renderGridButtonPanels();
+        });
+      });
+    }
+
+    function syncButtonOrderFromCandidates() {
+      for (const cat of Object.keys(categories)) {
+        ensureButtonOrder(cat);
+      }
+    }
+
+    function renderSources() {
+      collectPanelState();
+      const body = document.getElementById('sourcesBody');
+      body.innerHTML = candidates.filter(passesFilter).map((c, i) => {
+        const idx = candidates.indexOf(c);
+        return `
+        <tr data-idx="${idx}" class="${rowClass(c)}">
+          <td><code>${c.code}</code></td>
+          <td>${statusTags(c)}</td>
+          <td><input class="title-input" type="text" value="${(c.title || '').replace(/"/g,'&quot;')}" data-field="title" /></td>
+          <td><select data-field="category">${categoryOptions(c.category || 'sources')}</select></td>
+          <td><input type="checkbox" data-field="enabled" ${c.enabled ? 'checked' : ''} title="Show on remote" /></td>
+          <td><input type="checkbox" data-field="provision" ${c.provision ? 'checked' : ''} /></td>
+          <td><button type="button" data-action="test" data-code="${c.code}">Test</button></td>
+        </tr>`;
+      }).join('');
+      body.querySelectorAll('button[data-action=test]').forEach(btn => {
+        btn.addEventListener('click', () => testCode(btn.dataset.code));
+      });
+      body.querySelectorAll('[data-field=title]').forEach(input => {
+        input.addEventListener('input', () => {
+          const row = input.closest('tr');
+          const idx = Number(row?.dataset.idx);
+          const base = candidates[idx];
+          if (base) base.title = input.value;
+        });
+      });
+    }
+
+    function applyOrderToSources(sources) {
+      const out = sources.map(s => ({ ...s }));
+      for (const [section, ids] of Object.entries(buttonOrder)) {
+        if (!categories[section]) continue;
+        const orderMap = Object.fromEntries(ids.map((id, i) => [id, i]));
+        for (const s of out) {
+          if ((s.category || 'sources') === section && orderMap[s.id] !== undefined) {
+            s.order = orderMap[s.id];
+          }
+        }
+      }
+      return out;
+    }
+
+    function collectLayoutLabels() {
+      document.querySelectorAll('[data-label-id]').forEach(input => {
+        const id = input.dataset.labelId;
+        const text = input.value;
+        if (text.trim()) buttonLabels[id] = text;
+        else delete buttonLabels[id];
+      });
+    }
+
+    function collectSourceTitlesFromPanels() {
+      document.querySelectorAll('[data-source-id]').forEach(input => {
+        const src = candidates.find(c => c.id === input.dataset.sourceId);
+        if (src) src.title = input.value.trim() || src.title || src.code;
+      });
+    }
+
+    function buildSourcesPayload() {
+      collectPanelState();
+      syncTableTitlesFromCandidates();
+      const fromTable = readSourcesFromTable();
+      return applyOrderToSources(fromTable.map(s => {
+        const live = candidates.find(c => c.code === s.code);
+        return live ? { ...s, title: live.title || s.title } : s;
+      }));
+    }
+
+    function layoutLabelsForSave() {
+      const out = {};
+      for (const [id, text] of Object.entries(buttonLabels)) {
+        const trimmed = String(text).trim();
+        if (trimmed) out[id] = trimmed;
+      }
+      document.querySelectorAll('[data-label-id]').forEach(input => {
+        const trimmed = input.value.trim();
+        if (trimmed) out[input.dataset.labelId] = trimmed;
+      });
+      return out;
+    }
+
+    function syncTableTitlesFromCandidates() {
+      document.querySelectorAll('#sourcesBody tr').forEach(row => {
+        const idx = Number(row.dataset.idx);
+        const base = candidates[idx];
+        if (!base) return;
+        const input = row.querySelector('[data-field=title]');
+        if (input) input.value = base.title || '';
+      });
+    }
+
+    function ensureAllButtonOrders() {
+      for (const section of sectionOrder) ensureButtonOrder(section);
+      for (const section of Object.keys(staticCatalog)) ensureButtonOrder(section);
+    }
+
+    function readSourcesFromTable() {
+      const saved = new Map();
+      document.querySelectorAll('#sourcesBody tr').forEach(row => {
+        const idx = Number(row.dataset.idx);
+        const base = candidates[idx] || {};
+        const title = row.querySelector('[data-field=title]').value.trim();
+        const code = base.code;
+        saved.set(code, {
+          id: base.id || slugify(title, code),
+          code,
+          title: title || code,
+          category: row.querySelector('[data-field=category]').value,
+          enabled: row.querySelector('[data-field=enabled]').checked,
+          provision: row.querySelector('[data-field=provision]').checked,
+        });
+      });
+      // Keep rows not visible under current filter
+      candidates.forEach((base) => {
+        if (saved.has(base.code)) return;
+        saved.set(base.code, {
+          id: base.id || slugify(base.title, base.code),
+          code: base.code,
+          title: base.title || base.code,
+          category: base.category || 'sources',
+          enabled: !!base.enabled,
+          provision: !!base.provision,
+        });
+      });
+      return [...saved.values()];
+    }
+
+    function renderTemplateSelect() {
+      const sel = document.getElementById('fTemplate');
+      if (!sel) return;
+      const opts = layoutTemplates.map(t => {
+        const mark = t.default ? ' (default)' : '';
+        return `<option value="${t.id}">${t.title}${mark}</option>`;
+      });
+      sel.innerHTML = opts.length ? opts.join('') : '<option value="">No templates</option>';
+    }
+
+    async function loadTemplates() {
+      const res = await fetch('/api/layout-templates');
+      const data = await res.json();
+      if (data.ok) layoutTemplates = data.templates || [];
+      renderTemplateSelect();
+    }
+
+    async function applyTemplate() {
+      const templateId = document.getElementById('fTemplate').value;
+      if (!templateId) { log('Select a template first.'); return; }
+      const tpl = layoutTemplates.find(t => t.id === templateId);
+      const label = tpl?.title || templateId;
+      if (!confirm(`Apply template "${label}" to this room? Current layout will be replaced (connection/IP unchanged).`)) return;
+      const includeSources = document.getElementById('fTemplateSources').checked;
+      const res = await fetch(`/api/displays/${displayId}/apply-template`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ template: templateId, include_sources: includeSources }),
+      });
+      const data = await res.json();
+      if (!data.ok) throw new Error(data.error || 'Apply failed');
+      log(`Applied template "${label}".`);
+      await loadConfig();
+    }
+
+    async function saveAsTemplate() {
+      collectPanelState();
+      ensureAllButtonOrders();
+      normalizeMuteOrders();
+      const defaultId = layoutTemplates.find(t => t.default)?.id || 'director';
+      const templateId = prompt('Template id (URL-safe, e.g. director):', defaultId);
+      if (!templateId) return;
+      const title = prompt('Template title:', templateId);
+      if (!title) return;
+      const description = prompt('Short description (optional):', '') || '';
+      const includeSources = document.getElementById('fTemplateSources').checked;
+      const layout = {
+        button_size: document.getElementById('fBtnSize').value,
+        columns: Number(document.getElementById('fColumns').value),
+        section_order: sectionOrder,
+        category_order: ['sources', 'wireless', 'builtin', 'other'],
+        button_order: buttonOrder,
+        button_labels: layoutLabelsForSave(),
+        grid_size: gridSize,
+        power_mode: powerMode,
+        mute_mode: muteMode,
+        button_style: buttonStyle,
+        button_icons: buttonIcons,
+        hidden_buttons: [...hiddenButtons],
+      };
+      const body = {
+        title,
+        description,
+        layout,
+        set_default: confirm('Set as default template for new rooms?'),
+      };
+      if (includeSources) {
+        body.include_sources = true;
+        body.sources = buildSourcesPayload()
+          .filter(s => s.enabled || s.provision)
+          .map(s => ({
+            id: s.id,
+            enabled: s.enabled,
+            category: s.category,
+            order: s.order,
+            title: s.title,
+            ...(s.provision ? { provision: s.provision } : {}),
+          }));
+      }
+      const res = await fetch(`/api/layout-templates/${templateId.trim().toLowerCase()}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+      const data = await res.json();
+      if (!data.ok) throw new Error(data.error || 'Save template failed');
+      log(`Saved template "${title}" (${templateId}).`);
+      await loadTemplates();
+    }
+
+    function roomUrlPath(roomId) {
+      const loc = document.getElementById('fLocation')?.value || locationId || 'main';
+      const rid = (roomId || document.getElementById('fRoomId')?.value.trim().toLowerCase() || displayId || 'room');
+      return `/d/${loc}/${rid}`;
+    }
+
+    function updateRoomSlug() {
+      const slug = document.getElementById('fRoomId').value.trim().toLowerCase() || displayId;
+      const loc = document.getElementById('fLocation')?.value || locationId || 'main';
+      document.getElementById('roomSlug').textContent = slug;
+      const locEl = document.getElementById('locSlug');
+      if (locEl) locEl.textContent = loc;
+    }
+
+    async function checkRoomId() {
+      const input = document.getElementById('fRoomId');
+      const hint = document.getElementById('roomIdHint');
+      const id = input.value.trim().toLowerCase();
+      updateRoomSlug();
+      if (!id) {
+        roomIdOk = false;
+        hint.style.color = 'var(--danger)';
+        hint.innerHTML = 'Room id is required.';
+        return;
+      }
+      const res = await fetch(`/api/displays/check-id?id=${encodeURIComponent(id)}&exclude=${encodeURIComponent(displayId)}`);
+      const data = await res.json();
+      if (!data.valid) {
+        roomIdOk = false;
+        hint.style.color = 'var(--danger)';
+        hint.innerHTML = 'Use lowercase letters, numbers, hyphens or underscores.';
+        return;
+      }
+      if (!data.available) {
+        roomIdOk = false;
+        hint.style.color = 'var(--danger)';
+        hint.innerHTML = `Id "<code>${id}</code>" is already in use.`;
+        return;
+      }
+      roomIdOk = true;
+      hint.style.color = id !== displayId ? '#3dd68c' : 'var(--muted)';
+      hint.innerHTML = id !== displayId
+        ? `URL will change to ${roomUrlPath(id)}`
+        : `${roomUrlPath(id)}`;
+    }
+
+    function scheduleRoomIdCheck() {
+      clearTimeout(roomIdTimer);
+      roomIdTimer = setTimeout(() => checkRoomId().catch(() => {}), 250);
+    }
+
+    function renderLocationSelect(selectedId) {
+      const sel = document.getElementById('fLocation');
+      if (!sel) return;
+      sel.innerHTML = (locationsList || []).map(l =>
+        `<option value="${l.id}"${l.id === selectedId ? ' selected' : ''}>${l.title}</option>`
+      ).join('');
+      updateLocationHint(selectedId);
+      updateRoomSlug();
+    }
+
+    function updateLocationHint(locId) {
+      const hint = document.getElementById('locRemoteHint');
+      if (!hint) return;
+      const loc = locationsList.find(l => l.id === locId);
+      if (!loc) { hint.textContent = ''; return; }
+      if (loc.remote_url) {
+        hint.innerHTML = `Location remote UI: <a href="${loc.remote_url}" target="_blank" rel="noopener">${loc.remote_url}</a> — open this to manage TVs on site. TV IP below is the panel's LAN address (MDC).`;
+      } else {
+        hint.textContent = 'Set the location remote host under Locations to bookmark off-site access to this site\'s server.';
+      }
+    }
+
+    async function loadConfig() {
+      if (!displayId) { log('No display id in URL'); return; }
+      const meRes = await fetch('/api/auth/me');
+      const me = await meRes.json();
+      if (!me.user || me.user.role !== 'admin') {
+        location.href = `/login?room=${displayId}`;
+        return;
+      }
+      isAdmin = true;
+      document.getElementById('remoteLink').href = roomUrlPath();
+      const res = await fetch(`/api/displays/${displayId}/config`, { cache: 'no-store' });
+      const data = await res.json();
+      if (!data.ok) throw new Error(data.error || 'load failed');
+      const d = data.display;
+      locationId = d.location || locationId;
+      document.getElementById('pageTitle').textContent = `${d.title} — Setup`;
+      document.getElementById('pageSub').textContent = `${d.ip}:${d.port} · device ID ${d.device_id}`;
+      document.getElementById('fTitle').value = d.title || '';
+      document.getElementById('fRoomId').value = d.id || displayId;
+      updateRoomSlug();
+      scheduleRoomIdCheck();
+      document.getElementById('fIp').value = d.ip || '';
+      document.getElementById('fPort').value = d.port || 1515;
+      document.getElementById('fDeviceId').value = d.device_id ?? 0;
+      document.getElementById('fRoomUser').value = data.room_username || displayId;
+      candidates = data.candidates || [];
+      categories = data.categories || {};
+      sectionLabels = data.section_labels || categories;
+      staticCatalog = d.static_button_catalog || {};
+      iconCatalog = sortedIconCatalog(data.icon_catalog || d.icon_catalog || DEFAULT_ICON_CATALOG);
+      defaultIcons = d.default_icons || {};
+      applyUtilityIconSvgs(d.icon_svgs);
+      layoutTemplates = data.layout_templates || layoutTemplates;
+      locationsList = data.locations || locationsList;
+      renderTemplateSelect();
+      renderLocationSelect(d.location || 'main');
+      const layout = data.layout || {};
+      document.getElementById('fBtnSize').value = layout.button_size || 'md';
+      document.getElementById('fColumns').value = String(layout.columns || 2);
+      powerMode = layout.power_mode || 'split';
+      document.getElementById('fPowerMode').value = powerMode;
+      muteMode = layout.mute_mode || 'split';
+      document.getElementById('fMuteMode').value = muteMode;
+      buttonStyle = { ...(layout.button_style || { default: 'both' }) };
+      if (typeof buttonStyle === 'string') buttonStyle = { default: buttonStyle };
+      document.getElementById('fDefaultStyle').value = buttonStyle.default || 'both';
+      buttonIcons = { ...(layout.button_icons || {}) };
+      hiddenButtons = new Set(layout.hidden_buttons || []);
+      sectionOrder = [...(layout.section_order || ['master','sources','wireless','volume','navigation','picture','status','power','builtin','other'])];
+      buttonOrder = { ...(layout.button_order || {}) };
+      buttonLabels = { ...(layout.button_labels || {}) };
+      const rawGrid = { ...(layout.grid_size || {}), ...(layout.button_layout || {}) };
+      gridSize = {};
+      for (const [key, value] of Object.entries(rawGrid)) {
+        gridSize[key] = normalizeGridEntry(value, key);
+      }
+      for (const cat of Object.keys(categories)) {
+        if (!buttonOrder[cat]?.length) {
+          const enabled = (d.sources || [])
+            .filter(s => s.enabled && (s.category || 'sources') === cat)
+            .sort((a, b) => (a.order || 999) - (b.order || 999));
+          buttonOrder[cat] = enabled.map(s => s.id);
+        }
+      }
+      for (const section of Object.keys(staticCatalog)) {
+        if (!buttonOrder[section]?.length) buttonOrder[section] = defaultStaticOrder(section);
+      }
+      normalizeMuteOrders();
+      document.getElementById('previewRemote').href = d.remote_url || roomUrlPath();
+      renderSectionOrder();
+      renderGridButtonPanels();
+      renderSources();
+    }
+
+    async function saveLayout() {
+      collectPanelState();
+      ensureAllButtonOrders();
+      if (powerMode === 'toggle') {
+        buttonOrder.power = powerOrderIds();
+      }
+      normalizeMuteOrders();
+      const layout = {
+        button_size: document.getElementById('fBtnSize').value,
+        columns: Number(document.getElementById('fColumns').value),
+        section_order: sectionOrder,
+        category_order: ['sources', 'wireless', 'builtin', 'other'],
+        button_order: buttonOrder,
+        button_labels: layoutLabelsForSave(),
+        grid_size: gridSize,
+        power_mode: powerMode,
+        mute_mode: muteMode,
+        button_style: buttonStyle,
+        button_icons: buttonIcons,
+        hidden_buttons: [...hiddenButtons],
+      };
+      const sources = buildSourcesPayload();
+      const srcRes = await fetch(`/api/displays/${displayId}/sources`, {
+        method: 'PUT', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sources }),
+      });
+      const srcData = await srcRes.json();
+      if (!srcData.ok) throw new Error(srcData.error || 'source save failed');
+      const res = await fetch(`/api/displays/${displayId}/layout`, {
+        method: 'PUT', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ layout }),
+      });
+      const data = await res.json();
+      if (!data.ok) throw new Error(data.error);
+      candidates = srcData.candidates || candidates;
+      const savedLayout = data.display?.layout || layout;
+      buttonOrder = { ...(savedLayout.button_order || buttonOrder) };
+      buttonLabels = { ...(savedLayout.button_labels || layoutLabelsForSave()) };
+      const savedGrid = savedLayout.grid_size || {};
+      gridSize = {};
+      for (const [key, value] of Object.entries(savedGrid)) {
+        gridSize[key] = normalizeGridEntry(value, key);
+      }
+      powerMode = savedLayout.power_mode || powerMode;
+      document.getElementById('fPowerMode').value = powerMode;
+      muteMode = savedLayout.mute_mode || muteMode;
+      document.getElementById('fMuteMode').value = muteMode;
+      buttonStyle = { ...(savedLayout.button_style || buttonStyle) };
+      document.getElementById('fDefaultStyle').value = buttonStyle.default || 'both';
+      buttonIcons = { ...(savedLayout.button_icons || buttonIcons) };
+      hiddenButtons = new Set(savedLayout.hidden_buttons || hiddenButtons);
+      log('Remote layout and button names saved.');
+      renderGridButtonPanels();
+      renderSources();
+    }
+
+    async function saveConnection() {
+      await checkRoomId();
+      const newId = document.getElementById('fRoomId').value.trim().toLowerCase();
+      if (!roomIdOk) throw new Error('Fix the room id before saving.');
+      const payload = {
+        title: document.getElementById('fTitle').value.trim(),
+        ip: document.getElementById('fIp').value.trim(),
+        port: Number(document.getElementById('fPort').value),
+        device_id: Number(document.getElementById('fDeviceId').value),
+        location: document.getElementById('fLocation').value,
+      };
+      if (newId && newId !== displayId) payload.new_id = newId;
+      const res = await fetch(`/api/displays/${displayId}/config`, {
+        method: 'PUT', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      const data = await res.json();
+      if (!data.ok) throw new Error(data.error);
+      if (data.display?.id && data.display.id !== displayId) {
+        log(`Room id changed to "${data.display.id}". Redirecting…`);
+        location.href = data.display.setup_url || `${roomUrlPath(data.display.id)}/setup`;
+        return;
+      }
+      if (data.display?.location && data.display.location !== locationId) {
+        locationId = data.display.location;
+        log('Location changed. Redirecting…');
+        location.href = data.display.setup_url || `${roomUrlPath()}/setup`;
+        return;
+      }
+      log('Connection saved.');
+      await loadConfig();
+    }
+
+    async function saveSources() {
+      const sources = buildSourcesPayload();
+      const res = await fetch(`/api/displays/${displayId}/sources`, {
+        method: 'PUT', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sources }),
+      });
+      const data = await res.json();
+      if (!data.ok) throw new Error(data.error);
+      candidates = data.candidates || sources;
+      log(`Saved ${sources.filter(s => s.enabled).length} enabled sources.`);
+      renderGridButtonPanels();
+      renderSources();
+    }
+
+    async function runDiscover(quick) {
+      document.getElementById('discoverBtn').disabled = true;
+      document.getElementById('discoverQuickBtn').disabled = true;
+      log(quick ? 'Quick scan…' : 'Full discovery (may take a few minutes)…');
+      try {
+        const res = await fetch(`/api/displays/${displayId}/discover`, {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ quick }),
+        });
+        const data = await res.json();
+        if (!data.ok) throw new Error(data.error);
+        candidates = data.candidates || [];
+        renderGridButtonPanels();
+        renderSources();
+        log(`Discovery: ${data.stable_count} stable, ${data.unstable_count} unstable.`);
+        if (data.summary) log(data.summary);
+      } catch (err) {
+        log(`Discovery error: ${err.message}`);
+      } finally {
+        document.getElementById('discoverBtn').disabled = false;
+        document.getElementById('discoverQuickBtn').disabled = false;
+      }
+    }
+
+    async function testCode(code) {
+      log(`Testing ${code}…`);
+      const res = await fetch(`/api/displays/${displayId}/send-code`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code }),
+      });
+      const data = await res.json();
+      if (!data.ok) { log(`Test failed: ${data.error}`); return; }
+      const ack = data.ack ? 'ACK' : 'NAK/timeout';
+      const q = data.query_after?.value || '?';
+      const stable = data.input_stable ? 'stable' : 'unstable';
+      log(`${code}: ${ack} · query ${q} (${stable})`);
+    }
+
+    async function saveCredentials() {
+      const password = document.getElementById('fRoomPass').value;
+      if (!password) { log('Enter a new password to update credentials.'); return; }
+      const res = await fetch(`/api/displays/${displayId}/credentials`, {
+        method: 'PUT', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          username: document.getElementById('fRoomUser').value.trim(),
+          password,
+        }),
+      });
+      const data = await res.json();
+      if (!data.ok) throw new Error(data.error);
+      document.getElementById('fRoomPass').value = '';
+      log('Room credentials updated.');
+    }
+
+    document.getElementById('saveCredBtn').addEventListener('click', () => saveCredentials().catch(e => log(e.message)));
+    document.getElementById('logoutBtn').addEventListener('click', async () => {
+      await fetch('/api/auth/logout', { method: 'POST' });
+      location.href = '/login';
+    });
+    document.getElementById('fLocation')?.addEventListener('change', (e) => {
+      updateLocationHint(e.target.value);
+      updateRoomSlug();
+    });
+    document.getElementById('fRoomId')?.addEventListener('input', scheduleRoomIdCheck);
+    document.getElementById('applyTemplateBtn').addEventListener('click', () => applyTemplate().catch(e => log(e.message)));
+    document.getElementById('saveTemplateBtn').addEventListener('click', () => saveAsTemplate().catch(e => log(e.message)));
+    document.getElementById('saveLayoutBtn').addEventListener('click', () => saveLayout().catch(e => log(e.message)));
+    document.getElementById('saveConnBtn').addEventListener('click', () => saveConnection().catch(e => log(e.message)));
+    document.getElementById('saveSourcesBtn').addEventListener('click', () => saveSources().catch(e => log(e.message)));
+    document.getElementById('discoverBtn').addEventListener('click', () => runDiscover(false));
+    document.getElementById('discoverQuickBtn').addEventListener('click', () => runDiscover(true));
+    document.getElementById('addCodeBtn').addEventListener('click', () => {
+      const code = prompt('Enter MDC code (e.g. 0x23):');
+      if (!code) return;
+      const norm = code.trim().toLowerCase().startsWith('0x') ? code.trim().toLowerCase() : `0x${parseInt(code, 16).toString(16).padStart(2,'0')}`;
+      candidates.push({ code: norm, title: norm, enabled: false, provision: true, discovered: false, category: 'other', catalog: false });
+      renderGridButtonPanels();
+      renderSources();
+    });
+
+    document.querySelectorAll('#filters button').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('#filters button').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        activeFilter = btn.dataset.filter;
+        renderSources();
+        renderGridButtonPanels();
+      });
+    });
+
+    loadConfig().catch(err => log(err.message));
+  </script>
+</body>
+</html>

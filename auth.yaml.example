@@ -1,0 +1,15 @@
+# Copy to auth.yaml on first run (auto-created with defaults).
+# admin — full access to all rooms, setup, add/delete
+# rooms — per-display remote-only access
+
+admin:
+  username: admin
+  password: changeme   # hashed on save — change immediately
+
+rooms:
+  cabin-1:
+    username: cabin-1
+    password: cabin-1
+  cabin-2:
+    username: cabin-2
+    password: cabin-2

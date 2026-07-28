@@ -1,0 +1,10 @@
+services:
+  flip-remote:
+    build: .
+    volumes:
+      - ./displays.yaml:/app/displays.yaml
+      - ./layout_templates.yaml:/app/layout_templates.yaml
+      - ./maps:/app/maps
+      - ./source_catalog.yaml:/app/source_catalog.yaml
+    restart: unless-stopped
+    network_mode: host

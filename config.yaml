@@ -1,0 +1,84 @@
+# Samsung Flip Pro WM55B — MDC over RJ45
+# Protocol: Samsung MDC (Multiple Display Control) over TCP
+
+display:
+  model: WM55B
+  # Set on panel: Home → Network Settings (or System → Setup → Network Settings)
+  ip: 10.10.10.17
+  mac: 00:00:00:00:00:00     # <-- for Wake-on-LAN when powered off
+  port: 1515                 # Samsung MDC default (TCP)
+  device_id: 0               # 0 = single direct connection (gets ACK); 0xFE = broadcast (no ACK)
+  timeout_sec: 3
+  retry_count: 3             # Power on/off: retry every 2s if no ACK (Samsung spec)
+  retry_delay_sec: 2
+  reconnect_after_power_on_sec: 10  # RJ45: reconnect TCP after power-on command
+
+# --- Panel menu settings (configure once on the display) ---
+#
+# 1. Ethernet
+#    Connect RJ45 to your LAN (Cat5e/Cat6, 10/100 Mbps).
+#
+# 2. Network
+#    Home → Network Settings → Wired
+#    Use DHCP or static IP matching your network.
+#
+# 3. MDC input source
+#    Home → ID Settings → PC Connection Cable → RJ45(LAN) cable
+#
+# 4. Device ID
+#    Home → ID Settings → Device ID → 0  (must match device_id above)
+#
+# 5. Network Standby (recommended)
+#    Home → System → Power Control → Network Standby → On
+#    Keeps the RJ45 MDC port reachable when the panel looks off.
+#
+# 6. MDC on-screen popups (Flip Pro WM55B)
+#    The commercial-display path (Home → System → On Screen Display → MDC Message)
+#    does NOT exist on Flip Pro — that menu is for DB/DM signage panels.
+#    Flip Pro: Menu → Settings → System → Advanced settings (no MDC Message toggle found).
+#    MDC protocol commands 0xA3 and 0x70 also NAK on WM55B (error 0x01), so the remote
+#    server cannot disable these popups. They may be unavoidable on this firmware, or only
+#    reducible by sending fewer commands (e.g. less frequent status polling).
+
+commands:
+  power_on:  "AA1100010113"
+  power_off: "AA1100010012"
+  reboot:    "AA1100010214"
+  status:    "AA00000000"
+  mute_on:   "AA1300010115"
+  mute_off:  "AA1300010014"
+  vol_up:    "AA6200010063"
+  vol_down:  "AA6200010164"
+  hdmi1:     "AA1400012136"   # Teams
+  vol_0:   "AA1200010013"
+  hdmi2:     "AA1400012338"   # STB
+  stb:       "AA1400012338"
+  apple:     "AA140001253A"   # USB-C
+  usb_c2:    "AA140001697E"   # USB-C 2
+  teams:     "AA1400012136"
+  touchscreen: "AA1400016479" # IWB / whiteboard
+  browser:   "AA140001657A" # Web browser
+  menu:      "AA3400010136"
+  mdc_type:  "AA1D00001D"   # query: returns 0x01 if RJ45 MDC active
+
+inputs:
+  teams: 0x21
+  apple: 0x25
+  usb_c2: 0x69
+  stb: 0x23
+  touchscreen: 0x64
+  browser: 0x65
+  dp:    0x0F
+
+# Friendly names for MDC input codes (used with discovered_map.json)
+source_labels:
+  "0x21": Teams
+  "0x23": STB
+  "0x25": Apple
+  "0x64": Touchscreen
+  "0x65": Browser
+  "0x69": USB-C 2
+
+# Inputs where SET ACKs but query reports a different code (WM55B quirk)
+unstable_notes:
+  stb: "ACK 0x23 but query returns Touchscreen — HDMI may still switch"

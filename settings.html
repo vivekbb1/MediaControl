@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Settings</title>
+  <style>
+    :root {
+      --bg: #0f1117; --panel: #1a1d27; --panel2: #232735; --border: #2e3344;
+      --text: #e8ecf4; --muted: #8b93a7; --accent: #4f8cff; --danger: #f2555a; --ok: #3dd68c;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg); color: var(--text); min-height: 100vh; padding: 24px 16px 40px;
+    }
+    .wrap { max-width: 760px; margin: 0 auto; }
+    header { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; flex-wrap: wrap; }
+    header a { color: var(--accent); text-decoration: none; font-size: 0.9rem; }
+    h1 { font-size: 1.5rem; flex: 1; }
+    .card {
+      background: var(--panel); border: 1px solid var(--border); border-radius: 14px;
+      padding: 20px; margin-bottom: 16px;
+    }
+    .card h2 { font-size: 1rem; margin-bottom: 6px; }
+    .card p { color: var(--muted); font-size: 0.85rem; margin-bottom: 14px; }
+    label { display: block; font-size: 0.78rem; color: var(--muted); margin-bottom: 5px; }
+    input, select, textarea {
+      width: 100%; background: var(--panel2); border: 1px solid var(--border);
+      color: var(--text); border-radius: 10px; padding: 10px 12px; margin-bottom: 12px;
+    }
+    textarea { min-height: 72px; resize: vertical; }
+    .row { display: grid; gap: 12px; }
+    @media (min-width: 560px) { .row.two { grid-template-columns: 1fr 1fr; } }
+    .toolbar { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px; }
+    button, a.btn {
+      border-radius: 10px; padding: 10px 14px; font-weight: 600; font-size: 0.88rem;
+      cursor: pointer; text-decoration: none; display: inline-flex; align-items: center;
+      min-height: 42px; border: 1px solid var(--border); background: var(--panel2); color: var(--text);
+    }
+    button.primary, a.btn.primary { background: var(--accent); border-color: transparent; color: #fff; border: none; }
+    .msg { font-size: 0.85rem; margin-top: 8px; min-height: 1.2em; }
+    .msg.ok { color: var(--ok); }
+    .msg.err { color: var(--danger); }
+    .profile { font-size: 0.9rem; color: var(--muted); }
+    .profile strong { color: var(--text); }
+    .template-list, .loc-admin-list { display: grid; gap: 8px; margin-top: 8px; }
+    .template-item, .loc-admin-item {
+      display: flex; justify-content: space-between; gap: 10px; align-items: center;
+      background: var(--panel2); border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px;
+      font-size: 0.88rem;
+    }
+    .subtle { color: var(--muted); font-size: 0.78rem; }
+    .check-row { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+    .check-row input { width: auto; margin: 0; }
+    .check-row label { margin: 0; color: var(--text); font-size: 0.88rem; }
+    .future { border-style: dashed; opacity: 0.92; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <a href="/">← Home</a>
+      <h1>Settings</h1>
+    </header>
+
+    <section class="card" id="profileSection">
+      <h2>Your profile</h2>
+      <p class="profile">Signed in as <strong id="profileUser">—</strong> · <span id="profileRole">—</span></p>
+    </section>
+
+    <section class="card" id="accountSection">
+      <h2 id="account">Account &amp; password</h2>
+      <p id="accountHelp">Update master admin credentials.</p>
+      <label for="adminUser">Username</label>
+      <input id="adminUser" type="text" autocomplete="username" />
+      <label for="adminCurrent">Current password</label>
+      <input id="adminCurrent" type="password" autocomplete="current-password" />
+      <label for="adminNew">New password</label>
+      <input id="adminNew" type="password" autocomplete="new-password" />
+      <div class="toolbar">
+        <button type="button" class="primary" id="saveAdminBtn">Save password</button>
+      </div>
+      <div class="msg" id="adminMsg"></div>
+    </section>
+
+    <section class="card master-only" id="uiSection">
+      <h2 id="ui">Homepage &amp; UI</h2>
+      <p>Customize the home screen title and default remote shortcut for master admins.</p>
+      <label for="homepageTitle">Homepage title</label>
+      <input id="homepageTitle" type="text" />
+      <label for="homepageLead">Homepage description</label>
+      <textarea id="homepageLead"></textarea>
+      <div class="row two">
+        <div>
+          <label for="defaultLocation">Default location</label>
+          <select id="defaultLocation"></select>
+        </div>
+        <div>
+          <label for="defaultRoom">Default room</label>
+          <select id="defaultRoom"></select>
+        </div>
+      </div>
+      <div class="check-row">
+        <input type="checkbox" id="showDefaultRemote" />
+        <label for="showDefaultRemote">Show default remote shortcut on home page</label>
+      </div>
+      <div class="toolbar">
+        <button type="button" class="primary" id="saveSiteBtn">Save UI settings</button>
+      </div>
+      <div class="msg" id="siteMsg"></div>
+    </section>
+
+    <section class="card master-only" id="locationsSection">
+      <h2 id="locations">Locations</h2>
+      <p>Manage sites/buildings, remote host URLs, and location-scoped admins.</p>
+      <div class="toolbar">
+        <a class="btn primary" href="/locations">Manage locations</a>
+      </div>
+      <div class="loc-admin-list" id="locAdminList"></div>
+      <div class="row two" style="margin-top:14px">
+        <div>
+          <label for="locAdminLocation">Location</label>
+          <select id="locAdminLocation"></select>
+        </div>
+        <div>
+          <label for="locAdminUser">Admin username</label>
+          <input id="locAdminUser" type="text" placeholder="conares-admin" />
+        </div>
+      </div>
+      <label for="locAdminPass">Admin password</label>
+      <input id="locAdminPass" type="password" autocomplete="new-password" />
+      <div class="toolbar">
+        <button type="button" id="saveLocAdminBtn">Save location admin</button>
+      </div>
+      <div class="msg" id="locAdminMsg"></div>
+    </section>
+
+    <section class="card" id="templatesSection">
+      <h2 id="templates">Layout templates</h2>
+      <p>Reusable remote layouts. Apply templates per room in Setup, or edit them on any room's setup page.</p>
+      <div class="template-list" id="templateList"></div>
+    </section>
+
+    <section class="card future master-only">
+      <h2>Subscription (coming soon)</h2>
+      <p>Planned cloud hosting with tiers based on locations and rooms — ideal for rolling this out to small sites and residential multimedia control. Billing integration is not enabled in this local build.</p>
+    </section>
+  </div>
+  <script>
+    let me = null;
+    let settings = {};
+    let locations = [];
+    let rooms = [];
+    let templates = [];
+
+    async function ensureAuth() {
+      const res = await fetch('/api/auth/me');
+      const data = await res.json();
+      if (!data.ok || !data.user || data.user.role === 'room') {
+        location.href = '/login?next=/settings';
+        return null;
+      }
+      me = data.user;
+      document.getElementById('profileUser').textContent = me.username || '—';
+      document.getElementById('profileRole').textContent = me.is_master ? 'Master admin (all locations)' : `Location admin · ${me.location_id || ''}`;
+      if (!me.is_master) {
+        document.querySelectorAll('.master-only').forEach(el => el.hidden = true);
+        document.getElementById('accountHelp').textContent = 'Location admins sign in with credentials set by the master admin.';
+        document.getElementById('adminUser').disabled = true;
+        document.getElementById('saveAdminBtn').hidden = true;
+      } else {
+        document.getElementById('adminUser').value = me.username || 'admin';
+      }
+      return me;
+    }
+
+    function fillLocationRoomSelects() {
+      const locSel = document.getElementById('defaultLocation');
+      const roomSel = document.getElementById('defaultRoom');
+      const locAdminSel = document.getElementById('locAdminLocation');
+      locSel.innerHTML = locations.map(l => `<option value="${l.id}">${l.title}</option>`).join('');
+      locAdminSel.innerHTML = locations.map(l => `<option value="${l.id}">${l.title}</option>`).join('');
+      function fillRooms() {
+        const lid = locSel.value;
+        const list = rooms.filter(r => (r.location || locations[0]?.id) === lid);
+        roomSel.innerHTML = list.map(r => `<option value="${r.id}">${r.title}</option>`).join('');
+      }
+      locSel.addEventListener('change', fillRooms);
+      fillRooms();
+      if (settings.default_location) locSel.value = settings.default_location;
+      fillRooms();
+      if (settings.default_room) roomSel.value = settings.default_room;
+    }
+
+    function renderTemplates() {
+      const el = document.getElementById('templateList');
+      if (!templates.length) {
+        el.innerHTML = '<div class="subtle">No templates yet. Save one from any room Setup page.</div>';
+        return;
+      }
+      el.innerHTML = templates.map(t =>
+        `<div class="template-item"><span><strong>${t.title}</strong><br><span class="subtle">${t.id}${t.default ? ' · default' : ''}</span></span></div>`
+      ).join('');
+    }
+
+    function renderLocAdmins(map) {
+      const el = document.getElementById('locAdminList');
+      const rows = locations.map(loc => {
+        const user = map[loc.id];
+        return `<div class="loc-admin-item"><span><strong>${loc.title}</strong><br><span class="subtle">${user || 'No location admin'}</span></span></div>`;
+      }).join('');
+      el.innerHTML = rows || '<div class="subtle">No locations configured.</div>';
+    }
+
+    async function loadAll() {
+      const [siteRes, dispRes, tplRes] = await Promise.all([
+        fetch('/api/site-settings'),
+        fetch('/api/displays'),
+        fetch('/api/layout-templates'),
+      ]);
+      const siteData = await siteRes.json();
+      const dispData = await dispRes.json();
+      const tplData = await tplRes.json();
+      settings = siteData.settings || {};
+      locations = dispData.locations || [];
+      rooms = dispData.displays || [];
+      templates = tplData.templates || [];
+      document.getElementById('homepageTitle').value = settings.homepage_title || '';
+      document.getElementById('homepageLead').value = settings.homepage_lead || '';
+      document.getElementById('showDefaultRemote').checked = !!settings.show_default_remote;
+      fillLocationRoomSelects();
+      renderTemplates();
+      if (me?.is_master) renderLocAdmins(siteData.location_admins || {});
+    }
+
+    document.getElementById('saveAdminBtn').addEventListener('click', async () => {
+      const msg = document.getElementById('adminMsg');
+      msg.textContent = '';
+      msg.className = 'msg';
+      try {
+        const res = await fetch('/api/auth/admin-password', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            username: document.getElementById('adminUser').value.trim(),
+            current_password: document.getElementById('adminCurrent').value,
+            new_password: document.getElementById('adminNew').value,
+          }),
+        });
+        const data = await res.json();
+        if (!res.ok || !data.ok) throw new Error(data.error || 'Update failed');
+        document.getElementById('adminCurrent').value = '';
+        document.getElementById('adminNew').value = '';
+        msg.textContent = `Password updated for "${data.username}".`;
+        msg.className = 'msg ok';
+      } catch (err) {
+        msg.textContent = err.message;
+        msg.className = 'msg err';
+      }
+    });
+
+    document.getElementById('saveSiteBtn').addEventListener('click', async () => {
+      const msg = document.getElementById('siteMsg');
+      msg.textContent = '';
+      msg.className = 'msg';
+      try {
+        const res = await fetch('/api/site-settings', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            homepage_title: document.getElementById('homepageTitle').value.trim(),
+            homepage_lead: document.getElementById('homepageLead').value.trim(),
+            default_location: document.getElementById('defaultLocation').value,
+            default_room: document.getElementById('defaultRoom').value,
+            show_default_remote: document.getElementById('showDefaultRemote').checked,
+          }),
+        });
+        const data = await res.json();
+        if (!res.ok || !data.ok) throw new Error(data.error || 'Save failed');
+        msg.textContent = 'UI settings saved.';
+        msg.className = 'msg ok';
+      } catch (err) {
+        msg.textContent = err.message;
+        msg.className = 'msg err';
+      }
+    });
+
+    document.getElementById('saveLocAdminBtn').addEventListener('click', async () => {
+      const msg = document.getElementById('locAdminMsg');
+      msg.textContent = '';
+      msg.className = 'msg';
+      const location_id = document.getElementById('locAdminLocation').value;
+      const username = document.getElementById('locAdminUser').value.trim();
+      const password = document.getElementById('locAdminPass').value;
+      if (!username || !password) { msg.textContent = 'Username and password required.'; msg.className = 'msg err'; return; }
+      try {
+        const res = await fetch(`/api/location-admins/${encodeURIComponent(location_id)}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password }),
+        });
+        const data = await res.json();
+        if (!res.ok || !data.ok) throw new Error(data.error || 'Save failed');
+        document.getElementById('locAdminPass').value = '';
+        msg.textContent = `Location admin saved for ${location_id}.`;
+        msg.className = 'msg ok';
+        loadAll();
+      } catch (err) {
+        msg.textContent = err.message;
+        msg.className = 'msg err';
+      }
+    });
+
+    ensureAuth().then(u => { if (u) loadAll(); });
+  </script>
+</body>
+</html>

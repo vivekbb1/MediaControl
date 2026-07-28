@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="theme-color" content="#0f1117" />
+  <title>Samsung Flip Pro Remote</title>
+  <style>
+    :root {
+      --bg: #0f1117;
+      --panel: #1a1d27;
+      --panel2: #232735;
+      --border: #2e3344;
+      --text: #e8ecf4;
+      --muted: #8b93a7;
+      --accent: #4f8cff;
+      --accent2: #3b6fd4;
+      --ok: #3dd68c;
+      --warn: #f5a524;
+      --danger: #f2555a;
+      --radius: 12px;
+      --radius-pill: 999px;
+      --space-1: 6px;
+      --space-2: 8px;
+      --space-3: 10px;
+      --space-4: 12px;
+      --space-5: 16px;
+      --btn-min-h: 44px;
+      --btn-pad-y: 8px;
+      --btn-pad-x: 10px;
+      --btn-font: 0.88rem;
+      --btn-icon: 26px;
+      --btn-icon-brand: 36px;
+      --btn-gap: 8px;
+      --grid-gap: 10px;
+      --card-pad: 12px;
+    }
+    body.btn-size-sm {
+      --btn-min-h: 36px; --btn-pad-y: 6px; --btn-pad-x: 8px; --btn-font: 0.8rem;
+      --btn-icon: 22px; --btn-icon-brand: 30px; --btn-gap: 6px; --grid-gap: 8px; --card-pad: 10px;
+    }
+    body.btn-size-lg {
+      --btn-min-h: 50px; --btn-pad-y: 10px; --btn-pad-x: 12px; --btn-font: 0.94rem;
+      --btn-icon: 28px; --btn-icon-brand: 40px; --btn-gap: 8px; --grid-gap: 12px; --card-pad: 14px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: radial-gradient(1200px 600px at 10% -10%, #1a2744 0%, var(--bg) 55%);
+      color: var(--text);
+      min-height: 100vh;
+      min-height: 100dvh;
+      padding: max(10px, env(safe-area-inset-top)) max(10px, env(safe-area-inset-right)) max(10px, env(safe-area-inset-bottom)) max(10px, env(safe-area-inset-left));
+      -webkit-tap-highlight-color: transparent;
+    }
+    .wrap { max-width: 1100px; margin: 0 auto; width: 100%; }
+    header {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-3);
+      margin-bottom: var(--space-4);
+    }
+    h1 { font-size: clamp(1.15rem, 3.5vw, 1.4rem); font-weight: 700; letter-spacing: -0.02em; line-height: 1.2; }
+    .title-row {
+      display: flex; align-items: center; justify-content: space-between; gap: var(--space-3);
+    }
+    .title-row > div { min-width: 0; flex: 1; }
+    #cabinTitle {
+      font-size: clamp(1.35rem, 4.5vw, 1.75rem);
+      font-weight: 700;
+      line-height: 1.15;
+    }
+    .header-icons {
+      display: flex; align-items: center; gap: 8px; flex-shrink: 0;
+    }
+    .header-icon-btn {
+      width: 40px; height: 40px; border-radius: var(--radius);
+      background: var(--panel2); border: 1px solid var(--border); color: var(--text);
+      display: inline-flex; align-items: center; justify-content: center;
+      text-decoration: none; cursor: pointer; padding: 0;
+      transition: background .15s ease, border-color .15s ease;
+    }
+    .header-icon-btn:hover, .header-icon-btn:focus-visible {
+      background: #2c3142; border-color: #3d4458; outline: none;
+    }
+    .header-icon-btn:focus-visible { box-shadow: 0 0 0 2px var(--accent); }
+    .header-icon-btn svg { width: 20px; height: 20px; display: block; }
+    .header-icon-btn[hidden] { display: none !important; }
+
+    .status-scroll {
+      width: 100%;
+      overflow-x: auto;
+      overflow-y: hidden;
+      -webkit-overflow-scrolling: touch;
+      scroll-snap-type: x proximity;
+      scrollbar-width: none;
+      margin-left: calc(-1 * max(10px, env(safe-area-inset-left)));
+      margin-right: calc(-1 * max(10px, env(safe-area-inset-right)));
+      padding-left: max(10px, env(safe-area-inset-left));
+      padding-right: max(10px, env(safe-area-inset-right));
+    }
+    .status-scroll::-webkit-scrollbar { display: none; }
+    .status-bar {
+      display: flex;
+      flex-wrap: nowrap;
+      align-items: center;
+      gap: var(--space-2);
+      width: max-content;
+      min-width: 100%;
+      padding: 1px 0 2px;
+    }
+    .pill {
+      flex: 0 0 auto;
+      scroll-snap-align: start;
+      background: var(--panel2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-pill);
+      padding: 6px 11px;
+      font-size: 0.76rem;
+      line-height: 1.2;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+    }
+    .pill strong { font-weight: 600; }
+    .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); flex-shrink: 0; }
+    .dot.on { background: var(--ok); box-shadow: 0 0 8px var(--ok); }
+    .dot.off { background: var(--danger); }
+
+    .grid {
+      display: block;
+    }
+    @media (min-width: 540px) {
+      .grid {
+        columns: var(--layout-cols, 2);
+        column-gap: var(--grid-gap);
+      }
+    }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: var(--card-pad);
+      box-shadow: 0 4px 20px rgba(0,0,0,.18);
+      min-width: 0;
+      break-inside: avoid;
+      margin-bottom: var(--grid-gap);
+      display: inline-block;
+      width: 100%;
+      vertical-align: top;
+    }
+    .card.span-2 { column-span: all; }
+    .card h2 {
+      font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.08em;
+      color: var(--muted); margin-bottom: var(--space-3);
+    }
+
+    .btn-grid {
+      display: grid;
+      gap: var(--btn-gap);
+      align-items: stretch;
+      direction: ltr;
+      width: 100%;
+    }
+    .btn-grid > button {
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .btn-grid .wide { grid-column: 1 / -1; }
+
+    .btn-scroll-wrap {
+      overflow-x: auto;
+      overflow-y: hidden;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      margin-left: calc(-1 * var(--card-pad));
+      margin-right: calc(-1 * var(--card-pad));
+      padding-left: var(--card-pad);
+      padding-right: var(--card-pad);
+      direction: ltr;
+    }
+    .btn-scroll-wrap::-webkit-scrollbar { display: none; }
+    .btn-grid--scroll {
+      display: flex;
+      flex-direction: row;
+      flex-wrap: nowrap;
+      align-items: stretch;
+      gap: var(--btn-gap);
+      width: max-content;
+      min-width: 100%;
+      max-width: none;
+      margin-inline: 0;
+      direction: ltr;
+    }
+    .btn-grid--scroll > button {
+      flex: 1 0 52px;
+      width: auto;
+      min-width: 52px;
+      max-width: none;
+    }
+
+    button {
+      appearance: none; border: 1px solid var(--border); background: var(--panel2);
+      color: var(--text); border-radius: var(--radius);
+      padding: var(--btn-pad-y) var(--btn-pad-x);
+      font-size: var(--btn-font); font-weight: 600; cursor: pointer;
+      transition: transform .08s ease, background .15s ease, border-color .15s ease;
+      min-height: var(--btn-min-h);
+      width: 100%;
+      touch-action: manipulation;
+    }
+    button:hover, button:focus-visible { background: #2c3142; border-color: #3d4458; outline: none; }
+    button:focus-visible { box-shadow: 0 0 0 2px var(--accent); }
+    button:active { transform: scale(0.98); }
+    button.primary { background: linear-gradient(180deg, var(--accent), var(--accent2)); border-color: transparent; }
+    button.primary .btn-icon { color: #fff; }
+    .dpad button.primary .btn-icon svg { color: #fff; }
+    button.danger { background: linear-gradient(180deg, #ff6b6f, var(--danger)); border-color: transparent; }
+    button.success { background: linear-gradient(180deg, #57e6a5, #2db872); border-color: transparent; color: #0b1f14; }
+    button:disabled { opacity: .55; cursor: wait; }
+    button.warn { border-color: var(--warn); }
+
+    .btn-inner {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 4px; width: 100%; min-height: 100%;
+    }
+    .btn-icon {
+      width: var(--btn-icon); height: var(--btn-icon);
+      display: inline-flex; align-items: center; justify-content: center;
+      flex-shrink: 0; color: var(--text);
+    }
+    .btn-icon svg { width: 100%; height: 100%; display: block; color: inherit; }
+    .btn-icon .brand-icon-img { width: 100%; height: 100%; object-fit: contain; display: block; opacity: 0.92; }
+    .btn-label { line-height: 1.1; text-align: center; }
+
+    button.style-icon { padding: var(--btn-pad-y) var(--btn-pad-x); min-height: var(--btn-min-h); }
+    button.style-icon .btn-label { display: none; }
+    button.style-text { padding: var(--btn-pad-y) var(--btn-pad-x); }
+
+    section[data-section="sources"] button.style-icon,
+    section[data-section="wireless"] button.style-icon {
+      min-height: calc(var(--btn-min-h) + var(--btn-icon-brand) + var(--space-2));
+      padding: var(--space-3) var(--btn-pad-x);
+    }
+    section[data-section="sources"] button.style-icon .btn-icon,
+    section[data-section="wireless"] button.style-icon .btn-icon {
+      width: var(--btn-icon-brand); height: var(--btn-icon-brand);
+    }
+
+    button.style-both .btn-label { font-size: 0.72em; }
+    button.power-toggle.on { background: linear-gradient(180deg, #57e6a5, #2db872); color: #0b1f14; border-color: transparent; }
+    button.power-toggle.off { background: linear-gradient(180deg, #ff6b6f, var(--danger)); border-color: transparent; }
+    button.mute-toggle.muted { background: linear-gradient(180deg, #ffb347, #e08b1a); color: #2a1a05; border-color: transparent; }
+    button.mute-toggle.unmuted { background: var(--panel2); }
+
+    .nav-layout {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--space-3);
+    }
+    .nav-layout .section-stack {
+      width: 100%;
+      margin-top: 0;
+    }
+    .dpad {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      grid-template-rows: repeat(3, var(--btn-min-h));
+      gap: var(--btn-gap);
+      justify-content: center;
+      margin: var(--space-1) auto 0;
+      max-width: min(100%, 220px);
+      flex: 0 0 auto;
+    }
+    .nav-layout .dpad { margin: 0; }
+    .dpad button { min-height: var(--btn-min-h); height: 100%; padding: var(--btn-pad-y) var(--btn-pad-x); }
+    .dpad button.style-icon .btn-icon { width: var(--btn-icon); height: var(--btn-icon); }
+    .dpad .blank { visibility: hidden; pointer-events: none; min-height: var(--btn-min-h); }
+
+    .section-stack { margin-top: var(--space-3); }
+
+    .log {
+      margin-top: var(--space-4); background: #0b0d12; border: 1px solid var(--border);
+      border-radius: var(--radius); padding: var(--space-3); min-height: 80px; max-height: 160px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 0.76rem; color: #b8c0d4; overflow: auto; white-space: pre-wrap;
+    }
+    .toolbar { display: flex; gap: var(--space-2); margin-top: var(--space-2); flex-wrap: wrap; }
+    .toolbar button { width: auto; min-height: 36px; font-size: 0.78rem; padding: 6px 10px; }
+
+    @media (prefers-reduced-motion: reduce) {
+      button { transition: none; }
+      button:active { transform: none; }
+    }
+  </style>
+</head>
+<body class="btn-size-md">
+  <div class="wrap">
+    <header>
+      <div class="title-row">
+        <div>
+          <h1 id="cabinTitle">Samsung Flip Pro Remote</h1>
+        </div>
+        <nav class="header-icons" aria-label="Navigation">
+          <a href="/" id="allRoomsLink" class="header-icon-btn" hidden title="All rooms" aria-label="All rooms">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="m4 10 8-6 8 6"/><path d="M6 10v9h12v-9"/></svg>
+          </a>
+          <a id="setupLink" href="#" class="header-icon-btn" hidden title="Setup" aria-label="Setup">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6Z"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg>
+          </a>
+          <button type="button" id="logoutBtn" class="header-icon-btn" title="Sign out" aria-label="Sign out">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
+          </button>
+        </nav>
+      </div>
+      <div class="status-scroll">
+        <div class="status-bar" role="status" aria-live="polite">
+          <div class="pill"><span class="dot" id="connDot" aria-hidden="true"></span><span id="connText">Connecting…</span></div>
+          <div class="pill">Power: <strong id="powerText">—</strong></div>
+          <div class="pill">Input: <strong id="inputText">—</strong></div>
+          <div class="pill">Vol: <strong id="volText">—</strong></div>
+        </div>
+      </div>
+    </header>
+
+    <main class="grid" id="remoteGrid" aria-label="TV controls"></main>
+
+    <div class="log" id="log" role="log" aria-live="polite">Ready.</div>
+    <div class="toolbar">
+      <button type="button" id="clearLog">Clear log</button>
+    </div>
+  </div>
+
+  <script src="/brand_icons.js"></script>
+  <script>
+    const roomPathMatch = location.pathname.match(/^\/d\/([^/]+)\/([^/]+)/);
+    const locationId = roomPathMatch?.[1];
+    const displayId = roomPathMatch?.[2];
+    const api = (path) => `/api/displays/${displayId}${path}`;
+    const logEl = document.getElementById('log');
+    const connDot = document.getElementById('connDot');
+    const connText = document.getElementById('connText');
+    const powerText = document.getElementById('powerText');
+    const inputText = document.getElementById('inputText');
+    const volText = document.getElementById('volText');
+    let busy = false;
+    let sourceIds = new Set();
+    let wirelessSourceIds = new Set();
+    let lastSourcePick = null;
+    let displayData = null;
+    let mutedState = false;
+
+    if (!displayId || !locationId) location.href = '/';
+    document.getElementById('setupLink').href = `/d/${locationId}/${displayId}/setup`;
+
+    async function initNav() {
+      const meRes = await fetch('/api/auth/me');
+      const me = await meRes.json();
+      if (!me.user) {
+        location.href = `/login?room=${displayId}`;
+        return false;
+      }
+      if (me.user.role === 'room' && me.user.display_id !== displayId) {
+        location.href = me.user.remote_url || '/';
+        return false;
+      }
+      if (me.user.role === 'admin') {
+        document.getElementById('setupLink').hidden = false;
+        document.getElementById('allRoomsLink').hidden = false;
+      }
+      return true;
+    }
+
+    document.getElementById('logoutBtn').addEventListener('click', async () => {
+      await fetch('/api/auth/logout', { method: 'POST' });
+      location.href = '/login';
+    });
+
+    const ICON_ALIASES = { menu: 'settings' };
+    const ICONS = {};
+    const BUILTIN_ICON_BY_ID = {
+      up: 'arrow_up', down: 'arrow_down', left: 'arrow_left', right: 'arrow_right', ok: 'enter',
+      enter: 'enter', vol_up: 'volume_up', vol_down: 'volume_down',
+    };
+    let displayDefaultIcons = {};
+
+    function normalizeIconKey(key) {
+      if (!key) return null;
+      const text = String(key).trim();
+      return ICON_ALIASES[text] || text;
+    }
+
+    function resolveButtonIconKey(b) {
+      const fromButton = normalizeIconKey(b?.icon);
+      if (fromButton) return fromButton;
+      const fromLayout = normalizeIconKey(displayDefaultIcons[b?.id]);
+      if (fromLayout) return fromLayout;
+      return normalizeIconKey(BUILTIN_ICON_BY_ID[b?.id]) || null;
+    }
+
+    function setIconMap(iconSvgs) {
+      for (const key of Object.keys(ICONS)) delete ICONS[key];
+      if (iconSvgs) Object.assign(ICONS, iconSvgs);
+    }
+
+    function iconSvg(key) {
+      const resolved = normalizeIconKey(key);
+      if (!resolved) return ICONS.source || '';
+      return ICONS[resolved] || ICONS.source || '';
+    }
+
+    function mountUtilityIcons(root = document) {
+      root.querySelectorAll('[data-icon-key]').forEach((el) => {
+        const key = el.dataset.iconKey;
+        if (!key) return;
+        el.innerHTML = iconSvg(key);
+      });
+    }
+
+    function buttonInner(b) {
+      const style = b.style || 'both';
+      const label = b.title || b.id || '';
+      const labelHtml = `<span class="btn-label">${label}</span>`;
+      if (style === 'text') return `<span class="btn-inner">${labelHtml}</span>`;
+      const iconKey = resolveButtonIconKey(b);
+      if (!iconKey) {
+        if (style === 'icon') {
+          return `<span class="btn-inner"><span class="btn-icon" aria-hidden="true">${iconSvg('source')}</span></span>`;
+        }
+        return `<span class="btn-inner">${labelHtml}</span>`;
+      }
+      let iconHtml;
+      if (typeof isBrandIcon === 'function' && isBrandIcon(iconKey)) {
+        iconHtml = `<span class="btn-icon brand-icon" aria-hidden="true">${brandIconHtml(iconKey)}</span>`;
+      } else {
+        iconHtml = `<span class="btn-icon" aria-hidden="true">${iconSvg(iconKey)}</span>`;
+      }
+      if (style === 'icon') return `<span class="btn-inner">${iconHtml}</span>`;
+      return `<span class="btn-inner">${iconHtml}${labelHtml}</span>`;
+    }
+
+    function mkButton(b) {
+      const cls = [b.variant, b.wide ? 'wide' : '', `style-${b.style || 'both'}`];
+      const toggleKind = typeof b.toggle === 'string' ? b.toggle : null;
+      if (toggleKind === 'power') cls.push('power-toggle');
+      if (toggleKind === 'mute') cls.push('mute-toggle');
+      const aria = b.aria_label || b.title || b.id || '';
+      const hint = b.hint ? ` title="${b.hint}"` : '';
+      const ariaAttr = ` aria-label="${aria}"`;
+      if (b.action === 'refresh') {
+        return `<button type="button" class="${cls.filter(Boolean).join(' ')}" id="refreshBtn"${ariaAttr}${hint}>${buttonInner(b)}</button>`;
+      }
+      const toggleAttr = toggleKind ? ` data-toggle="${toggleKind}"` : '';
+      const cmd = toggleKind === 'power' ? 'power_toggle' : toggleKind === 'mute' ? 'mute_toggle' : b.id;
+      return `<button type="button" class="${cls.filter(Boolean).join(' ')}" data-cmd="${cmd}"${toggleAttr}${ariaAttr}${hint}>${buttonInner(b)}</button>`;
+    }
+
+    function btnHtml(b) { return mkButton(b); }
+
+    function renderScrollButtonGroup(buttons, mapFn) {
+      const mk = mapFn || ((b) => mkButton(b));
+      return `<div class="btn-scroll-wrap"><div class="btn-grid btn-grid--scroll">${buttons.map(mk).join('')}</div></div>`;
+    }
+
+    function btnGridStyle(grid, { rowHeight } = {}) {
+      const cols = Math.max(1, Number(grid?.cols || 2));
+      const rows = Math.max(1, Number(grid?.rows || 1));
+      const rowTrack = rowHeight || 'var(--btn-min-h)';
+      return [
+        `grid-template-columns:repeat(${cols},minmax(0,1fr))`,
+        `grid-template-rows:repeat(${rows},${rowTrack})`,
+      ].join(';');
+    }
+
+    function renderButtonGroup(buttons, grid, { mapFn, rowHeight, scroll } = {}) {
+      const mk = mapFn || ((b) => mkButton(b));
+      const cols = Math.max(1, Number(grid?.cols || 2));
+      const count = buttons.length;
+      if (!count) return '';
+      if (scroll) return renderScrollButtonGroup(buttons, mk);
+
+      const rows = Math.max(1, Math.ceil(count / cols));
+      const style = btnGridStyle({ cols, rows }, { rowHeight });
+      return `<div class="btn-grid" style="${style}">${buttons.map(mk).join('')}</div>`;
+    }
+
+    function renderStaticSection(section) {
+      const buttons = section.buttons || [];
+      const grid = section.grid || { cols: 2, rows: 1 };
+      const zoneGrids = section.zone_grids || {};
+
+      if (section.id === 'navigation') {
+        const dpadIds = new Set(['up', 'left', 'ok', 'right', 'down']);
+        const actions = buttons.filter(b => !dpadIds.has(b.id));
+        const dpadMap = Object.fromEntries(buttons.filter(b => dpadIds.has(b.id)).map(b => [b.id, b]));
+        const dpadCells = [
+          ['blank', 'up', 'blank'],
+          ['left', 'ok', 'right'],
+          ['blank', 'down', 'blank'],
+        ];
+        const dpadHtml = dpadCells.map(row => row.map(cell => {
+          if (cell === 'blank') return '<span class="blank" aria-hidden="true"></span>';
+          const b = dpadMap[cell];
+          if (!b) return '<span class="blank" aria-hidden="true"></span>';
+          return mkButton(b);
+        }).join('')).join('');
+        const actionsGrid = zoneGrids.actions || grid;
+        const actionsHtml = renderButtonGroup(actions, actionsGrid, { mapFn: (b) => mkButton(b), scroll: true });
+        return `<section class="card span-2" data-section="${section.id}">
+          <h2>${section.label}</h2>
+          <div class="nav-layout">
+            <div class="dpad" role="group" aria-label="Direction pad">${dpadHtml}</div>
+            <div class="section-stack">${actionsHtml}</div>
+          </div>
+        </section>`;
+      }
+
+      if (section.id === 'volume') {
+        const main = buttons.filter(b => (b.zone || 'main') === 'main');
+        const presets = buttons.filter(b => b.zone === 'presets');
+        const mainHtml = renderButtonGroup(main, grid, { mapFn: (b) => mkButton(b) });
+        const presetHtml = presets.length
+          ? `<div class="section-stack">${renderButtonGroup(presets, zoneGrids.presets || { cols: 5, rows: 1 }, {
+              mapFn: (b) => mkButton(b),
+            })}</div>`
+          : '';
+        return `<section class="card" data-section="${section.id}">
+          <h2>${section.label}</h2>
+          ${mainHtml}
+          ${presetHtml}
+        </section>`;
+      }
+
+      return `<section class="card" data-section="${section.id}">
+        <h2>${section.label}</h2>
+        ${renderButtonGroup(buttons, grid, { mapFn: (b) => mkButton(b) })}
+      </section>`;
+    }
+
+    function renderSourceSection(section) {
+      const grid = section.grid || { cols: 2, rows: 1 };
+      const count = (section.buttons || []).length;
+      const cols = Math.max(1, Number(grid.cols || 2));
+      const rows = Math.max(1, Math.ceil(count / cols) || 1);
+      const brandRow = 'calc(var(--btn-min-h) + var(--btn-icon-brand) + var(--space-3))';
+      const style = btnGridStyle({ cols, rows }, { rowHeight: brandRow });
+      const items = (section.buttons || []).map((b) => mkButton(b)).join('');
+      return `<section class="card" data-section="${section.id}">
+        <h2>${section.label}</h2>
+        <div class="btn-grid" style="${style}">${items}</div>
+      </section>`;
+    }
+
+    function renderSection(section) {
+      const span = section.span === 2 ? ' span-2' : '';
+      if (section.type === 'sources') {
+        return renderSourceSection(section).replace('class="card"', `class="card${span}"`);
+      }
+      const html = renderStaticSection(section);
+      if (section.span === 2 && !html.includes('span-2')) {
+        return html.replace('class="card"', 'class="card span-2"');
+      }
+      return html;
+    }
+
+    function appendLog(line) {
+      const ts = new Date().toLocaleTimeString();
+      logEl.textContent = `[${ts}] ${line}\n` + logEl.textContent;
+    }
+
+    function formatParsed(parsed) {
+      if (!parsed) return '';
+      if (parsed.status === 'ACK' && parsed.value) return ` · value ${parsed.value}`;
+      if (parsed.status === 'NAK') return ` · NAK`;
+      return '';
+    }
+
+    function formatQueryAfter(data) {
+      if (!data.query_after) return '';
+      const qv = data.query_after.value || '?';
+      return ` · query ${qv}` + (data.input_stable === false ? ' (unstable)' : '');
+    }
+
+    function applyLayout(display) {
+      const layout = display.layout || {};
+      const layoutCols = Math.max(1, Math.min(6, Number(layout.columns) || 2));
+      document.body.className = `btn-size-${layout.button_size || 'md'}`;
+
+      const gridEl = document.getElementById('remoteGrid');
+      gridEl.style.setProperty('--layout-cols', String(layoutCols));
+      const sections = display.remote_sections || [];
+      gridEl.innerHTML = sections.map(renderSection).join('');
+      mountUtilityIcons(document.getElementById('remoteGrid'));
+      sourceIds = new Set((display.sources || []).map(s => s.id));
+      wirelessSourceIds = new Set(
+        (display.sources || []).filter(s => s.category === 'wireless').map(s => s.id)
+      );
+      bindCmdButtons(document.getElementById('remoteGrid'));
+      const refreshBtn = document.getElementById('refreshBtn');
+      if (refreshBtn) refreshBtn.addEventListener('click', refreshStatus);
+      updatePowerToggleButton(powerText.textContent);
+      updateMuteToggleButton(mutedState);
+    }
+
+    function formatPowerStatus(powerState) {
+      const text = String(powerState || '').toLowerCase();
+      if (text === 'on') return 'On';
+      if (text === 'off') return 'Off';
+      if (!powerState || powerState === '—') return '—';
+      return String(powerState);
+    }
+
+    function updatePowerToggleButton(powerState) {
+      const btn = document.querySelector('button[data-toggle="power"]');
+      if (!btn) return;
+      const on = String(powerState || '').toLowerCase() === 'on';
+      btn.classList.toggle('on', on);
+      btn.classList.toggle('off', !on);
+      const label = btn.querySelector('.btn-label');
+      if (label) label.textContent = on ? 'On' : 'Off';
+      btn.setAttribute('aria-label', on ? 'Power on — tap to turn off' : 'Power off — tap to turn on');
+    }
+
+    function updateMuteToggleButton(muted) {
+      const btn = document.querySelector('button[data-toggle="mute"]');
+      if (!btn) return;
+      mutedState = !!muted;
+      btn.classList.toggle('muted', mutedState);
+      btn.classList.toggle('unmuted', !mutedState);
+      const label = btn.querySelector('.btn-label');
+      const icon = btn.querySelector('.btn-icon');
+      if (label) label.textContent = mutedState ? 'Muted' : 'Mute';
+      if (icon) icon.innerHTML = mutedState ? iconSvg('unmute') : iconSvg('mute');
+      btn.setAttribute('aria-label', mutedState ? 'Muted — tap to unmute' : 'Unmuted — tap to mute');
+    }
+
+    function bindCmdButtons(root) {
+      root.querySelectorAll('button[data-cmd]').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          const cmd = btn.dataset.cmd;
+          if (cmd === 'power_toggle') {
+            const on = String(powerText.textContent || '').toLowerCase() === 'on';
+            await sendCommand(on ? 'power_off' : 'power_on', on ? 'Power Off' : 'Power On');
+            return;
+          }
+          if (cmd === 'mute_toggle') {
+            await sendCommand(mutedState ? 'mute_off' : 'mute_on', mutedState ? 'Unmute' : 'Mute');
+            return;
+          }
+          const label = btn.querySelector('.btn-label')?.textContent?.trim() || btn.textContent.trim();
+          const powerOff = String(powerText.textContent || '').toLowerCase() !== 'on';
+          if (sourceIds.has(cmd) && powerOff) {
+            await sendCommand('power_on', 'Power On');
+            await sendCommand(cmd, label);
+          } else {
+            await sendCommand(cmd, label);
+          }
+        });
+      });
+    }
+
+    async function loadDisplay() {
+      const res = await fetch(api('/config'), { cache: 'no-store' });
+      if (res.status === 401 || res.status === 403) {
+        location.href = `/login?room=${displayId}`;
+        return;
+      }
+      const data = await res.json();
+      if (!data.ok) throw new Error(data.error || 'config failed');
+      displayData = data.display;
+      const cabinTitle = document.getElementById('cabinTitle');
+      cabinTitle.textContent = displayData.title;
+      cabinTitle.title = `MDC · ${displayData.ip}:${displayData.port} · id ${displayData.device_id}`;
+      document.title = `${displayData.title} — Remote`;
+      if (displayData.setup_url) {
+        document.getElementById('setupLink').href = displayData.setup_url;
+      } else if (displayData.location && displayData.id) {
+        document.getElementById('setupLink').href = `/d/${displayData.location}/${displayData.id}/setup`;
+      }
+      setIconMap(displayData.icon_svgs);
+      displayDefaultIcons = displayData.default_icons || {};
+      if (!Object.keys(ICONS).length) {
+        console.warn('No icon_svgs in config — utility icons will not render');
+      }
+      applyLayout(displayData);
+    }
+
+    function applyStatusInput(data) {
+      if (data.power === 'Off') {
+        inputText.textContent = 'None';
+        return;
+      }
+      const queried = data.input_code;
+      const graceMs = 90000;
+      const recent = lastSourcePick && (Date.now() - lastSourcePick.at) < graceMs;
+      if (queried === '0x64' && recent && wirelessSourceIds.has(lastSourcePick.id)) {
+        inputText.textContent = lastSourcePick.label;
+        return;
+      }
+      inputText.textContent = data.input_label || data.input_code || '—';
+    }
+
+    function applyVolumeStatus(data) {
+      if (data.power === 'Off') {
+        volText.textContent = 'Off';
+        return;
+      }
+      volText.textContent = data.volume_label ?? data.volume ?? '—';
+    }
+
+    async function refreshStatus() {
+      try {
+        const res = await fetch(api('/status'));
+        const data = await res.json();
+        if (!data.ok) throw new Error(data.error || 'status failed');
+        connDot.className = 'dot on';
+        connText.textContent = 'Connected';
+        powerText.textContent = formatPowerStatus(data.power);
+        applyStatusInput(data);
+        applyVolumeStatus(data);
+        updatePowerToggleButton(data.power);
+        updateMuteToggleButton(data.muted);
+        return data;
+      } catch (err) {
+        connDot.className = 'dot off';
+        connText.textContent = 'Offline';
+        appendLog(`Status error: ${err.message}`);
+      }
+    }
+
+    async function sendCommand(cmd, label) {
+      if (busy) return;
+      busy = true;
+      document.querySelectorAll('button[data-cmd]').forEach(b => b.disabled = true);
+      try {
+        const res = await fetch(api('/send'), {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ command: cmd }),
+        });
+        if (res.status === 401 || res.status === 403) {
+          location.href = `/login?room=${displayId}`;
+          return;
+        }
+        const data = await res.json();
+        if (!data.ok) throw new Error(data.error || 'send failed');
+        const ack = data.ack ? 'ACK' : 'SENT';
+        appendLog(`${label || cmd}: ${ack}${formatParsed(data.parsed)}${formatQueryAfter(data)}`);
+        if (data.note) appendLog(`  ↳ ${data.note}`);
+        if (!data.ack && data.parsed?.status === 'NAK') {
+          appendLog(`  ↳ TV rejected this command (NAK). Run Discover in Setup to find working codes.`);
+        }
+        if (sourceIds.has(cmd) && data.ack) {
+          const picked = data.input_label || label;
+          lastSourcePick = { id: cmd, label: picked, at: Date.now() };
+          inputText.textContent = picked;
+        }
+        if (cmd.startsWith('power_') || cmd.startsWith('vol_') || cmd.startsWith('mute_') || sourceIds.has(cmd) || cmd === 'reboot') {
+          if (cmd === 'power_on' || cmd === 'reboot') await new Promise(r => setTimeout(r, cmd === 'reboot' ? 10000 : 2000));
+          else if (wirelessSourceIds.has(cmd)) await new Promise(r => setTimeout(r, 1200));
+          await refreshStatus();
+        } else if (cmd === 'power_off') {
+          powerText.textContent = 'Off';
+          inputText.textContent = 'None';
+          volText.textContent = 'Off';
+          updatePowerToggleButton('Off');
+          await refreshStatus();
+        }
+      } catch (err) {
+        appendLog(`${label || cmd}: ERROR ${err.message}`);
+      } finally {
+        busy = false;
+        document.querySelectorAll('button[data-cmd]').forEach(b => b.disabled = false);
+      }
+    }
+
+    document.getElementById('clearLog').addEventListener('click', () => { logEl.textContent = 'Ready.'; });
+    initNav().then((ok) => {
+      if (!ok) return;
+      loadDisplay().then(refreshStatus).catch(err => appendLog(err.message));
+      setInterval(refreshStatus, 15000);
+    });
+  </script>
+</body>
+</html>

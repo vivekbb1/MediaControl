@@ -1,0 +1,833 @@
+room_order:
+- director
+- rebar
+- billet
+- pipe
+displays:
+  director:
+    title: Director
+    model: WM55B
+    ip: 192.168.0.38
+    port: 1515
+    device_id: 0
+    layout:
+      button_size: lg
+      columns: 2
+      section_order:
+      - master
+      - sources
+      - wireless
+      - volume
+      - navigation
+      - picture
+      - status
+      - builtin
+      - other
+      category_order:
+      - sources
+      - wireless
+      - builtin
+      - other
+      button_order:
+        master:
+        - power_toggle
+        - mute_toggle
+        - vol_down
+        - vol_up
+        power:
+        - power_toggle
+        - reboot
+        - power_on
+        - power_off
+        volume:
+        - vol_0
+        - vol_25
+        - vol_50
+        - vol_75
+        - vol_100
+        navigation:
+        - up
+        - left
+        - ok
+        - right
+        - down
+        - home
+        - back
+        - exit
+        - menu
+        - info
+        picture:
+        - screen_fit
+        - aspect_16_9
+        - aspect_4_3
+        status:
+        - reboot
+        - refresh
+        - query_power
+        - query_input
+        sources:
+        - apple
+        - teams
+        - touchscreen
+        - browser
+        - stb
+        - usb_c
+        wireless:
+        - screen_mirror
+        - usb_c2
+        builtin: []
+        other: []
+      button_labels:
+        power_toggle: Power
+        mute_toggle: Mute
+        vol_down: "\u2212"
+        vol_up: +
+        vol_0: 0%
+        vol_25: 25%
+        vol_50: 50%
+        vol_75: 75%
+        vol_100: 100%
+        up: Up
+        left: Left
+        ok: OK
+        right: Right
+        down: Down
+        menu: Menu
+        home: Home
+        back: Back
+        exit: Exit
+        info: Info
+        screen_fit: Screen Fit
+        aspect_16_9: '16:9'
+        aspect_4_3: '4:3'
+        refresh: Refresh
+        query_power: Query Power
+        query_input: Query Input
+        reboot: Reboot
+      grid_size:
+        master:
+          cols: 4
+          rows: 1
+        sources:
+          cols: 2
+          rows: 2
+        wireless:
+          cols: 2
+          rows: 1
+        volume:
+          cols: 5
+          rows: 1
+        status:
+          cols: 5
+          rows: 1
+        power:
+          cols: 3
+          rows: 1
+        volume_presets:
+          cols: 5
+          rows: 1
+        navigation_actions:
+          cols: 5
+          rows: 1
+        picture:
+          cols: 5
+          rows: 1
+        builtin:
+          cols: 2
+          rows: 0
+        other:
+          cols: 2
+          rows: 0
+        navigation:
+          cols: 2
+          rows: 0
+      power_mode: toggle
+      mute_mode: toggle
+      button_style:
+        default: both
+        master: icon
+        sources: icon
+        wireless: icon
+        volume: text
+        navigation: icon
+        picture: icon
+        status: icon
+      button_icons:
+        power_toggle: power
+        vol_down: volume_down
+        vol_up: volume_up
+        apple: apple
+        teams: teams
+        touchscreen: whiteboard
+        browser: browser
+        screen_mirror: airplay
+        usb_c2: flip
+        menu: settings
+        home: home
+        back: back
+        screen_fit: screen_fit
+        aspect_16_9: aspect_16_9
+        aspect_4_3: aspect_4_3
+        refresh: refresh
+        reboot: reboot
+        stb: stb
+        usb_c: usb_c
+      hidden_buttons: []
+    sources:
+    - id: apple
+      code: '0x25'
+      title: Apple
+      enabled: true
+      category: sources
+      order: 0
+    - id: teams
+      code: '0x21'
+      title: Teams
+      enabled: true
+      category: sources
+      order: 1
+    - id: touchscreen
+      code: '0x64'
+      title: Whiteboard
+      enabled: true
+      category: sources
+      order: 2
+    - id: browser
+      code: '0x65'
+      title: Browser
+      enabled: true
+      category: sources
+      order: 3
+    - id: stb
+      code: '0x23'
+      title: STB
+      enabled: true
+      category: sources
+      order: 4
+    - id: usb_c
+      code: '0x31'
+      title: USB C
+      enabled: true
+      category: sources
+      order: 5
+    - id: screen_mirror
+      code: '0x61'
+      title: AirPlay
+      enabled: true
+      category: wireless
+      order: 0
+    - id: usb_c2
+      code: '0x69'
+      title: Flip
+      enabled: true
+      category: wireless
+      order: 1
+    location: conares
+  billet:
+    title: Billet
+    model: WM55B
+    ip: 0.0.0.0
+    port: 1515
+    device_id: 0
+    location: conares
+    sources:
+    - id: touchscreen
+      code: '0x64'
+      title: Whiteboard
+      enabled: true
+      category: sources
+      order: 2
+    - id: browser
+      code: '0x65'
+      title: Browser
+      enabled: true
+      category: sources
+      order: 3
+    - id: usb_c
+      code: '0x25'
+      title: USB C
+      enabled: true
+      category: sources
+      order: 5
+    - id: screen_mirror
+      code: '0x61'
+      title: AirPlay / SmartView+
+      enabled: true
+      category: wireless
+      order: 0
+    - id: usb_c2
+      code: '0x69'
+      title: Flip
+      enabled: true
+      category: wireless
+      order: 1
+    layout:
+      button_size: lg
+      columns: 2
+      section_order:
+      - master
+      - sources
+      - wireless
+      - volume
+      - navigation
+      - picture
+      - status
+      - builtin
+      - other
+      category_order:
+      - sources
+      - wireless
+      - builtin
+      - other
+      button_order:
+        master:
+        - power_toggle
+        - mute_toggle
+        - vol_down
+        - vol_up
+        power:
+        - reboot
+        - power_on
+        - power_off
+        volume:
+        - vol_0
+        - vol_25
+        - vol_50
+        - vol_75
+        - vol_100
+        navigation:
+        - up
+        - left
+        - ok
+        - right
+        - down
+        - home
+        - back
+        - exit
+        - menu
+        - info
+        picture:
+        - screen_fit
+        - aspect_16_9
+        - aspect_4_3
+        status:
+        - reboot
+        - refresh
+        - query_power
+        - query_input
+        sources:
+        - apple
+        - teams
+        - touchscreen
+        - browser
+        - stb
+        - usb_c
+        wireless:
+        - screen_mirror
+        - usb_c2
+        builtin: []
+        other: []
+      button_labels:
+        power_toggle: Power
+        mute_toggle: Mute
+        vol_down: "\u2212"
+        vol_up: +
+        vol_0: 0%
+        vol_25: 25%
+        vol_50: 50%
+        vol_75: 75%
+        vol_100: 100%
+        up: Up
+        left: Left
+        ok: OK
+        right: Right
+        down: Down
+        menu: Menu
+        home: Home
+        back: Back
+        exit: Exit
+        info: Info
+        screen_fit: Screen Fit
+        aspect_16_9: '16:9'
+        aspect_4_3: '4:3'
+        refresh: Refresh
+        query_power: Query Power
+        query_input: Query Input
+        reboot: Reboot
+      grid_size:
+        master:
+          cols: 4
+          rows: 1
+        sources:
+          cols: 2
+          rows: 2
+        wireless:
+          cols: 2
+          rows: 1
+        volume:
+          cols: 5
+          rows: 1
+        status:
+          cols: 5
+          rows: 1
+        power:
+          cols: 3
+          rows: 1
+        volume_presets:
+          cols: 5
+          rows: 1
+        navigation_actions:
+          cols: 5
+          rows: 1
+        picture:
+          cols: 5
+          rows: 1
+        builtin:
+          cols: 2
+          rows: 0
+        other:
+          cols: 2
+          rows: 0
+        navigation:
+          cols: 2
+          rows: 0
+      power_mode: toggle
+      mute_mode: toggle
+      button_style:
+        default: both
+        master: icon
+        sources: icon
+        wireless: icon
+        volume: text
+        navigation: icon
+        picture: icon
+        status: icon
+      button_icons:
+        power_toggle: power
+        vol_down: volume_down
+        vol_up: volume_up
+        apple: apple
+        teams: teams
+        touchscreen: whiteboard
+        browser: browser
+        screen_mirror: airplay
+        usb_c2: flip
+        menu: settings
+        home: home
+        back: back
+        screen_fit: screen_fit
+        aspect_16_9: aspect_16_9
+        aspect_4_3: aspect_4_3
+        refresh: refresh
+        reboot: reboot
+      hidden_buttons: []
+  rebar:
+    title: Rebar
+    model: WM55B
+    ip: 0.0.0.0
+    port: 1515
+    device_id: 0
+    location: conares
+    sources:
+    - id: touchscreen
+      code: '0x64'
+      title: Whiteboard
+      enabled: true
+      category: sources
+      order: 2
+    - id: browser
+      code: '0x65'
+      title: Browser
+      enabled: true
+      category: sources
+      order: 3
+    - id: usb_c
+      code: '0x25'
+      title: USB C
+      enabled: true
+      category: sources
+      order: 5
+    - id: screen_mirror
+      code: '0x61'
+      title: AirPlay / SmartView+
+      enabled: true
+      category: wireless
+      order: 0
+    - id: usb_c2
+      code: '0x69'
+      title: Flip
+      enabled: true
+      category: wireless
+      order: 1
+    layout:
+      button_size: lg
+      columns: 2
+      section_order:
+      - master
+      - sources
+      - wireless
+      - volume
+      - navigation
+      - picture
+      - status
+      - builtin
+      - other
+      category_order:
+      - sources
+      - wireless
+      - builtin
+      - other
+      button_order:
+        master:
+        - power_toggle
+        - mute_toggle
+        - vol_down
+        - vol_up
+        power:
+        - reboot
+        - power_on
+        - power_off
+        volume:
+        - vol_0
+        - vol_25
+        - vol_50
+        - vol_75
+        - vol_100
+        navigation:
+        - up
+        - left
+        - ok
+        - right
+        - down
+        - home
+        - back
+        - exit
+        - menu
+        - info
+        picture:
+        - screen_fit
+        - aspect_16_9
+        - aspect_4_3
+        status:
+        - reboot
+        - refresh
+        - query_power
+        - query_input
+        sources:
+        - apple
+        - teams
+        - touchscreen
+        - browser
+        - stb
+        - usb_c
+        wireless:
+        - screen_mirror
+        - usb_c2
+        builtin: []
+        other: []
+      button_labels:
+        power_toggle: Power
+        mute_toggle: Mute
+        vol_down: "\u2212"
+        vol_up: +
+        vol_0: 0%
+        vol_25: 25%
+        vol_50: 50%
+        vol_75: 75%
+        vol_100: 100%
+        up: Up
+        left: Left
+        ok: OK
+        right: Right
+        down: Down
+        menu: Menu
+        home: Home
+        back: Back
+        exit: Exit
+        info: Info
+        screen_fit: Screen Fit
+        aspect_16_9: '16:9'
+        aspect_4_3: '4:3'
+        refresh: Refresh
+        query_power: Query Power
+        query_input: Query Input
+        reboot: Reboot
+      grid_size:
+        master:
+          cols: 4
+          rows: 1
+        sources:
+          cols: 2
+          rows: 2
+        wireless:
+          cols: 2
+          rows: 1
+        volume:
+          cols: 5
+          rows: 1
+        status:
+          cols: 5
+          rows: 1
+        power:
+          cols: 3
+          rows: 1
+        volume_presets:
+          cols: 5
+          rows: 1
+        navigation_actions:
+          cols: 5
+          rows: 1
+        picture:
+          cols: 5
+          rows: 1
+        builtin:
+          cols: 2
+          rows: 0
+        other:
+          cols: 2
+          rows: 0
+        navigation:
+          cols: 2
+          rows: 0
+      power_mode: toggle
+      mute_mode: toggle
+      button_style:
+        default: both
+        master: icon
+        sources: icon
+        wireless: icon
+        volume: text
+        navigation: icon
+        picture: icon
+        status: icon
+      button_icons:
+        power_toggle: power
+        vol_down: volume_down
+        vol_up: volume_up
+        apple: apple
+        teams: teams
+        touchscreen: whiteboard
+        browser: browser
+        screen_mirror: airplay
+        usb_c2: flip
+        menu: settings
+        home: home
+        back: back
+        screen_fit: screen_fit
+        aspect_16_9: aspect_16_9
+        aspect_4_3: aspect_4_3
+        refresh: refresh
+        reboot: reboot
+      hidden_buttons: []
+  pipe:
+    title: Pipe
+    model: WM55B
+    ip: 0.0.0.0
+    port: 1515
+    device_id: 0
+    location: conares
+    sources:
+    - id: touchscreen
+      code: '0x64'
+      title: Whiteboard
+      enabled: true
+      category: sources
+      order: 2
+    - id: browser
+      code: '0x65'
+      title: Browser
+      enabled: true
+      category: sources
+      order: 3
+    - id: usb_c
+      code: '0x25'
+      title: USB C
+      enabled: true
+      category: sources
+      order: 5
+    - id: screen_mirror
+      code: '0x61'
+      title: AirPlay / SmartView+
+      enabled: true
+      category: wireless
+      order: 0
+    - id: usb_c2
+      code: '0x69'
+      title: Flip
+      enabled: true
+      category: wireless
+      order: 1
+    layout:
+      button_size: lg
+      columns: 2
+      section_order:
+      - master
+      - sources
+      - wireless
+      - volume
+      - navigation
+      - picture
+      - status
+      - builtin
+      - other
+      category_order:
+      - sources
+      - wireless
+      - builtin
+      - other
+      button_order:
+        master:
+        - power_toggle
+        - mute_toggle
+        - vol_down
+        - vol_up
+        power:
+        - reboot
+        - power_on
+        - power_off
+        volume:
+        - vol_0
+        - vol_25
+        - vol_50
+        - vol_75
+        - vol_100
+        navigation:
+        - up
+        - left
+        - ok
+        - right
+        - down
+        - home
+        - back
+        - exit
+        - menu
+        - info
+        picture:
+        - screen_fit
+        - aspect_16_9
+        - aspect_4_3
+        status:
+        - reboot
+        - refresh
+        - query_power
+        - query_input
+        sources:
+        - apple
+        - teams
+        - touchscreen
+        - browser
+        - stb
+        - usb_c
+        wireless:
+        - screen_mirror
+        - usb_c2
+        builtin: []
+        other: []
+      button_labels:
+        power_toggle: Power
+        mute_toggle: Mute
+        vol_down: "\u2212"
+        vol_up: +
+        vol_0: 0%
+        vol_25: 25%
+        vol_50: 50%
+        vol_75: 75%
+        vol_100: 100%
+        up: Up
+        left: Left
+        ok: OK
+        right: Right
+        down: Down
+        menu: Menu
+        home: Home
+        back: Back
+        exit: Exit
+        info: Info
+        screen_fit: Screen Fit
+        aspect_16_9: '16:9'
+        aspect_4_3: '4:3'
+        refresh: Refresh
+        query_power: Query Power
+        query_input: Query Input
+        reboot: Reboot
+      grid_size:
+        master:
+          cols: 4
+          rows: 1
+        sources:
+          cols: 2
+          rows: 2
+        wireless:
+          cols: 2
+          rows: 1
+        volume:
+          cols: 5
+          rows: 1
+        status:
+          cols: 5
+          rows: 1
+        power:
+          cols: 3
+          rows: 1
+        volume_presets:
+          cols: 5
+          rows: 1
+        navigation_actions:
+          cols: 5
+          rows: 1
+        picture:
+          cols: 5
+          rows: 1
+        builtin:
+          cols: 2
+          rows: 0
+        other:
+          cols: 2
+          rows: 0
+        navigation:
+          cols: 2
+          rows: 0
+      power_mode: toggle
+      mute_mode: toggle
+      button_style:
+        default: both
+        master: icon
+        sources: icon
+        wireless: icon
+        volume: text
+        navigation: icon
+        picture: icon
+        status: icon
+      button_icons:
+        power_toggle: power
+        vol_down: volume_down
+        vol_up: volume_up
+        apple: apple
+        teams: teams
+        touchscreen: whiteboard
+        browser: browser
+        screen_mirror: airplay
+        usb_c2: flip
+        menu: settings
+        home: home
+        back: back
+        screen_fit: screen_fit
+        aspect_16_9: aspect_16_9
+        aspect_4_3: aspect_4_3
+        refresh: refresh
+        reboot: reboot
+      hidden_buttons: []
+locations:
+  conares:
+    title: Conares
+    host: ''
+    port: 8080
+    note: ''
+location_order:
+- conares
+site:
+  homepage_title: Office TV Remotes
+  homepage_lead: Locations group rooms by site. Each room has its own TV IP for local control.
+  default_location: conares
+  default_room: director
+  show_default_remote: true

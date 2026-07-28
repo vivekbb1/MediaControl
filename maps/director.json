@@ -1,0 +1,322 @@
+{
+  "host": "10.10.10.17",
+  "port": 1515,
+  "inputs": [
+    {
+      "code": "0x21",
+      "code_dec": 33,
+      "packet": "AA1400012136",
+      "set": {
+        "status": "ACK",
+        "raw": "AA FF 00 03 41 14 21 78",
+        "ack": true,
+        "ref_cmd": "0x14",
+        "value": "0x21",
+        "value_dec": 33
+      },
+      "query_after": {
+        "status": "ACK",
+        "raw": "AA FF 00 03 41 14 21 78",
+        "ack": true,
+        "ref_cmd": "0x14",
+        "value": "0x21",
+        "value_dec": 33
+      },
+      "stable": true
+    },
+    {
+      "code": "0x23",
+      "code_dec": 35,
+      "packet": "AA1400012338",
+      "set": {
+        "status": "ACK",
+        "raw": "AA FF 00 03 41 14 23 7A",
+        "ack": true,
+        "ref_cmd": "0x14",
+        "value": "0x23",
+        "value_dec": 35
+      },
+      "query_after": {
+        "status": "ACK",
+        "raw": "AA FF 00 03 41 14 64 BB",
+        "ack": true,
+        "ref_cmd": "0x14",
+        "value": "0x64",
+        "value_dec": 100
+      },
+      "stable": false
+    },
+    {
+      "code": "0x25",
+      "code_dec": 37,
+      "packet": "AA140001253A",
+      "set": {
+        "status": "ACK",
+        "raw": "AA FF 00 03 41 14 25 7C",
+        "ack": true,
+        "ref_cmd": "0x14",
+        "value": "0x25",
+        "value_dec": 37
+      },
+      "query_after": {
+        "status": "ACK",
+        "raw": "AA FF 00 03 41 14 25 7C",
+        "ack": true,
+        "ref_cmd": "0x14",
+        "value": "0x25",
+        "value_dec": 37
+      },
+      "stable": true
+    },
+    {
+      "code": "0x31",
+      "code_dec": 49,
+      "packet": "AA1400013146",
+      "set": {
+        "status": "ACK",
+        "raw": "AA FF 00 03 41 14 31 88",
+        "ack": true,
+        "ref_cmd": "0x14",
+        "value": "0x31",
+        "value_dec": 49
+      },
+      "query_after": {
+        "status": "ACK",
+        "raw": "AA FF 00 03 41 14 64 BB",
+        "ack": true,
+        "ref_cmd": "0x14",
+        "value": "0x64",
+        "value_dec": 100
+      },
+      "stable": false
+    },
+    {
+      "code": "0x64",
+      "code_dec": 100,
+      "packet": "AA1400016479",
+      "set": {
+        "status": "ACK",
+        "raw": "AA FF 00 03 41 14 64 BB",
+        "ack": true,
+        "ref_cmd": "0x14",
+        "value": "0x64",
+        "value_dec": 100
+      },
+      "query_after": {
+        "status": "ACK",
+        "raw": "AA FF 00 03 41 14 64 BB",
+        "ack": true,
+        "ref_cmd": "0x14",
+        "value": "0x64",
+        "value_dec": 100
+      },
+      "stable": true
+    },
+    {
+      "code": "0x65",
+      "code_dec": 101,
+      "packet": "AA140001657A",
+      "set": {
+        "status": "ACK",
+        "raw": "AA FF 00 03 41 14 65 BC",
+        "ack": true,
+        "ref_cmd": "0x14",
+        "value": "0x65",
+        "value_dec": 101
+      },
+      "query_after": {
+        "status": "ACK",
+        "raw": "AA FF 00 03 41 14 65 BC",
+        "ack": true,
+        "ref_cmd": "0x14",
+        "value": "0x65",
+        "value_dec": 101
+      },
+      "stable": true
+    },
+    {
+      "code": "0x69",
+      "code_dec": 105,
+      "packet": "AA140001697E",
+      "set": {
+        "status": "ACK",
+        "raw": "AA FF 00 03 41 14 69 C0",
+        "ack": true,
+        "ref_cmd": "0x14",
+        "value": "0x69",
+        "value_dec": 105
+      },
+      "query_after": {
+        "status": "ACK",
+        "raw": "AA FF 00 03 41 14 69 C0",
+        "ack": true,
+        "ref_cmd": "0x14",
+        "value": "0x69",
+        "value_dec": 105
+      },
+      "stable": true
+    }
+  ],
+  "volumes": [
+    {
+      "level": 0,
+      "packet": "AA1200010013",
+      "set": {
+        "status": "ACK",
+        "raw": "AA FF 00 03 41 12 00 55",
+        "ack": true,
+        "ref_cmd": "0x12",
+        "value": "0x00",
+        "value_dec": 0
+      },
+      "query_after": {
+        "status": "ACK",
+        "raw": "AA FF 00 03 41 12 00 55",
+        "ack": true,
+        "ref_cmd": "0x12",
+        "value": "0x00",
+        "value_dec": 0
+      },
+      "ok": true
+    },
+    {
+      "level": 1,
+      "packet": "AA1200010114",
+      "set": {
+        "status": "ACK",
+        "raw": "AA FF 00 03 41 12 01 56",
+        "ack": true,
+        "ref_cmd": "0x12",
+        "value": "0x01",
+        "value_dec": 1
+      },
+      "query_after": {
+        "status": "ACK",
+        "raw": "AA FF 00 03 41 12 01 56",
+        "ack": true,
+        "ref_cmd": "0x12",
+        "value": "0x01",
+        "value_dec": 1
+      },
+      "ok": true
+    },
+    {
+      "level": 25,
+      "packet": "AA120001192C",
+      "set": {
+        "status": "ACK",
+        "raw": "AA FF 00 03 41 12 19 6E",
+        "ack": true,
+        "ref_cmd": "0x12",
+        "value": "0x19",
+        "value_dec": 25
+      },
+      "query_after": {
+        "status": "ACK",
+        "raw": "AA FF 00 03 41 12 19 6E",
+        "ack": true,
+        "ref_cmd": "0x12",
+        "value": "0x19",
+        "value_dec": 25
+      },
+      "ok": true
+    },
+    {
+      "level": 50,
+      "packet": "AA1200013245",
+      "set": {
+        "status": "ACK",
+        "raw": "AA FF 00 03 41 12 32 87",
+        "ack": true,
+        "ref_cmd": "0x12",
+        "value": "0x32",
+        "value_dec": 50
+      },
+      "query_after": {
+        "status": "ACK",
+        "raw": "AA FF 00 03 41 12 32 87",
+        "ack": true,
+        "ref_cmd": "0x12",
+        "value": "0x32",
+        "value_dec": 50
+      },
+      "ok": true
+    },
+    {
+      "level": 75,
+      "packet": "AA1200014B5E",
+      "set": {
+        "status": "ACK",
+        "raw": "AA FF 00 03 41 12 4B A0",
+        "ack": true,
+        "ref_cmd": "0x12",
+        "value": "0x4B",
+        "value_dec": 75
+      },
+      "query_after": {
+        "status": "ACK",
+        "raw": "AA FF 00 03 41 12 4B A0",
+        "ack": true,
+        "ref_cmd": "0x12",
+        "value": "0x4B",
+        "value_dec": 75
+      },
+      "ok": true
+    },
+    {
+      "level": 100,
+      "packet": "AA1200016477",
+      "set": {
+        "status": "ACK",
+        "raw": "AA FF 00 03 41 12 64 B9",
+        "ack": true,
+        "ref_cmd": "0x12",
+        "value": "0x64",
+        "value_dec": 100
+      },
+      "query_after": {
+        "status": "ACK",
+        "raw": "AA FF 00 03 41 12 64 B9",
+        "ack": true,
+        "ref_cmd": "0x12",
+        "value": "0x64",
+        "value_dec": 100
+      },
+      "ok": true
+    }
+  ],
+  "queries": {
+    "power": {
+      "status": "ACK",
+      "raw": "AA FF 00 03 41 11 01 55",
+      "ack": true,
+      "ref_cmd": "0x11",
+      "value": "0x01",
+      "value_dec": 1
+    },
+    "input": {
+      "status": "ACK",
+      "raw": "AA FF 00 03 41 14 64 BB",
+      "ack": true,
+      "ref_cmd": "0x14",
+      "value": "0x64",
+      "value_dec": 100
+    },
+    "volume": {
+      "status": "ACK",
+      "raw": "AA FF 00 03 41 12 64 B9",
+      "ack": true,
+      "ref_cmd": "0x12",
+      "value": "0x64",
+      "value_dec": 100
+    },
+    "mute": {
+      "status": "ACK",
+      "raw": "AA FF 00 03 41 13 00 56",
+      "ack": true,
+      "ref_cmd": "0x13",
+      "value": "0x00",
+      "value_dec": 0
+    }
+  }
+}

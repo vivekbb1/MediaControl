@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Locations</title>
+  <style>
+    :root {
+      --bg: #0f1117; --panel: #1a1d27; --panel2: #232735; --border: #2e3344;
+      --text: #e8ecf4; --muted: #8b93a7; --accent: #4f8cff; --danger: #f2555a;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg); color: var(--text); min-height: 100vh; padding: 24px;
+    }
+    .wrap { max-width: 720px; margin: 0 auto; }
+    header { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; }
+    header a { color: var(--accent); text-decoration: none; font-size: 0.9rem; }
+    h1 { font-size: 1.5rem; flex: 1; }
+    .card {
+      background: var(--panel); border: 1px solid var(--border); border-radius: 14px;
+      padding: 18px; margin-bottom: 12px;
+    }
+    .card h2 { font-size: 1rem; margin-bottom: 4px; }
+    .meta { color: var(--muted); font-size: 0.82rem; margin-top: 6px; word-break: break-all; }
+    label { display: block; font-size: 0.78rem; color: var(--muted); margin-bottom: 5px; }
+    input, textarea {
+      width: 100%; background: var(--panel2); border: 1px solid var(--border);
+      color: var(--text); border-radius: 10px; padding: 10px 12px; margin-bottom: 10px;
+    }
+    textarea { min-height: 64px; resize: vertical; }
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .toolbar { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+    button, a.btn {
+      border-radius: 10px; padding: 10px 14px; font-weight: 600; font-size: 0.85rem;
+      cursor: pointer; border: 1px solid var(--border); background: var(--panel2); color: var(--text);
+      text-decoration: none; display: inline-flex; align-items: center;
+    }
+    button.primary { background: var(--accent); border-color: transparent; color: #fff; }
+    button.danger { color: var(--danger); border-color: rgba(242,85,90,.35); }
+    .lead { color: var(--muted); font-size: 0.88rem; margin-bottom: 16px; line-height: 1.45; }
+    .empty { color: var(--muted); text-align: center; padding: 20px; }
+    .hint { font-size: 0.76rem; color: var(--muted); margin: -6px 0 10px; }
+    .hint.ok { color: #3dd68c; }
+    .hint.warn { color: var(--danger); }
+    input.invalid { border-color: var(--danger); }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <a href="/">← Rooms</a>
+      <h1>Locations</h1>
+      <button type="button" class="primary" id="addBtn">+ Add location</button>
+    </header>
+    <p class="lead">
+      A <strong>location</strong> is a site or building (e.g. Dubai HQ, London office).
+      Set the <strong>remote host</strong> and <strong>HTTP port</strong> where this site's remote server runs
+      so TVs can be configured centrally — each <strong>room</strong> under the location keeps its own TV IP (MDC port 1515).
+    </p>
+    <div id="list"></div>
+    <div class="card" id="formCard" hidden>
+      <h2 id="formTitle">New location</h2>
+      <label>Location id</label>
+      <input id="fId" placeholder="dubai-hq" pattern="[a-z0-9][a-z0-9_-]*" />
+      <div class="hint" id="idHint">Lowercase letters, numbers, hyphens. Used in config only.</div>
+      <label>Title</label>
+      <input id="fTitle" placeholder="Dubai HQ" />
+      <div class="row">
+        <div>
+          <label>Remote host (IP or hostname)</label>
+          <input id="fHost" placeholder="203.0.113.10 or vpn.example.com" />
+          <div class="hint" id="urlHint">Host and port only — http:// is added automatically.</div>
+        </div>
+        <div>
+          <label>Remote HTTP port</label>
+          <input id="fPort" type="number" value="8080" />
+        </div>
+      </div>
+      <label>Notes</label>
+      <textarea id="fNote" placeholder="VPN details, on-site contact, etc."></textarea>
+      <div class="toolbar">
+        <button type="button" class="primary" id="saveBtn">Save location</button>
+        <button type="button" id="cancelBtn">Cancel</button>
+      </div>
+    </div>
+  </div>
+  <script>
+    let locations = [];
+    let editingId = null;
+    let idOk = false;
+    let urlOk = true;
+    let checkTimer = null;
+
+    function esc(s) {
+      return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
+    }
+
+    function setHint(el, text, kind) {
+      el.textContent = text;
+      el.className = 'hint' + (kind ? ` ${kind}` : '');
+    }
+
+    async function checkId() {
+      const input = document.getElementById('fId');
+      const hint = document.getElementById('idHint');
+      const id = input.value.trim().toLowerCase();
+      if (!id) {
+        idOk = false;
+        input.classList.add('invalid');
+        setHint(hint, 'Location id is required.', 'warn');
+        return;
+      }
+      const res = await fetch(`/api/locations/check-id?id=${encodeURIComponent(id)}&exclude=${encodeURIComponent(editingId || '')}`);
+      const data = await res.json();
+      if (!data.valid) {
+        idOk = false;
+        input.classList.add('invalid');
+        setHint(hint, 'Use lowercase letters, numbers, hyphens or underscores; must start with a letter or digit.', 'warn');
+        return;
+      }
+      if (!data.available) {
+        idOk = false;
+        input.classList.add('invalid');
+        setHint(hint, `Id "${id}" is already in use.`, 'warn');
+        return;
+      }
+      idOk = true;
+      input.classList.remove('invalid');
+      setHint(hint, editingId && id !== editingId ? `Id will change from "${editingId}" to "${id}".` : 'Id is available.', 'ok');
+    }
+
+    async function checkUrl() {
+      const host = document.getElementById('fHost').value.trim();
+      const port = Number(document.getElementById('fPort').value) || 8080;
+      const hint = document.getElementById('urlHint');
+      if (!host) {
+        urlOk = true;
+        setHint(hint, 'Host and port only — http:// is added automatically.');
+        return;
+      }
+      const res = await fetch(`/api/locations/check-url?host=${encodeURIComponent(host)}&port=${port}&exclude=${encodeURIComponent(editingId || '')}`);
+      const data = await res.json();
+      if (data.host && data.host !== host) {
+        document.getElementById('fHost').value = data.host;
+        if (data.port) document.getElementById('fPort').value = String(data.port);
+      }
+      if (!data.available) {
+        urlOk = false;
+        setHint(hint, `Remote URL already used by "${data.duplicate_title || data.duplicate}".`, 'warn');
+        return;
+      }
+      urlOk = true;
+      const preview = data.host ? `http://${data.host}:${data.port}` : '';
+      setHint(hint, preview ? `Remote URL ${preview} is available.` : 'Host and port only — http:// is added automatically.', preview ? 'ok' : '');
+    }
+
+    function scheduleChecks() {
+      clearTimeout(checkTimer);
+      checkTimer = setTimeout(() => {
+        checkId().catch(() => {});
+        checkUrl().catch(() => {});
+      }, 250);
+    }
+
+    function renderList() {
+      const el = document.getElementById('list');
+      if (!locations.length) {
+        el.innerHTML = '<div class="card empty">No locations yet.</div>';
+        return;
+      }
+      el.innerHTML = locations.map(loc => `
+        <div class="card" data-id="${esc(loc.id)}">
+          <h2>${esc(loc.title)}</h2>
+          <div class="meta">
+            id: <code>${esc(loc.id)}</code> · ${loc.room_count} room${loc.room_count === 1 ? '' : 's'}<br>
+            ${loc.remote_url ? `Remote: <a href="${esc(loc.remote_url)}" target="_blank" rel="noopener">${esc(loc.remote_url)}</a><br>` : 'Remote: <em>not set</em> (configure host for off-site access)<br>'}
+            ${loc.note ? esc(loc.note) : ''}
+          </div>
+          <div class="toolbar">
+            <button type="button" data-edit="${esc(loc.id)}">Edit</button>
+            <button type="button" class="danger" data-del="${esc(loc.id)}">Delete</button>
+          </div>
+        </div>
+      `).join('');
+      el.querySelectorAll('[data-edit]').forEach(btn => btn.addEventListener('click', () => openEdit(btn.dataset.edit)));
+      el.querySelectorAll('[data-del]').forEach(btn => btn.addEventListener('click', () => deleteLoc(btn.dataset.del)));
+    }
+
+    function openNew() {
+      editingId = null;
+      document.getElementById('formTitle').textContent = 'New location';
+      document.getElementById('fId').value = '';
+      document.getElementById('fId').disabled = false;
+      document.getElementById('fTitle').value = '';
+      document.getElementById('fHost').value = '';
+      document.getElementById('fPort').value = '8080';
+      document.getElementById('fNote').value = '';
+      document.getElementById('formCard').hidden = false;
+      scheduleChecks();
+    }
+
+    function openEdit(id) {
+      const loc = locations.find(l => l.id === id);
+      if (!loc) return;
+      editingId = id;
+      document.getElementById('formTitle').textContent = `Edit ${loc.title}`;
+      document.getElementById('fId').value = id;
+      document.getElementById('fId').disabled = false;
+      document.getElementById('fTitle').value = loc.title || '';
+      document.getElementById('fHost').value = loc.host || '';
+      document.getElementById('fPort').value = String(loc.port || 8080);
+      document.getElementById('fNote').value = loc.note || '';
+      document.getElementById('formCard').hidden = false;
+      scheduleChecks();
+    }
+
+    async function load() {
+      const res = await fetch('/api/locations');
+      const data = await res.json();
+      if (!data.ok) throw new Error(data.error || 'load failed');
+      locations = data.locations || [];
+      renderList();
+    }
+
+    async function save() {
+      await checkId();
+      await checkUrl();
+      const id = document.getElementById('fId').value.trim().toLowerCase();
+      const body = {
+        title: document.getElementById('fTitle').value.trim(),
+        host: document.getElementById('fHost').value.trim(),
+        port: Number(document.getElementById('fPort').value) || 8080,
+        note: document.getElementById('fNote').value.trim(),
+      };
+      if (!id) { alert('Location id required'); return; }
+      if (!body.title) { alert('Title required'); return; }
+      if (!idOk) { alert('Fix the location id before saving.'); return; }
+      if (!urlOk) { alert('Fix the duplicate remote URL before saving.'); return; }
+      const url = editingId ? `/api/locations/${editingId}` : '/api/locations';
+      const method = editingId ? 'PUT' : 'POST';
+      const payload = editingId
+        ? { ...body, ...(id !== editingId ? { new_id: id } : {}) }
+        : { id, ...body };
+      const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+      const data = await res.json();
+      if (!data.ok) throw new Error(data.error || 'save failed');
+      document.getElementById('formCard').hidden = true;
+      editingId = null;
+      await load();
+    }
+
+    async function deleteLoc(id) {
+      const loc = locations.find(l => l.id === id);
+      if (!loc) return;
+      let reassign_to = null;
+      if (loc.room_count > 0) {
+        const others = locations.filter(l => l.id !== id);
+        if (!others.length) { alert('Create another location before deleting this one (rooms must be reassigned).'); return; }
+        reassign_to = prompt(`"${loc.title}" has ${loc.room_count} room(s). Reassign them to location id:`, others[0].id);
+        if (!reassign_to) return;
+      }
+      if (!confirm(`Delete location "${loc.title}"?`)) return;
+      const res = await fetch(`/api/locations/${id}`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ reassign_to }),
+      });
+      const data = await res.json();
+      if (!data.ok) alert(data.error || 'Delete failed');
+      else load();
+    }
+
+    document.getElementById('addBtn').addEventListener('click', openNew);
+    document.getElementById('cancelBtn').addEventListener('click', () => { document.getElementById('formCard').hidden = true; });
+    document.getElementById('saveBtn').addEventListener('click', () => save().catch(e => alert(e.message)));
+    document.getElementById('fId').addEventListener('input', scheduleChecks);
+    document.getElementById('fHost').addEventListener('input', scheduleChecks);
+    document.getElementById('fPort').addEventListener('input', scheduleChecks);
+
+    fetch('/api/auth/me').then(r => r.json()).then(data => {
+      if (!data.ok || !data.user?.is_master) location.href = '/login?next=/locations';
+      else {
+        load().catch(e => alert(e.message));
+        if (new URLSearchParams(location.search).get('new') === '1') openNew();
+      }
+    });
+  </script>
+</body>
+</html>

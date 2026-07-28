@@ -1,0 +1,83 @@
+# Home Assistant — Samsung Flip Pro via room_cmd.py (multi-room)
+#
+# Prerequisites:
+#   - This repo on the HA host (or NAS) with Python 3
+#   - displays.yaml configured with room ids (e.g. cabin-1)
+#   - TV reachable on LAN (MDC port 1515)
+#
+# List rooms:
+#   python3 /path/to/samsung-flip-mdc/room_cmd.py --list-rooms
+#
+# Manual test:
+#   python3 /path/to/samsung-flip-mdc/room_cmd.py cabin-1 power_on
+#   python3 /path/to/samsung-flip-mdc/room_cmd.py cabin-1 teams
+
+shell_command:
+  flip_director_power_on: 'python3 /Users/VB/Projects/samsung-flip-mdc/room_cmd.py cabin-1 power_on'
+  flip_director_power_off: 'python3 /Users/VB/Projects/samsung-flip-mdc/room_cmd.py cabin-1 power_off'
+  flip_director_teams: 'python3 /Users/VB/Projects/samsung-flip-mdc/room_cmd.py cabin-1 teams'
+  flip_director_apple: 'python3 /Users/VB/Projects/samsung-flip-mdc/room_cmd.py cabin-1 apple'
+
+# --- Option A: shell_command scripts (simplest) ---
+
+script:
+  flip_director_on:
+    alias: Director TV — Power On
+    sequence:
+      - service: shell_command.flip_director_power_on
+
+  flip_director_off:
+    alias: Director TV — Power Off
+    sequence:
+      - service: shell_command.flip_director_power_off
+
+  flip_director_teams:
+    alias: Director TV — Teams input
+    sequence:
+      - service: shell_command.flip_director_teams
+
+# --- Option B: command_line switch (toggle power) ---
+# Note: state query is approximate; Flip may not report power reliably over MDC.
+
+switch:
+  - platform: command_line
+    switches:
+      director_tv_power:
+        friendly_name: Director Samsung Flip
+        command_on: 'python3 /Users/VB/Projects/samsung-flip-mdc/room_cmd.py cabin-1 power_on'
+        command_off: 'python3 /Users/VB/Projects/samsung-flip-mdc/room_cmd.py cabin-1 power_off'
+        # Optional: poll power (may NAK on some firmware)
+        # command_state: 'python3 /Users/VB/Projects/samsung-flip-mdc/room_cmd.py cabin-1 query_power --json'
+        # value_template: '{{ value_json.ack and value_json.parsed.value == "0x01" }}'
+
+# --- Option C: REST via remote server (needs admin session cookie) ---
+# Prefer room_cmd.py for automations — no login required.
+#
+# rest_command:
+#   flip_send:
+#     url: "http://192.168.0.10:8080/api/displays/{{ room }}/send"
+#     method: POST
+#     headers:
+#       Content-Type: application/json
+#       Cookie: "session=YOUR_ADMIN_SESSION"
+#     payload: '{"command":"{{ command }}"}'
+#
+# Automation example:
+#   action: rest_command.flip_send
+#   data:
+#     room: cabin-1
+#     command: power_on
+
+# --- Physical wall switch / GPIO ---
+# Wire the switch to HA (e.g. Shelly, Zigbee button, GPIO on Pi) and trigger:
+#   service: script.flip_director_on
+# or toggle:
+#   service: switch.turn_on
+#   target:
+#     entity_id: switch.director_tv_power
+
+# Available commands per room (from remote / setup):
+#   power_on, power_off, power_toggle, reboot
+#   apple, teams, browser, touchscreen, screen_mirror, usb_c2, …
+#   vol_up, vol_down, mute_on, mute_off, vol_0 … vol_100
+#   up, down, left, right, ok, home, back, menu, info

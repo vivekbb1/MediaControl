@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Add room</title>
+  <style>
+    :root {
+      --bg: #0f1117; --panel: #1a1d27; --panel2: #232735; --border: #2e3344;
+      --text: #e8ecf4; --muted: #8b93a7; --accent: #4f8cff; --danger: #f2555a; --ok: #3dd68c;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg); color: var(--text); min-height: 100vh; padding: 24px;
+    }
+    .wrap { max-width: 640px; margin: 0 auto; }
+    header { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; }
+    header a { color: var(--accent); text-decoration: none; font-size: 0.9rem; }
+    h1 { font-size: 1.5rem; flex: 1; }
+    .card {
+      background: var(--panel); border: 1px solid var(--border); border-radius: 14px; padding: 22px;
+    }
+    h2 { font-size: 0.75rem; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin: 18px 0 12px; }
+    h2:first-child { margin-top: 0; }
+    .grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
+    @media (min-width: 520px) { .grid.cols-2 { grid-template-columns: 1fr 1fr; } }
+    label { display: block; font-size: 0.78rem; color: var(--muted); margin-bottom: 5px; }
+    input, select {
+      width: 100%; background: var(--panel2); border: 1px solid var(--border);
+      color: var(--text); border-radius: 10px; padding: 11px 12px;
+    }
+    .hint { font-size: 0.76rem; color: var(--muted); margin-top: 4px; }
+    .hint.ok { color: var(--ok); }
+    .hint.warn { color: var(--danger); }
+    input.invalid { border-color: var(--danger); }
+    .toolbar { display: flex; gap: 10px; margin-top: 22px; flex-wrap: wrap; }
+    button, a.btn {
+      border-radius: 10px; padding: 12px 18px; font-weight: 600; font-size: 0.92rem;
+      cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; justify-content: center;
+      min-height: 48px;
+    }
+    button.primary { background: var(--accent); color: #fff; border: none; }
+    button.ghost, a.btn.ghost { background: transparent; color: var(--text); border: 1px solid var(--border); }
+    .msg { margin-top: 12px; font-size: 0.88rem; }
+    .msg.err { color: var(--danger); }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <a href="/">← Back</a>
+      <h1>Add room / zone</h1>
+    </header>
+    <form class="card" id="form">
+      <h2>Location &amp; TV connection</h2>
+      <div class="grid cols-2">
+        <div>
+          <label>Location</label>
+          <select id="location"></select>
+          <div class="hint">Site/building for this room</div>
+        </div>
+        <div><label>TV name</label><input id="title" required placeholder="Boardroom" /></div>
+        <div>
+          <label>Room id (URL)</label>
+          <input id="id" required pattern="[a-z0-9][a-z0-9_-]*" placeholder="boardroom" />
+          <div class="hint" id="idHint">/d/<span id="locSlug">main</span>/<span id="slug">boardroom</span></div>
+        </div>
+        <div><label>IP address</label><input id="ip" required placeholder="10.10.10.17" /></div>
+        <div><label>Port</label><input id="port" type="number" value="1515" /></div>
+        <div><label>Device ID</label><input id="deviceId" type="number" value="0" min="0" max="254" /></div>
+      </div>
+      <h2>Room access credentials</h2>
+      <p style="color:var(--muted);font-size:0.85rem;margin-bottom:12px">Users with these credentials can open this room's remote only.</p>
+      <div class="grid cols-2">
+        <div><label>Username</label><input id="username" required placeholder="boardroom" /></div>
+        <div><label>Password</label><input id="password" type="password" required autocomplete="new-password" /></div>
+      </div>
+      <h2>Remote layout template</h2>
+      <p style="color:var(--muted);font-size:0.85rem;margin-bottom:12px">New rooms start from this template. You can change each room individually in Setup afterward.</p>
+      <div class="grid cols-2">
+        <div>
+          <label>Layout template</label>
+          <select id="template"></select>
+        </div>
+        <div style="display:flex;align-items:flex-end;padding-bottom:2px">
+          <label style="display:flex;align-items:center;gap:8px;margin:0;font-size:0.85rem;color:var(--text)">
+            <input type="checkbox" id="templateSources" checked />
+            Copy source buttons
+          </label>
+        </div>
+      </div>
+      <div class="toolbar">
+        <button type="submit" class="primary" id="submitBtn">Create room</button>
+        <a href="/" class="btn ghost">Cancel</a>
+      </div>
+      <div class="msg" id="msg"></div>
+    </form>
+  </div>
+  <script>
+    let idTouched = false;
+    let idOk = false;
+    let idTimer = null;
+    const titleEl = document.getElementById('title');
+    const idEl = document.getElementById('id');
+    const userEl = document.getElementById('username');
+    const locEl = document.getElementById('location');
+    const slugEl = document.getElementById('slug');
+    const locSlugEl = document.getElementById('locSlug');
+    const idHint = document.getElementById('idHint');
+
+    function slugify(t) {
+      return t.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'room';
+    }
+
+    function roomPathFor(id) {
+      const loc = locEl?.value || 'main';
+      const rid = id || slugEl.textContent || 'room';
+      return `/d/${loc}/${rid}`;
+    }
+
+    function updatePathPreview(id) {
+      const loc = locEl?.value || 'main';
+      if (locSlugEl) locSlugEl.textContent = loc;
+      if (id) slugEl.textContent = id;
+    }
+
+    function setIdHint(text, kind) {
+      idHint.className = 'hint' + (kind ? ` ${kind}` : '');
+      if (kind) {
+        idHint.textContent = text;
+      } else {
+        updatePathPreview(slugEl.textContent);
+        idHint.innerHTML = roomPathFor(slugEl.textContent);
+      }
+    }
+
+    async function checkRoomId() {
+      const id = idEl.value.trim().toLowerCase();
+      slugEl.textContent = id || 'room';
+      if (!id) {
+        idOk = false;
+        idEl.classList.add('invalid');
+        setIdHint('Room id is required.', 'warn');
+        return;
+      }
+      const res = await fetch(`/api/displays/check-id?id=${encodeURIComponent(id)}`);
+      const data = await res.json();
+      if (!data.valid) {
+        idOk = false;
+        idEl.classList.add('invalid');
+        setIdHint('Use lowercase letters, numbers, hyphens or underscores.', 'warn');
+        return;
+      }
+      if (!data.available) {
+        idOk = false;
+        idEl.classList.add('invalid');
+        setIdHint(`Id "${id}" is already in use.`, 'warn');
+        return;
+      }
+      idOk = true;
+      idEl.classList.remove('invalid');
+      updatePathPreview(id);
+      idHint.className = 'hint ok';
+      idHint.innerHTML = `${roomPathFor(id)} — available`;
+    }
+
+    function scheduleIdCheck() {
+      clearTimeout(idTimer);
+      idTimer = setTimeout(() => checkRoomId().catch(() => {}), 250);
+    }
+
+    titleEl.addEventListener('input', () => {
+      if (!idTouched) {
+        idEl.value = slugify(titleEl.value);
+        userEl.value = idEl.value;
+        slugEl.textContent = idEl.value;
+        scheduleIdCheck();
+      }
+    });
+    idEl.addEventListener('input', () => {
+      idTouched = true;
+      slugEl.textContent = idEl.value;
+      if (!userEl.dataset.touched) userEl.value = idEl.value;
+      scheduleIdCheck();
+    });
+    userEl.addEventListener('input', () => { userEl.dataset.touched = '1'; });
+    locEl?.addEventListener('change', () => scheduleIdCheck());
+
+    async function ensureAdmin() {
+      const res = await fetch('/api/auth/me');
+      const data = await res.json();
+      const role = data.user?.role;
+      if (!data.ok || !['admin', 'location_admin'].includes(role)) {
+        location.href = '/login?next=/add';
+        return null;
+      }
+      window.__addUser = data.user;
+      return data.user;
+    }
+
+    async function loadTemplates() {
+      const res = await fetch('/api/layout-templates');
+      const data = await res.json();
+      const sel = document.getElementById('template');
+      if (!data.ok || !data.templates?.length) {
+        sel.innerHTML = '<option value="">Default (director)</option>';
+        return;
+      }
+      sel.innerHTML = data.templates.map(t => {
+        const mark = t.default ? ' (default)' : '';
+        return `<option value="${t.id}"${t.default ? ' selected' : ''}>${t.title}${mark}</option>`;
+      }).join('');
+    }
+
+    async function loadLocations() {
+      const res = await fetch('/api/locations');
+      const data = await res.json();
+      const sel = document.getElementById('location');
+      if (!data.ok || !data.locations?.length) {
+        sel.innerHTML = '<option value="main">Main site</option>';
+        return;
+      }
+      sel.innerHTML = data.locations.map(l => `<option value="${l.id}">${l.title}</option>`).join('');
+      const params = new URLSearchParams(location.search);
+      if (params.get('location')) sel.value = params.get('location');
+      if (window.__addUser?.location_id) {
+        sel.value = window.__addUser.location_id;
+        sel.disabled = true;
+      }
+    }
+
+    document.getElementById('form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const msg = document.getElementById('msg');
+      const btn = document.getElementById('submitBtn');
+      msg.textContent = '';
+      btn.disabled = true;
+      try {
+        await checkRoomId();
+        if (!idOk) throw new Error('Choose an available room id.');
+        const res = await fetch('/api/displays', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            id: idEl.value.trim().toLowerCase(),
+            title: titleEl.value.trim(),
+            ip: document.getElementById('ip').value.trim(),
+            port: Number(document.getElementById('port').value) || 1515,
+            device_id: Number(document.getElementById('deviceId').value) || 0,
+            username: userEl.value.trim(),
+            password: document.getElementById('password').value,
+            template: document.getElementById('template').value || undefined,
+            template_sources: document.getElementById('templateSources').checked,
+            location: document.getElementById('location').value,
+          }),
+        });
+        const data = await res.json();
+        if (!res.ok || !data.ok) throw new Error(data.error || 'Failed');
+        location.href = data.display.setup_url;
+      } catch (err) {
+        msg.className = 'msg err';
+        msg.textContent = err.message;
+        btn.disabled = false;
+      }
+    });
+
+    ensureAdmin().then(() => {
+      loadTemplates();
+      loadLocations();
+    });
+  </script>
+</body>
+</html>

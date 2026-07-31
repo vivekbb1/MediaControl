@@ -235,6 +235,94 @@
 - Cost savings (reduced physical key printing, front desk labor)
 - Data-driven insights (ordering patterns, staff response times)
 
+### 11. BLUETOOTH BEACON PROXIMITY & PRESENCE DETECTION ✅ 🆕
+**Status:** ✅ FULLY IMPLEMENTED
+
+**Beacon Scanning:**
+- ✅ iBeacon protocol (Apple)
+- ✅ Eddystone protocol (Google - UID, URL, TLM)
+- ✅ AltBeacon protocol (Open Standard)
+- ✅ RSSI measurement and smoothing (Kalman filter)
+- ✅ Multi-beacon triangulation for accurate positioning
+
+**Proximity Detection:**
+- ✅ **4 proximity zones** (Immediate <1m, Near 1-3m, Far 3-10m, Unknown >10m)
+- ✅ **RSSI-to-distance conversion** (calibrated at 1 meter, adjustable path loss exponent)
+- ✅ **RSSI smoothing** (Kalman filter to reduce noise ±10 dBm)
+- ✅ **Real-time proximity tracking** (user-to-beacon distance)
+
+**Presence Detection:**
+- ✅ **Room entry/exit events** (automatic detection with debouncing)
+- ✅ **Dwell time tracking** (how long someone stays in a room)
+- ✅ **Multi-user support** (multiple people in same room)
+- ✅ **Debouncing** (5s enter, 30s exit to avoid false triggers)
+
+**User Identification:**
+- ✅ **Phone Bluetooth MAC address** (detect guest/staff phones)
+- ✅ **Personal beacon tags** (wearable beacons for staff/guests)
+- ✅ **Guest association** (link beacon to room number and reservation)
+
+**Automation Triggers:**
+- ✅ **Automatic door unlock** when guest approaches (passive entry enhancement)
+- ✅ **Welcome automation** (lights on, HVAC adjust, TV welcome screen)
+- ✅ **Energy saving mode** when guest leaves (lights off, HVAC eco mode)
+- ✅ **Housekeeping tracking** (log entry/exit, verify cleaning time)
+- ✅ **VIP alerts** (notify staff when VIP approaches lobby/restaurant)
+- ✅ **Asset tracking** (locate housekeeping carts, wheelchairs, equipment)
+
+**Occupancy Monitoring:**
+- ✅ **Real-time room occupancy** (which rooms are currently occupied)
+- ✅ **Floor occupancy** (total occupancy by floor)
+- ✅ **Occupancy reports** (peak times, average dwell, checkout prediction)
+- ✅ **Housekeeping efficiency** (time per room, idle time, rooms cleaned vs assigned)
+
+**Staff Accountability:**
+- ✅ **Staff location tracking** (which room staff is currently in)
+- ✅ **Cleaning verification** (verify staff spent adequate time cleaning, e.g., 30 min)
+- ✅ **Access logs** (timestamp, room, dwell time for audit trail)
+- ✅ **Efficiency metrics** (rooms cleaned per shift, average time per room)
+
+**Battery Monitoring:**
+- ✅ **Beacon battery level tracking** (Eddystone TLM)
+- ✅ **Low battery alerts** (<20%, <10%)
+- ✅ **Replacement scheduling** (auto-schedule 30 days before estimated death)
+- ✅ **Estimated lifespan tracking** (based on manufacturer specs)
+
+**Use Cases:**
+- 🏨 **Hotel Guest Experience:**
+  - Approach room → Auto-unlock door + lights on + HVAC adjust + welcome screen
+  - Leave room (5 min) → Lights off + HVAC eco mode (save energy)
+  - Return to room → Restore guest preferences automatically
+- 🧹 **Housekeeping Management:**
+  - Staff enters room → Log entry + start cleaning timer
+  - Staff exits room (after 30 min) → Mark room as cleaned + notify supervisor
+  - Track rooms cleaned per shift + average cleaning time
+- 🎩 **VIP Service:**
+  - VIP guest in lobby → Alert concierge + display personalized greeting
+  - VIP guest at restaurant → Alert maitre d' + prepare preferred table
+- 🛒 **Asset Tracking:**
+  - Housekeeping cart on Floor 22 → Update cart location in real-time
+  - Wheelchair in lobby → Track location for staff to locate quickly
+- 📊 **Analytics:**
+  - Peak occupancy times (8 PM most rooms occupied, 1 PM lowest)
+  - Average room dwell time (14.5 hours per day)
+  - Common area popularity (pool: 342 visits/month, gym: 178 visits/month)
+
+**Hardware Requirements:**
+- **Beacons:** $10-25 per beacon (Estimote, Kontakt.io, Minew, Gimbal)
+- **Battery life:** 2-3 years (CR2477 battery)
+- **Deployment:** 1 beacon per room (basic) or 3 beacons per room (advanced triangulation)
+- **Gateway scanners:** MediaControl Gateway (built-in BLE), Raspberry Pi ($35), or ESP32 ($5-10)
+- **Range:** 10-30 meters (depending on environment)
+
+**Commercial Impact:**
+- Enhanced guest experience (automatic welcome, personalized preferences)
+- Energy savings (15-30% from automatic lights/HVAC when room vacant)
+- Housekeeping efficiency (optimize cleaning schedules, verify cleaning time)
+- Staff accountability (know which rooms staff visited and for how long)
+- VIP service (proactive alerts when high-value guests approach areas)
+- Data-driven insights (occupancy patterns, guest behavior, space utilization)
+
 ---
 
 ## ⚠️ WHAT'S MISSING FOR "HOLISTIC" (ADVANCED FEATURES)

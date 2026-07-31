@@ -322,6 +322,28 @@ websockets>=12.0  # WebSocket client/server for cloud connection
 # XML parsing (ETS import)
 # xml.etree.ElementTree (built-in Python module)
 
+# === Home Automation & Security Devices ===
+
+# ONVIF (IP Cameras)
+onvif-zeep>=0.2.12  # Already included above (ONVIF protocol for IP cameras/doorbells)
+# Used for: Dahua, Hikvision, Ubiquiti, Axis, Reolink, Amcrest cameras
+
+# MQTT (Elevator, Pool, General IoT)
+# paho-mqtt>=1.6.1  # Already included above (MQTT client)
+# Used for: Elevator control, pool automation, generic IoT devices
+
+# HTTP/REST API
+# aiohttp>=3.9.0  # Already included above (async HTTP client/server)
+# Used for: Tailwind, Rachio, UniFi Access, Hayward, Pentair cloud APIs
+
+# WebSocket (Pool automation - Pentair IntelliCenter)
+# websockets>=12.0  # Already included above
+# Used for: Pentair IntelliCenter local WebSocket API
+
+# RS-485 / Serial (Pool automation)
+# pyserial>=3.5  # Already included above (serial port communication)
+# Used for: Pentair IntelliTouch, Hayward ProLogic via RS-485
+
 # === Development & Testing ===
 # pytest>=7.4.0
 # pytest-asyncio>=0.21.0

@@ -1,0 +1,335 @@
+# INDIA STB CONFIGURATION - Airtel/Jio/Tata Play
+# Complete setup for Indian set-top boxes with EPG and channel logos
+
+displays:
+  # ============================================================================
+  # AIRTEL DIGITAL TV / AIRTEL XSTREAM SETUP
+  # ============================================================================
+  living_room_airtel:
+    title: Living Room (Airtel)
+    model: WM55B + Airtel STB
+    ip: 192.168.1.100
+    location: home
+    
+    # Broadlink IR Control for Airtel STB
+    broadlink:
+      host: 192.168.1.150
+      mac: "24:DF:A7:F9:4D:84"
+      device_type: 0x61A2  # RM4 Mini
+    
+    # EPG Configuration for India
+    epg:
+      enabled: true
+      country_code: "in"
+      timezone: "Asia/Kolkata"  # Indian Standard Time (IST)
+      
+      # Indian EPG Sources
+      sources:
+        # Primary: Tata Play + JioTV combined
+        - url: "https://avkb.short.gy/epg.xml.gz"
+          priority: 1
+        
+        # JioTV 7-day EPG (backup)
+        - url: "https://github.com/arnab8820/JioTV-epg/raw/main/epg.xml.gz"
+          priority: 2
+        
+        # India general (iptv-org)
+        - url: "https://iptv-org.github.io/epg/guides/in.xml.gz"
+          priority: 3
+      
+      # Popular Indian Channels - Airtel Channel Numbers
+      channels:
+        # Hindi Entertainment
+        - name: "Star Plus HD"
+          epg_id: "461"  # JioTV ID
+          channel_number: 109
+          ir_command: "num_1,num_0,num_9"
+          category: "Hindi Entertainment"
+        
+        - name: "Sony Entertainment HD"
+          epg_id: "291"
+          channel_number: 107
+          ir_command: "num_1,num_0,num_7"
+          category: "Hindi Entertainment"
+        
+        - name: "Zee TV HD"
+          epg_id: "473"
+          channel_number: 105
+          ir_command: "num_1,num_0,num_5"
+          category: "Hindi Entertainment"
+        
+        - name: "Colors HD"
+          epg_id: "144"
+          channel_number: 111
+          ir_command: "num_1,num_1,num_1"
+          category: "Hindi Entertainment"
+        
+        - name: "Star Bharat HD"
+          epg_id: "503"
+          channel_number: 121
+          ir_command: "num_1,num_2,num_1"
+          category: "Hindi Entertainment"
+        
+        # Hindi Movies
+        - name: "Sony MAX HD"
+          epg_id: "476"
+          channel_number: 404
+          ir_command: "num_4,num_0,num_4"
+          category: "Hindi Movies"
+        
+        - name: "Zee Cinema HD"
+          epg_id: "821"
+          channel_number: 401
+          ir_command: "num_4,num_0,num_1"
+          category: "Hindi Movies"
+        
+        - name: "Star Gold HD"
+          epg_id: "465"
+          channel_number: 407
+          ir_command: "num_4,num_0,num_7"
+          category: "Hindi Movies"
+        
+        - name: "Colors Cineplex HD"
+          epg_id: "174"
+          channel_number: 417
+          ir_command: "num_4,num_1,num_7"
+          category: "Hindi Movies"
+        
+        # News
+        - name: "Aaj Tak HD"
+          epg_id: "216"
+          channel_number: 313
+          ir_command: "num_3,num_1,num_3"
+          category: "News"
+        
+        - name: "India TV"
+          epg_id: "263"
+          channel_number: 315
+          ir_command: "num_3,num_1,num_5"
+          category: "News"
+        
+        - name: "NDTV India"
+          epg_id: "156"
+          channel_number: 317
+          ir_command: "num_3,num_1,num_7"
+          category: "News"
+        
+        - name: "Republic TV"
+          epg_id: "693"
+          channel_number: 393
+          ir_command: "num_3,num_9,num_3"
+          category: "News"
+        
+        # Sports
+        - name: "Sony Ten 1 HD"
+          epg_id: "284"
+          channel_number: 277
+          ir_command: "num_2,num_7,num_7"
+          category: "Sports"
+        
+        - name: "Star Sports 1 HD"
+          epg_id: "480"
+          channel_number: 272
+          ir_command: "num_2,num_7,num_2"
+          category: "Sports"
+        
+        - name: "Star Sports Select 1 HD"
+          epg_id: "564"
+          channel_number: 280
+          ir_command: "num_2,num_8,num_0"
+          category: "Sports"
+        
+        # English Entertainment
+        - name: "Star World HD"
+          epg_id: "562"
+          channel_number: 178
+          ir_command: "num_1,num_7,num_8"
+          category: "English Entertainment"
+        
+        - name: "Comedy Central HD"
+          epg_id: "188"
+          channel_number: 179
+          ir_command: "num_1,num_7,num_9"
+          category: "English Entertainment"
+        
+        # Kids
+        - name: "Pogo"
+          epg_id: "559"
+          channel_number: 507
+          ir_command: "num_5,num_0,num_7"
+          category: "Kids"
+        
+        - name: "Sony YAY"
+          epg_id: "1296"
+          channel_number: 509
+          ir_command: "num_5,num_0,num_9"
+          category: "Kids"
+        
+        - name: "Nickelodeon"
+          epg_id: "246"
+          channel_number: 513
+          ir_command: "num_5,num_1,num_3"
+          category: "Kids"
+        
+        # Music
+        - name: "MTV Beats HD"
+          epg_id: "1117"
+          channel_number: 458
+          ir_command: "num_4,num_5,num_8"
+          category: "Music"
+        
+        - name: "9XM"
+          epg_id: "162"
+          channel_number: 484
+          ir_command: "num_4,num_8,num_4"
+          category: "Music"
+  
+  # ============================================================================
+  # JIOTV / JIO FIBER STB SETUP
+  # ============================================================================
+  bedroom_jio:
+    title: Bedroom (JioTV)
+    model: WM55B + Jio STB
+    ip: 192.168.1.101
+    location: home
+    
+    broadlink:
+      host: 192.168.1.151
+      mac: "24:DF:A7:F9:4D:85"
+      device_type: 0x61A2
+    
+    epg:
+      enabled: true
+      country_code: "in"
+      timezone: "Asia/Kolkata"
+      
+      sources:
+        # JioTV-specific EPG (primary)
+        - url: "https://avkb.short.gy/jioepg.xml.gz"
+          priority: 1
+        
+        # Full 7-day backup
+        - url: "https://github.com/arnab8820/JioTV-epg/raw/main/epg.xml.gz"
+          priority: 2
+      
+      # JioTV uses different channel numbers than Airtel
+      channels:
+        - name: "Star Plus HD"
+          epg_id: "461"
+          channel_number: 144
+          ir_command: "num_1,num_4,num_4"
+        
+        - name: "Sony Entertainment HD"
+          epg_id: "291"
+          channel_number: 199
+          ir_command: "num_1,num_9,num_9"
+        
+        - name: "Zee TV HD"
+          epg_id: "473"
+          channel_number: 147
+          ir_command: "num_1,num_4,num_7"
+        
+        - name: "Colors HD"
+          epg_id: "144"
+          channel_number: 145
+          ir_command: "num_1,num_4,num_5"
+
+# ==============================================================================
+# CHANNEL LOGO SOURCES (Automatic)
+# ==============================================================================
+
+# Channel logos are automatically fetched from:
+# https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/india/
+
+# Popular Indian Channel Logos:
+# Star Plus:     https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/india/star-plus-in.png
+# Sony TV:       https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/india/sony-entertainment-television-in.png
+# Zee TV:        https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/india/zee-tv-in.png
+# Colors:        https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/india/colors-in.png
+# Star Sports:   https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/india/star-sports-1-in.png
+# Sony Max:      https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/india/sony-max-in.png
+
+# ==============================================================================
+# POPULAR INDIAN CHANNEL IDS (for EPG Mapping)
+# ==============================================================================
+
+# Use these tvg-id values for JioTV/Tata Play EPG:
+# Hindi Entertainment:
+#   Star Plus HD: 461
+#   Sony TV HD: 291
+#   Zee TV HD: 473
+#   Colors HD: 144
+#   Star Bharat: 503
+#   &TV: 694
+#   Sony Sab: 471
+#   Zee Anmol: 1145
+
+# Hindi Movies:
+#   Sony Max HD: 476
+#   Zee Cinema HD: 821
+#   Star Gold HD: 465
+#   Colors Cineplex: 174
+#   & Pictures: 1295
+#   Sony Wah: 1009
+#   Zee Bollywood: 1146
+
+# News (Hindi):
+#   Aaj Tak: 216
+#   India TV: 263
+#   NDTV India: 156
+#   Republic TV: 693
+#   Zee News: 170
+#   ABP News: 213
+
+# Sports:
+#   Sony Ten 1 HD: 284
+#   Sony Ten 2 HD: 289
+#   Sony Ten 3 HD: 290
+#   Star Sports 1 HD: 480
+#   Star Sports 2 HD: 563
+#   Star Sports Select 1 HD: 564
+#   Star Sports Select 2 HD: 1289
+
+# English Entertainment:
+#   Star World HD: 562
+#   Comedy Central: 188
+#   Colors Infinity: 185
+#   Sony Pix: 186
+
+# Kids:
+#   Pogo: 559
+#   Sony YAY: 1296
+#   Nickelodeon: 246
+#   Disney Channel: 1031
+#   Cartoon Network: 816
+#   Discovery Kids: 554
+
+# Music:
+#   MTV Beats: 1117
+#   9XM: 162
+#   B4U Music: 414
+#   Mastiii: 1000
+
+# ==============================================================================
+# TIMEZONE NOTES
+# ==============================================================================
+
+# India uses a single timezone: Asia/Kolkata (IST - UTC+5:30)
+# All EPG times are automatically converted to IST
+# No daylight saving time adjustments needed
+
+# ==============================================================================
+# TESTING
+# ==============================================================================
+
+# Test EPG fetching:
+# python3 epg_client.py https://avkb.short.gy/epg.xml.gz
+
+# Test channel logo:
+# python3 epg_client.py logo "Star Plus" in
+
+# View Airtel channel list:
+# https://assets.airtel.in/static-assets/cms/dth-images/iptv/List-of-Ala-carte-FTA-channels-IPTV-11092025.pdf
+
+# JioTV channel reference:
+# https://mitthu786.github.io/tvepg/

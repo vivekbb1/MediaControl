@@ -1,6 +1,6 @@
 # Consumer Smart Home Platform Integration
 
-**Apple Home, Google Home, Xiaomi Mi Home, Amazon Alexa, Samsung SmartThings**
+**Apple Home, Google Home, Xiaomi Mi Home, Amazon Alexa, Samsung SmartThings, IKEA Home smart**
 
 ---
 
@@ -12,8 +12,9 @@
 4. [Xiaomi Mi Home Integration](#xiaomi-mi-home-integration)
 5. [Amazon Alexa Integration](#amazon-alexa-integration)
 6. [Samsung SmartThings Integration](#samsung-smartthings-integration)
-7. [Configuration](#configuration)
-8. [API Reference](#api-reference)
+7. [IKEA Home smart Integration](#ikea-home-smart-integration)
+8. [Configuration](#configuration)
+9. [API Reference](#api-reference)
 
 ---
 
@@ -26,6 +27,7 @@
 - **Xiaomi Mi Home** - Direct Mi Home app integration
 - **Amazon Alexa** - Alexa Smart Home Skill API
 - **Samsung SmartThings** - SmartThings Device SDK
+- **IKEA Home smart** - DIRIGERA hub + TRÅDFRI/SYMFONISK control
 
 ### Why Direct Integration?
 
@@ -1033,17 +1035,514 @@ samsung_smartthings:
 
 ---
 
+## IKEA Home smart Integration
+
+### Overview
+
+**IKEA Home smart** is IKEA's smart home ecosystem, featuring affordable smart lighting, blinds, and speakers.
+
+**MediaControl** integrates with IKEA via:
+1. **DIRIGERA hub** (IKEA's new smart home hub, replaces TRÅDFRI gateway)
+2. **Local CoAP API** (direct control without cloud)
+3. **IKEA Home smart app integration**
+
+**IKEA Smart Home Products:**
+- **TRÅDFRI** - Smart lighting (bulbs, panels, remotes)
+- **SYMFONISK** - Smart speakers (collaboration with Sonos)
+- **FYRTUR/KADRILJ** - Smart blinds
+- **TRÅDFRI** - Smart plugs and outlets
+- **TRÅDFRI** - Shortcut buttons
+- **TRÅDFRI** - Motion sensors
+
+### Why IKEA Integration Matters
+
+🏆 **Affordable** - IKEA smart home products are 50-70% cheaper than Philips Hue  
+🏆 **Popular** - 200+ million IKEA Family members worldwide  
+🏆 **Quality** - IKEA lighting quality rivals premium brands  
+🏆 **Zigbee** - All IKEA devices use Zigbee 3.0 (open standard)  
+🏆 **Local Control** - Works without internet (via DIRIGERA hub)  
+
+### Supported Devices
+
+#### 1. **DIRIGERA Hub** (New Smart Home Hub)
+
+IKEA's latest smart home hub, replacing the TRÅDFRI gateway:
+- Zigbee 3.0 + Matter support
+- Local API (CoAP)
+- Works with IKEA Home smart app
+- Cloud-free operation
+- Automatic firmware updates
+
+#### 2. **TRÅDFRI Lighting**
+
+Smart bulbs and panels:
+- White spectrum (2200K-4000K)
+- Color temperature adjustable
+- RGB color bulbs (16 million colors)
+- Brightness control (0-100%)
+- Remote control pairing
+
+Popular models:
+- TRÅDFRI LED bulb E27 (1000 lumen, $10)
+- TRÅDFRI LED bulb GU10 (400 lumen, $8)
+- FLOALT LED light panel (30×90 cm, $70)
+
+#### 3. **SYMFONISK Speakers** (IKEA + Sonos)
+
+Smart speakers with Sonos sound quality:
+- SYMFONISK WiFi bookshelf speaker ($149)
+- SYMFONISK table lamp with WiFi speaker ($169)
+- SYMFONISK picture frame speaker ($199)
+- Full Sonos compatibility
+- AirPlay 2 support
+- Spotify Connect
+
+**Note:** SYMFONISK speakers are controlled via Sonos integration (already implemented in `audio_devices.py`). MediaControl can control them as Sonos devices.
+
+#### 4. **FYRTUR/KADRILJ Smart Blinds**
+
+Battery-powered smart blinds:
+- FYRTUR (blackout, $149-$229)
+- KADRILJ (roller blind, $159-$239)
+- Battery life: 6-12 months
+- Shortcut button included
+- Timer function
+- Group control
+
+#### 5. **TRÅDFRI Smart Plugs**
+
+Smart outlets:
+- TRÅDFRI control outlet ($15)
+- On/off control
+- Power monitoring
+- Schedule support
+
+#### 6. **TRÅDFRI Shortcut Buttons**
+
+Programmable buttons:
+- TRÅDFRI shortcut button ($8)
+- Single press, double press, long press
+- Battery life: 2+ years
+- Pair with multiple devices
+
+#### 7. **TRÅDFRI Motion Sensors**
+
+Motion-activated control:
+- TRÅDFRI wireless motion sensor ($15)
+- Detection range: 5 meters, 120°
+- Battery life: 2+ years
+- Auto-off timer (1-10 minutes)
+
+### Integration Architecture
+
+```
+┌─────────────────────────────────────────────────┐
+│         IKEA Home smart Integration             │
+│                                                 │
+│  ┌──────────────┐         ┌──────────────┐     │
+│  │MediaControl  │◀───────▶│ DIRIGERA Hub │     │
+│  │Gateway       │  CoAP   │              │     │
+│  └──────────────┘  Local  └──────┬───────┘     │
+│         │                        │             │
+│         │                   Zigbee 3.0         │
+│         │                        │             │
+│         │              ┌─────────┼─────────┐   │
+│         │              │         │         │   │
+│         │         ┌────▼───┐ ┌──▼────┐ ┌──▼──┐│
+│         │         │TRÅDFRI │ │FYRTUR │ │Outlet││
+│         │         │ Bulb   │ │ Blind │ │      ││
+│         │         └────────┘ └───────┘ └──────┘│
+│         │                                       │
+│  Integration Methods:                          │
+│  1. CoAP (local, fastest)                      │
+│  2. IKEA Home smart app (cloud)                │
+│  3. Zigbee (via MediaControl Zigbee)           │
+└─────────────────────────────────────────────────┘
+```
+
+### Setup Instructions
+
+#### 1. Connect DIRIGERA Hub
+
+**Physical Setup:**
+1. Plug DIRIGERA hub into power + Ethernet
+2. Open **IKEA Home smart** app
+3. Add hub to your account
+4. Pair IKEA devices (bulbs, blinds, etc.)
+
+**MediaControl Integration:**
+1. In MediaControl web interface: **Settings** → **Integrations** → **IKEA Home smart**
+2. Enter DIRIGERA hub IP address
+3. Click **Get Security Code**
+4. Press pairing button on DIRIGERA hub (within 30 seconds)
+5. Security code appears in MediaControl
+6. Click **Connect**
+
+#### 2. Discover IKEA Devices
+
+MediaControl automatically discovers all IKEA devices:
+
+```
+Found IKEA Devices:
+  - Living Room Ceiling (TRÅDFRI Bulb, White Spectrum)
+  - Bedroom Lamp (TRÅDFRI Bulb, RGB Color)
+  - Living Room Blinds (FYRTUR, Blackout)
+  - TV Outlet (TRÅDFRI Control Outlet)
+  - Hallway Motion (TRÅDFRI Motion Sensor)
+```
+
+#### 3. Configure Devices
+
+For each IKEA device:
+- Set friendly name
+- Assign to MediaControl room
+- Configure automation triggers
+
+### MediaControl ↔ IKEA Automation
+
+**MediaControl → IKEA:**
+- Meeting started → Dim TRÅDFRI ceiling lights to 30%
+- Presentation mode → Set lights to cool white (4000K)
+- Movie time → Turn off all lights, close FYRTUR blinds
+- Meeting ended → Restore lights to 100%, open blinds
+
+**IKEA → MediaControl:**
+- TRÅDFRI shortcut button pressed → Turn on Conference TV
+- Motion sensor triggered → Turn on MediaControl display
+- Blinds fully closed → Switch display to Movie mode
+
+### Configuration
+
+```yaml
+ikea_home_smart:
+  enabled: true
+  
+  # DIRIGERA Hub
+  hub:
+    ip_address: "192.168.1.150"
+    security_code: "your_security_code"  # Obtained during pairing
+    port: 5684  # CoAP port
+    
+  # IKEA devices to control from MediaControl
+  devices:
+    # TRÅDFRI Lighting
+    - device_id: "ikea_living_room_ceiling"
+      name: "Living Room Ceiling Light"
+      type: "light"
+      ikea_device_id: "65537"  # IKEA internal device ID
+      
+      # Light capabilities
+      capabilities:
+        on_off: true
+        brightness: true
+        color_temperature: true  # 2200K-4000K
+        rgb_color: false  # This bulb is white spectrum only
+        
+      # MediaControl integration
+      room: "living_room"
+      control_from_mc: true  # Allow MediaControl to control
+      
+    - device_id: "ikea_bedroom_lamp"
+      name: "Bedroom Lamp"
+      type: "light"
+      ikea_device_id: "65538"
+      capabilities:
+        on_off: true
+        brightness: true
+        color_temperature: false
+        rgb_color: true  # RGB color bulb
+      room: "bedroom"
+    
+    # FYRTUR Blinds
+    - device_id: "ikea_living_room_blinds"
+      name: "Living Room Blinds"
+      type: "blind"
+      ikea_device_id: "65539"
+      
+      # Blind capabilities
+      capabilities:
+        open: true
+        close: true
+        position: true  # 0-100%
+        
+      # MediaControl integration
+      room: "living_room"
+      
+      # Automation
+      automation:
+        # Close blinds when presentation mode activated
+        - trigger: "presentation_mode"
+          action: "close"
+        # Open blinds when meeting ends
+        - trigger: "meeting_ended"
+          action: "open"
+    
+    # TRÅDFRI Smart Plug
+    - device_id: "ikea_tv_outlet"
+      name: "TV Outlet"
+      type: "outlet"
+      ikea_device_id: "65540"
+      
+      capabilities:
+        on_off: true
+        
+      # Link to MediaControl display
+      linked_display: "display_1"
+      # When display turns on → outlet turns on
+      # When display turns off → outlet turns off
+    
+    # TRÅDFRI Motion Sensor
+    - device_id: "ikea_hallway_motion"
+      name: "Hallway Motion Sensor"
+      type: "motion_sensor"
+      ikea_device_id: "65541"
+      
+      # Trigger MediaControl actions
+      triggers:
+        - event: "motion_detected"
+          mc_action: "turn_on_display"
+          display_id: "display_hallway"
+          
+        - event: "no_motion"
+          delay: 300  # 5 minutes
+          mc_action: "turn_off_display"
+          display_id: "display_hallway"
+    
+    # TRÅDFRI Shortcut Button
+    - device_id: "ikea_conference_button"
+      name: "Conference Room Button"
+      type: "shortcut_button"
+      ikea_device_id: "65542"
+      
+      # Button actions
+      actions:
+        single_press:
+          mc_action: "turn_on_display"
+          display_id: "display_1"
+          
+        double_press:
+          mc_action: "activate_preset"
+          preset_id: "presentation_mode"
+          
+        long_press:
+          mc_action: "turn_off_all_displays"
+          room: "conference_room"
+  
+  # Automation
+  automation:
+    # MediaControl → IKEA
+    - trigger: "meeting_started"
+      room: "conference_room"
+      actions:
+        - type: "light"
+          action: "set_brightness"
+          device_ids: ["ikea_living_room_ceiling"]
+          brightness: 30
+          
+        - type: "light"
+          action: "set_color_temperature"
+          device_ids: ["ikea_living_room_ceiling"]
+          color_temp: 4000  # Cool white
+    
+    - trigger: "movie_mode"
+      room: "living_room"
+      actions:
+        - type: "light"
+          action: "turn_off"
+          device_ids: ["all"]  # All lights in room
+          
+        - type: "blind"
+          action: "close"
+          device_ids: ["ikea_living_room_blinds"]
+    
+    # IKEA → MediaControl
+    - trigger: "ikea_device"
+      device_id: "ikea_conference_button"
+      event: "single_press"
+      mc_action: "turn_on_display"
+      display_id: "display_1"
+```
+
+### Use Cases
+
+#### 1. Conference Room Integration
+
+**Setup:**
+- 4× TRÅDFRI ceiling lights (white spectrum)
+- 2× FYRTUR blackout blinds
+- 1× TRÅDFRI shortcut button
+
+**Automation:**
+```
+Meeting Started:
+  → Lights: 30% brightness, 4000K (cool white for alertness)
+  → Blinds: Close (reduce glare on displays)
+
+Presentation Mode:
+  → Lights: 10% brightness
+  → Blinds: Close fully
+  → Display: Full brightness
+
+Meeting Ended:
+  → Lights: 100% brightness, 2700K (warm white)
+  → Blinds: Open
+
+Shortcut Button (single press):
+  → Turn on all displays
+
+Shortcut Button (double press):
+  → Activate presentation preset
+```
+
+#### 2. Home Theater
+
+**Setup:**
+- 6× TRÅDFRI RGB bulbs (bias lighting behind TV)
+- 2× FYRTUR blackout blinds
+- 1× TRÅDFRI motion sensor
+
+**Automation:**
+```
+Movie Mode:
+  → All lights: OFF (except bias lighting: 10%, warm amber)
+  → Blinds: Close
+  → TV: Turn on, switch to Apple TV
+
+Motion Detected (when TV off):
+  → Hallway lights: Turn on (for safety)
+
+No Motion for 10 minutes (when TV on):
+  → (Do nothing - movie in progress)
+```
+
+#### 3. Office/Workspace
+
+**Setup:**
+- 2× FLOALT LED panels (above desk)
+- 1× KADRILJ roller blind (window)
+- 1× TRÅDFRI shortcut button
+
+**Automation:**
+```
+Work Mode (button single press):
+  → Panels: 100% brightness, 4000K (cool white for focus)
+  → Blind: Open 50% (natural light + glare control)
+  → Display: Turn on
+
+Break Mode (button double press):
+  → Panels: 50% brightness, 2700K (warm white for relaxation)
+  → Display: Turn off
+
+End of Day (button long press):
+  → Panels: Turn off
+  → Blind: Close
+  → Display: Turn off
+  → Smart plug (PC): Turn off
+```
+
+### API Integration
+
+```python
+# MediaControl → IKEA
+# Turn on light
+POST /api/consumer-platforms/ikea/light/on
+{
+  "device_id": "ikea_living_room_ceiling",
+  "brightness": 80,
+  "color_temp": 2700  # Warm white
+}
+
+# Control blind
+POST /api/consumer-platforms/ikea/blind/position
+{
+  "device_id": "ikea_living_room_blinds",
+  "position": 50  # 50% open
+}
+
+# IKEA → MediaControl (Webhook/CoAP)
+# Motion detected
+POST http://mediacontrol-gateway-ip:8080/api/ikea/webhook
+{
+  "device_id": "ikea_hallway_motion",
+  "event": "motion_detected",
+  "timestamp": "2026-07-31T10:00:00Z"
+}
+
+# Button pressed
+POST http://mediacontrol-gateway-ip:8080/api/ikea/webhook
+{
+  "device_id": "ikea_conference_button",
+  "event": "single_press",
+  "timestamp": "2026-07-31T10:00:00Z"
+}
+```
+
+### SYMFONISK Speaker Integration
+
+**Note:** SYMFONISK speakers are Sonos-compatible and are controlled via MediaControl's existing Sonos integration (`audio_devices.py`).
+
+**Features:**
+- Group SYMFONISK with other Sonos speakers
+- AirPlay 2 streaming
+- Spotify Connect
+- Volume control
+- Play/pause/skip
+
+**Example:**
+```yaml
+# In audio_devices.py config
+sonos_devices:
+  - device_id: "symfonisk_living_room"
+    name: "SYMFONISK Living Room"
+    ip_address: "192.168.1.200"
+    room: "living_room"
+    
+    # SYMFONISK is a Sonos device
+    manufacturer: "IKEA"
+    model: "SYMFONISK Bookshelf Speaker"
+```
+
+### Why IKEA Integration is Valuable
+
+**Affordability:**
+- TRÅDFRI bulb: $10 (vs Philips Hue $25)
+- FYRTUR blind: $149 (vs Lutron $500)
+- 60-80% cost savings vs premium brands
+
+**Quality:**
+- IKEA lighting matches Philips Hue quality
+- SYMFONISK speakers have Sonos internals (identical sound quality)
+- FYRTUR blinds are reliable and quiet
+
+**Popularity:**
+- 200+ million IKEA Family members
+- IKEA stores in 60+ countries
+- Easy to buy (no online ordering required)
+
+**Local Control:**
+- Works without internet (DIRIGERA hub)
+- No cloud required for basic functions
+- Privacy-friendly
+
+**Future-Proof:**
+- Zigbee 3.0 (open standard)
+- Matter support (DIRIGERA hub)
+- Regular firmware updates
+
+---
+
 ## Multi-Platform Comparison
 
-| Feature | Apple Home | Google Home | Xiaomi | Alexa | SmartThings |
-|---------|-----------|-------------|--------|-------|-------------|
-| **Voice Assistant** | Siri | Google Assistant | Xiao AI | Alexa | Bixby |
-| **Local Control** | ✅ HAP | ✅ Local Home SDK | ✅ Local Gateway | ❌ Cloud only | ✅ Device SDK |
-| **Setup Difficulty** | Easy (QR code) | Easy (OAuth) | Medium | Easy | Easy |
-| **Privacy** | ✅ Excellent | ⚠️ Good | ⚠️ China data | ⚠️ Amazon data | ⚠️ Samsung data |
-| **Automation** | ✅ Excellent | ✅ Excellent | ✅ Good | ✅ Excellent | ✅ Good |
-| **Ecosystem Size** | Large | Largest | Large (Asia) | Largest | Large |
-| **Best For** | Apple users | Android users | Xiaomi users | Amazon users | Samsung users |
+| Feature | Apple Home | Google Home | Xiaomi | Alexa | SmartThings | IKEA |
+|---------|-----------|-------------|--------|-------|-------------|------|
+| **Voice Assistant** | Siri | Google Assistant | Xiao AI | Alexa | Bixby | N/A (works with all) |
+| **Local Control** | ✅ HAP | ✅ Local Home SDK | ✅ Local Gateway | ❌ Cloud only | ✅ Device SDK | ✅ CoAP (DIRIGERA) |
+| **Setup Difficulty** | Easy (QR code) | Easy (OAuth) | Medium | Easy | Easy | Easy (pairing button) |
+| **Privacy** | ✅ Excellent | ⚠️ Good | ⚠️ China data | ⚠️ Amazon data | ⚠️ Samsung data | ✅ Excellent (local) |
+| **Automation** | ✅ Excellent | ✅ Excellent | ✅ Good | ✅ Excellent | ✅ Good | ⚠️ Basic |
+| **Ecosystem Size** | Large | Largest | Large (Asia) | Largest | Large | Medium |
+| **Best For** | Apple users | Android users | Xiaomi users | Amazon users | Samsung users | Budget-conscious |
+| **Price** | $$$ | $$-$$$ | $ | $$ | $$ | $ (50-70% cheaper) |
 
 ---
 
@@ -1078,6 +1577,12 @@ consumer_platforms:
   # Samsung SmartThings
   samsung_smartthings:
     enabled: true
+    # See detailed config above
+    
+  # IKEA Home smart
+  ikea_home_smart:
+    enabled: true
+    hub_ip: "192.168.1.150"
     # See detailed config above
 ```
 
@@ -1165,6 +1670,41 @@ POST /api/consumer-platforms/smartthings/command
 }
 ```
 
+### IKEA Home smart API
+
+```http
+# Control TRÅDFRI light
+POST /api/consumer-platforms/ikea/light/control
+{
+  "device_id": "ikea_living_room_ceiling",
+  "on": true,
+  "brightness": 80,
+  "color_temp": 2700
+}
+
+# Control FYRTUR blind
+POST /api/consumer-platforms/ikea/blind/position
+{
+  "device_id": "ikea_living_room_blinds",
+  "position": 50
+}
+
+# Get IKEA device status
+GET /api/consumer-platforms/ikea/device/{device_id}
+
+Response:
+{
+  "device_id": "ikea_living_room_ceiling",
+  "name": "Living Room Ceiling Light",
+  "type": "light",
+  "state": {
+    "on": true,
+    "brightness": 80,
+    "color_temp": 2700
+  }
+}
+```
+
 ---
 
 ## Best Practices
@@ -1202,6 +1742,16 @@ POST /api/consumer-platforms/smartthings/command
 ✅ Create SmartThings scenes with MediaControl devices  
 ✅ Link to Samsung TVs for integrated control  
 ✅ Use SmartThings hub for Zigbee/Z-Wave devices
+
+### IKEA Home smart
+✅ Use DIRIGERA hub for local control (no cloud required)  
+✅ TRÅDFRI bulbs are 50-70% cheaper than Philips Hue (great value)  
+✅ Pair FYRTUR blinds with presentation mode (auto-close for glare control)  
+✅ Use TRÅDFRI shortcut buttons for quick access (single/double/long press)  
+✅ SYMFONISK speakers work as Sonos devices (use Sonos integration)  
+✅ Motion sensors can auto-turn on displays when entering room  
+✅ Update DIRIGERA firmware regularly for new features  
+✅ Buy extra TRÅDFRI remotes ($15) for manual control
 
 ---
 

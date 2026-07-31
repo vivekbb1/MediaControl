@@ -1,6 +1,6 @@
 """
 Consumer Smart Home Platform Integration
-Apple Home, Google Home, Xiaomi Mi Home, Amazon Alexa, Samsung SmartThings
+Apple Home, Google Home, Xiaomi Mi Home, Amazon Alexa, Samsung SmartThings, IKEA Home smart
 
 Features:
 - Apple HomeKit (HAP protocol, native HomeKit accessory)
@@ -8,6 +8,7 @@ Features:
 - Xiaomi Mi Home (Cloud API, Local Gateway, Yeelight)
 - Amazon Alexa (Smart Home Skill, Video Skill)
 - Samsung SmartThings (Device SDK, Cloud API)
+- IKEA Home smart (DIRIGERA hub, CoAP, TRÅDFRI/FYRTUR/SYMFONISK)
 """
 
 from dataclasses import dataclass, field
@@ -27,6 +28,7 @@ class ConsumerPlatform(Enum):
     XIAOMI = "xiaomi"
     ALEXA = "alexa"
     SMARTTHINGS = "smartthings"
+    IKEA = "ikea"
 
 
 class DeviceType(Enum):
@@ -554,6 +556,142 @@ class SamsungSmartThingsController:
         return True
 
 
+# ========== IKEA Home smart Integration ==========
+
+class IKEAHomeSmartController:
+    """
+    IKEA Home smart integration
+    DIRIGERA hub + TRÅDFRI/FYRTUR/SYMFONISK control
+    """
+    
+    def __init__(self, hub_ip: str, security_code: str = ""):
+        self.hub_ip = hub_ip
+        self.security_code = security_code
+        
+        self.devices: Dict[str, PlatformDevice] = {}
+        self.ikea_devices: Dict[str, Dict[str, Any]] = {}  # IKEA devices (lights, blinds, etc.)
+        
+        print(f"IKEA Home smart Controller initialized")
+        print(f"  DIRIGERA Hub: {hub_ip}")
+    
+    async def pair_with_hub(self):
+        """Pair with DIRIGERA hub"""
+        print(f"Pairing with DIRIGERA hub at {self.hub_ip}...")
+        print(f"  Press the pairing button on DIRIGERA hub within 30 seconds")
+        
+        # In real implementation: use CoAP client to pair with DIRIGERA
+        # from aiocoap import ...
+        
+        print(f"  ✓ Paired with DIRIGERA hub")
+        print(f"  Security Code: {self.security_code}")
+        return True
+    
+    async def discover_ikea_devices(self):
+        """Discover IKEA devices via DIRIGERA hub"""
+        print(f"Discovering IKEA devices...")
+        
+        # Mock devices
+        devices = [
+            {"id": "65537", "name": "Living Room Ceiling", "type": "light", "subtype": "white_spectrum"},
+            {"id": "65538", "name": "Bedroom Lamp", "type": "light", "subtype": "rgb_color"},
+            {"id": "65539", "name": "Living Room Blinds", "type": "blind", "subtype": "blackout"},
+            {"id": "65540", "name": "TV Outlet", "type": "outlet"},
+            {"id": "65541", "name": "Hallway Motion", "type": "motion_sensor"},
+            {"id": "65542", "name": "Conference Button", "type": "shortcut_button"}
+        ]
+        
+        for device in devices:
+            self.ikea_devices[device["id"]] = device
+            print(f"  Found: {device['name']} ({device['type']})")
+        
+        return devices
+    
+    async def control_light(self, ikea_device_id: str, on: bool = None, brightness: int = None, color_temp: int = None):
+        """Control TRÅDFRI light"""
+        if ikea_device_id not in self.ikea_devices:
+            return False
+        
+        device = self.ikea_devices[ikea_device_id]
+        
+        print(f"TRÅDFRI control: {device['name']}")
+        if on is not None:
+            print(f"  Power: {'ON' if on else 'OFF'}")
+        if brightness is not None:
+            print(f"  Brightness: {brightness}%")
+        if color_temp is not None:
+            print(f"  Color temp: {color_temp}K")
+        
+        # In real implementation: use CoAP to send commands to DIRIGERA
+        # PUT coap://{self.hub_ip}/15001/{ikea_device_id}
+        # Payload: {"5850": 1, "5851": brightness, "5711": color_temp}
+        
+        print(f"  ✓ Command sent")
+        return True
+    
+    async def control_blind(self, ikea_device_id: str, position: int):
+        """Control FYRTUR/KADRILJ blind"""
+        if ikea_device_id not in self.ikea_devices:
+            return False
+        
+        device = self.ikea_devices[ikea_device_id]
+        
+        print(f"FYRTUR/KADRILJ control: {device['name']}")
+        print(f"  Position: {position}%")
+        
+        # In real implementation: use CoAP
+        # PUT coap://{self.hub_ip}/15015/{ikea_device_id}
+        # Payload: {"5536": position}
+        
+        print(f"  ✓ Blind moved to {position}%")
+        return True
+    
+    async def control_outlet(self, ikea_device_id: str, on: bool):
+        """Control TRÅDFRI smart outlet"""
+        if ikea_device_id not in self.ikea_devices:
+            return False
+        
+        device = self.ikea_devices[ikea_device_id]
+        
+        print(f"TRÅDFRI outlet control: {device['name']}")
+        print(f"  Power: {'ON' if on else 'OFF'}")
+        
+        # In real implementation: use CoAP
+        # PUT coap://{self.hub_ip}/15001/{ikea_device_id}
+        # Payload: {"5850": 1 if on else 0}
+        
+        print(f"  ✓ Outlet turned {'ON' if on else 'OFF'}")
+        return True
+    
+    async def on_button_press(self, ikea_device_id: str, press_type: str):
+        """Handle TRÅDFRI shortcut button press"""
+        if ikea_device_id not in self.ikea_devices:
+            return
+        
+        device = self.ikea_devices[ikea_device_id]
+        
+        print(f"TRÅDFRI button pressed: {device['name']}")
+        print(f"  Press type: {press_type}")  # "single", "double", "long"
+        
+        # Trigger MediaControl action based on button press
+        # Example: single press → turn on display
+        if press_type == "single":
+            print(f"  → Triggering MC action: turn_on_display")
+        elif press_type == "double":
+            print(f"  → Triggering MC action: activate_preset")
+        elif press_type == "long":
+            print(f"  → Triggering MC action: turn_off_all_displays")
+    
+    async def on_motion_detected(self, ikea_device_id: str):
+        """Handle TRÅDFRI motion sensor trigger"""
+        if ikea_device_id not in self.ikea_devices:
+            return
+        
+        device = self.ikea_devices[ikea_device_id]
+        
+        print(f"TRÅDFRI motion detected: {device['name']}")
+        print(f"  → Triggering MC action: turn_on_display")
+
+
 # ========== Unified Consumer Platform Controller ==========
 
 class ConsumerPlatformController:
@@ -568,6 +706,7 @@ class ConsumerPlatformController:
         self.xiaomi: Optional[XiaomiMiHomeController] = None
         self.alexa: Optional[AmazonAlexaController] = None
         self.smartthings: Optional[SamsungSmartThingsController] = None
+        self.ikea: Optional[IKEAHomeSmartController] = None
         
         print(f"\n{'='*60}")
         print(f"Consumer Platform Controller Initialized")
@@ -587,6 +726,8 @@ class ConsumerPlatformController:
             devices.extend(self.alexa.devices.values())
         if self.smartthings:
             devices.extend(self.smartthings.devices.values())
+        if self.ikea:
+            devices.extend(self.ikea.devices.values())
         
         return devices
     
@@ -598,7 +739,8 @@ class ConsumerPlatformController:
                 "google_home": self.google_home is not None,
                 "xiaomi": self.xiaomi is not None,
                 "alexa": self.alexa is not None,
-                "smartthings": self.smartthings is not None
+                "smartthings": self.smartthings is not None,
+                "ikea": self.ikea is not None
             },
             "device_count": {
                 "total": len(self.get_all_devices()),
@@ -606,7 +748,8 @@ class ConsumerPlatformController:
                 "google_home": len(self.google_home.devices) if self.google_home else 0,
                 "xiaomi": len(self.xiaomi.devices) if self.xiaomi else 0,
                 "alexa": len(self.alexa.devices) if self.alexa else 0,
-                "smartthings": len(self.smartthings.devices) if self.smartthings else 0
+                "smartthings": len(self.smartthings.devices) if self.smartthings else 0,
+                "ikea": len(self.ikea.ikea_devices) if self.ikea else 0
             }
         }
 
@@ -650,6 +793,10 @@ if __name__ == "__main__":
     cp.smartthings = SamsungSmartThingsController(personal_access_token="smartthings_token")
     cp.smartthings.register_display("display_1", "Conference TV", "Conference Room", "mc_display_1")
     
+    # IKEA Home smart
+    print("\n--- IKEA Home smart ---\n")
+    cp.ikea = IKEAHomeSmartController(hub_ip="192.168.1.150", security_code="your_security_code")
+    
     # Simulate commands
     print("\n" + "="*60)
     print("SIMULATING VOICE COMMANDS")
@@ -687,6 +834,15 @@ if __name__ == "__main__":
         devices = await cp.xiaomi.discover_xiaomi_devices()
         if devices:
             await cp.xiaomi.control_yeelight("123456789", "set_brightness", {"brightness": 80})
+        
+        # IKEA: Discover devices & Control light
+        print("\n--- IKEA: Discover devices & Control TRÅDFRI light ---\n")
+        await cp.ikea.pair_with_hub()
+        ikea_devices = await cp.ikea.discover_ikea_devices()
+        if ikea_devices:
+            await cp.ikea.control_light("65537", on=True, brightness=80, color_temp=2700)
+            await cp.ikea.control_blind("65539", position=50)
+            await cp.ikea.on_button_press("65542", "single")
     
     asyncio.run(run_simulation())
     

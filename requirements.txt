@@ -305,6 +305,10 @@ python-miio>=0.5.12  # Xiaomi & Aqara device control
 # Samsung SmartThings
 pysmartthings>=0.7.8  # SmartThings API client
 
+# IKEA Home smart
+aiocoap>=0.4.7  # CoAP client for DIRIGERA hub (local control)
+# pytradfri>=9.0.0  # Alternative library for IKEA TRÅDFRI (via CoAP)
+
 # === Development & Testing ===
 # pytest>=7.4.0
 # pytest-asyncio>=0.21.0

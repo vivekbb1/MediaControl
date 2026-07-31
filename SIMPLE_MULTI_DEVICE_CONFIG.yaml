@@ -1,0 +1,80 @@
+# SIMPLE MULTI-DEVICE SETUP
+# Home theater with 1 TV, Apple TV, and STB
+
+room:
+  id: "living-room"
+  name: "Living Room"
+  timezone: "Asia/Dubai"
+
+displays:
+  - id: "tv-main"
+    type: "samsung_flip"
+    name: "Main TV"
+    ip: "192.168.1.10"
+    inputs:
+      hdmi1:
+        source_id: "stb-dubai"
+      hdmi2:
+        source_id: "apple-tv"
+
+sources:
+  # UAE STB (e& / du / OSN)
+  - id: "stb-dubai"
+    type: "stb"
+    name: "e& TV"
+    control:
+      type: "broadlink"
+      device_ip: "192.168.1.50"
+      ir_codes_file: "ir_codes/etisalat_stb.yaml"
+    hdmi_connection:
+      display_id: "tv-main"
+      input_port: "hdmi1"
+    epg:
+      timezone: "Asia/Dubai"
+      sources:
+        - url: "https://example.com/osn_epg.xml"
+  
+  # Apple TV
+  - id: "apple-tv"
+    type: "apple_tv"
+    name: "Apple TV"
+    control:
+      type: "pyatv"
+      ip: "192.168.1.60"
+      credentials_file: "credentials/appletv.json"
+    hdmi_connection:
+      display_id: "tv-main"
+      input_port: "hdmi2"
+    apps:
+      - id: "com.netflix.Netflix"
+        name: "Netflix"
+        icon: "netflix"
+      - id: "com.amazon.aiv.AIVApp"
+        name: "Prime Video"
+        icon: "prime"
+      - id: "com.disney.disneyplus"
+        name: "Disney+"
+        icon: "disney"
+
+# Quick access presets
+presets:
+  - name: "Netflix"
+    source_id: "apple-tv"
+    displays: ["tv-main"]
+    action:
+      type: "launch_app"
+      app_id: "com.netflix.Netflix"
+  
+  - name: "Live TV"
+    source_id: "stb-dubai"
+    displays: ["tv-main"]
+    action:
+      type: "send_command"
+      command: "home"
+  
+  - name: "OSN Movies"
+    source_id: "stb-dubai"
+    displays: ["tv-main"]
+    action:
+      type: "tune_channel"
+      channel: 301

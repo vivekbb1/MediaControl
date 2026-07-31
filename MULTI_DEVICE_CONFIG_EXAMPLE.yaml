@@ -1,0 +1,462 @@
+# MULTI-DEVICE ROOM CONFIGURATION EXAMPLE
+# Complete setup with 3 displays, multiple sources, HDMI matrix, and presets
+
+room:
+  id: "conference-room-a"
+  name: "Conference Room A"
+  location: "Building 1, Floor 2"
+  timezone: "Asia/Dubai"
+
+# =============================================================================
+# DISPLAYS (Samsung Flip / Smart TV)
+# =============================================================================
+displays:
+  - id: "display-1"
+    type: "samsung_flip"
+    name: "Main Display"
+    ip: "192.168.1.10"
+    model: "WM85R"
+    
+    # HDMI inputs and what's connected to each
+    inputs:
+      hdmi1:
+        source_id: "stb-airtel"
+        label: "Airtel STB"
+      hdmi2:
+        source_id: "apple-tv"
+        label: "Apple TV"
+      hdmi3:
+        source_id: "android-stick"
+        label: "Mi Stick"
+      hdmi4:
+        source_id: null  # From matrix (dynamic)
+        label: "Matrix"
+      displayport:
+        source_id: null
+        label: "Laptop"
+      usb-c:
+        source_id: null
+        label: "Wireless Present"
+  
+  - id: "display-2"
+    type: "samsung_flip"
+    name: "Side Display"
+    ip: "192.168.1.11"
+    model: "WM85R"
+    
+    inputs:
+      hdmi1:
+        source_id: null  # From matrix (dynamic)
+        label: "Matrix"
+      hdmi2:
+        source_id: null
+        label: "Unused"
+  
+  - id: "display-3"
+    type: "samsung_flip"
+    name: "Back Display"
+    ip: "192.168.1.12"
+    model: "WM65R"
+    
+    inputs:
+      hdmi1:
+        source_id: null  # From matrix (dynamic)
+        label: "Matrix"
+
+# =============================================================================
+# SOURCE DEVICES (STBs, Apple TV, Android TV, etc.)
+# =============================================================================
+sources:
+  
+  # ---------------------------------------------------------------------------
+  # SET-TOP BOX 1: Airtel Digital TV (India)
+  # ---------------------------------------------------------------------------
+  - id: "stb-airtel"
+    type: "stb"
+    name: "Airtel STB"
+    provider: "airtel"
+    
+    control:
+      type: "broadlink"
+      device_ip: "192.168.1.50"  # Broadlink RM4 device
+      ir_codes_file: "ir_codes/airtel_stb.yaml"
+      timeout: 5
+    
+    hdmi_connection:
+      display_id: "display-1"
+      input_port: "hdmi1"
+    
+    # EPG configuration
+    epg:
+      timezone: "Asia/Kolkata"  # Source timezone
+      display_timezone: "Asia/Dubai"  # Viewing timezone (auto-converts times)
+      sources:
+        - url: "https://raw.githubusercontent.com/iptv-org/epg/master/sites/airtel.in/airtel.in.channels.xml"
+          type: "xmltv"
+      update_interval: 21600  # 6 hours
+      cache_days: 1
+    
+    # Channel mapping
+    channels:
+      "StarPlus.in":
+        number: 109
+        name: "Star Plus"
+        category: "Entertainment"
+        language: "Hindi"
+        ir_command: "1,0,9"  # Or use preset codes
+      
+      "SonyTV.in":
+        number: 110
+        name: "Sony TV"
+        category: "Entertainment"
+        language: "Hindi"
+      
+      "ZeeTVHD.in":
+        number: 111
+        name: "Zee TV HD"
+        category: "Entertainment"
+        language: "Hindi"
+      
+      "StarSportsHD1.in":
+        number: 277
+        name: "Star Sports HD 1"
+        category: "Sports"
+        language: "English"
+  
+  # ---------------------------------------------------------------------------
+  # SET-TOP BOX 2: Jio Fiber (India)
+  # ---------------------------------------------------------------------------
+  - id: "stb-jio"
+    type: "stb"
+    name: "Jio STB"
+    provider: "jio"
+    
+    control:
+      type: "broadlink"
+      device_ip: "192.168.1.50"
+      ir_codes_file: "ir_codes/jio_stb.yaml"
+    
+    hdmi_connection:
+      display_id: "display-1"
+      input_port: "hdmi1"
+      via_matrix: true
+      matrix_input: 2
+  
+  # ---------------------------------------------------------------------------
+  # APPLE TV 4K
+  # ---------------------------------------------------------------------------
+  - id: "apple-tv"
+    type: "apple_tv"
+    name: "Apple TV 4K"
+    model: "Apple TV 4K (3rd Gen)"
+    
+    control:
+      type: "pyatv"
+      ip: "192.168.1.60"
+      credentials_file: "credentials/appletv.json"
+    
+    hdmi_connection:
+      display_id: "display-1"
+      input_port: "hdmi2"
+      via_matrix: false  # Direct connection
+    
+    # Apps available on Apple TV
+    apps:
+      - id: "com.netflix.Netflix"
+        name: "Netflix"
+        icon: "netflix"
+        category: "streaming"
+      
+      - id: "com.amazon.aiv.AIVApp"
+        name: "Prime Video"
+        icon: "prime"
+        category: "streaming"
+      
+      - id: "com.disney.disneyplus"
+        name: "Disney+"
+        icon: "disney"
+        category: "streaming"
+      
+      - id: "com.apple.TVWatchList"
+        name: "Apple TV+"
+        icon: "appletv"
+        category: "streaming"
+      
+      - id: "com.google.ios.youtube"
+        name: "YouTube"
+        icon: "youtube"
+        category: "streaming"
+      
+      - id: "com.hulu.plus"
+        name: "Hulu"
+        icon: "hulu"
+        category: "streaming"
+      
+      - id: "com.spotify.client"
+        name: "Spotify"
+        icon: "spotify"
+        category: "music"
+  
+  # ---------------------------------------------------------------------------
+  # ANDROID TV STICK (Mi TV Stick)
+  # ---------------------------------------------------------------------------
+  - id: "android-stick"
+    type: "android_tv"
+    name: "Mi TV Stick"
+    model: "Mi TV Stick 4K"
+    
+    control:
+      type: "adb"
+      ip: "192.168.1.61"
+      port: 5555
+    
+    hdmi_connection:
+      display_id: "display-1"
+      input_port: "hdmi3"
+    
+    # Apps on Android TV
+    apps:
+      - id: "com.netflix.ninja/.MainActivity"
+        name: "Netflix"
+        icon: "netflix"
+        category: "streaming"
+      
+      - id: "com.hotstar.streaming/.MainActivity"
+        name: "Hotstar"
+        icon: "hotstar"
+        category: "streaming"
+      
+      - id: "tv.zee5/.MainActivity"
+        name: "Zee5"
+        icon: "zee5"
+        category: "streaming"
+      
+      - id: "com.sonyliv/.MainActivity"
+        name: "SonyLIV"
+        icon: "sonyliv"
+        category: "streaming"
+      
+      - id: "com.google.android.youtube.tv/.activity.ShellActivity"
+        name: "YouTube"
+        icon: "youtube"
+        category: "streaming"
+
+# =============================================================================
+# HDMI MATRIX SWITCHER (Optional)
+# =============================================================================
+matrix:
+  id: "matrix-1"
+  type: "monoprice_blackbird"  # or "generic_tcp"
+  name: "4x4 Matrix Switcher"
+  model: "Monoprice Blackbird 4K"
+  
+  control:
+    ip: "192.168.1.100"
+    port: 23
+    timeout: 5
+  
+  num_inputs: 4
+  num_outputs: 4
+  
+  # Map matrix inputs to source devices
+  inputs:
+    1: "stb-airtel"
+    2: "stb-jio"
+    3: "apple-tv"
+    4: "android-stick"
+  
+  # Map matrix outputs to displays
+  outputs:
+    1: "display-1"
+    2: "display-2"
+    3: "display-3"
+    4: null  # Unused
+
+# =============================================================================
+# SOURCE PRESETS
+# Quick-access shortcuts that combine multiple actions
+# =============================================================================
+presets:
+  
+  # --- Streaming Apps ---
+  
+  - name: "Netflix"
+    icon: "netflix"
+    category: "streaming"
+    source_id: "apple-tv"
+    displays: ["display-1"]
+    action:
+      type: "launch_app"
+      app_id: "com.netflix.Netflix"
+    description: "Open Netflix on main display"
+  
+  - name: "Prime Video"
+    icon: "prime"
+    category: "streaming"
+    source_id: "apple-tv"
+    displays: ["display-1"]
+    action:
+      type: "launch_app"
+      app_id: "com.amazon.aiv.AIVApp"
+  
+  - name: "Disney+"
+    icon: "disney"
+    category: "streaming"
+    source_id: "apple-tv"
+    displays: ["display-1"]
+    action:
+      type: "launch_app"
+      app_id: "com.disney.disneyplus"
+  
+  - name: "YouTube"
+    icon: "youtube"
+    category: "streaming"
+    source_id: "apple-tv"
+    displays: ["display-1"]
+    action:
+      type: "launch_app"
+      app_id: "com.google.ios.youtube"
+  
+  - name: "Hotstar"
+    icon: "hotstar"
+    category: "streaming"
+    source_id: "android-stick"
+    displays: ["display-1"]
+    action:
+      type: "launch_app"
+      app_id: "com.hotstar.streaming/.MainActivity"
+  
+  # --- TV Channels ---
+  
+  - name: "Star Plus"
+    icon: "channel"
+    category: "tv"
+    source_id: "stb-airtel"
+    displays: ["display-1"]
+    action:
+      type: "tune_channel"
+      channel: 109
+  
+  - name: "Sony TV"
+    icon: "channel"
+    category: "tv"
+    source_id: "stb-airtel"
+    displays: ["display-1"]
+    action:
+      type: "tune_channel"
+      channel: 110
+  
+  - name: "Star Sports"
+    icon: "channel"
+    category: "sports"
+    source_id: "stb-airtel"
+    displays: ["display-1"]
+    action:
+      type: "tune_channel"
+      channel: 277
+  
+  # --- Multi-Display Scenarios ---
+  
+  - name: "Apple TV on All Displays"
+    icon: "apple"
+    category: "multi"
+    source_id: "apple-tv"
+    displays: ["display-1", "display-2", "display-3"]
+    action:
+      type: "send_command"
+      command: "home"
+    description: "Show Apple TV on all three displays"
+  
+  - name: "Presentation Mode"
+    icon: "presentation"
+    category: "multi"
+    source_id: null
+    displays: ["display-1", "display-2"]
+    action:
+      type: "send_command"
+      command: "set_input"
+      params:
+        input: "displayport"
+    description: "Switch main displays to laptop input"
+
+# =============================================================================
+# LAYOUT CUSTOMIZATION (Remote button layout)
+# =============================================================================
+remote_layout:
+  # Show source grid at top (streaming apps + TV channels)
+  source_grid:
+    enabled: true
+    columns: 4
+    show_icons: true
+    show_labels: true
+    categories:
+      - "streaming"
+      - "tv"
+      - "sports"
+      - "multi"
+  
+  # Navigation controls
+  navigation:
+    enabled: true
+    show_dpad: true
+    show_ok: true
+    show_back: true
+    show_home: true
+    show_menu: true
+    contextual: true  # Routes to active source
+  
+  # Channel controls (for STB)
+  channels:
+    enabled: true
+    show_number_pad: true
+    show_channel_up_down: true
+    show_last_channel: true
+    show_guide: true
+  
+  # Transport controls (play/pause/etc.)
+  transport:
+    enabled: true
+    show_play_pause: true
+    show_stop: true
+    show_rewind_forward: true
+    show_record: false
+  
+  # Volume controls
+  volume:
+    enabled: true
+    show_volume_up_down: true
+    show_mute: true
+    show_presets: true
+
+# =============================================================================
+# DISPLAY SELECTOR (For multi-display rooms)
+# =============================================================================
+display_selector:
+  enabled: true
+  default_display: "display-1"
+  show_in_ui: true
+  quick_switch: true
+
+# =============================================================================
+# AUTOMATION / SCENES (Future enhancement)
+# =============================================================================
+scenes:
+  - name: "Movie Night"
+    actions:
+      - switch_display: "display-1"
+        source: "apple-tv"
+        app: "com.netflix.Netflix"
+      - set_volume: 50
+      - set_lights: "dim"  # Requires smart home integration
+  
+  - name: "Sports Mode"
+    actions:
+      - switch_display: "display-1"
+        source: "stb-airtel"
+        channel: 277  # Star Sports
+      - set_volume: 75
+  
+  - name: "All Off"
+    actions:
+      - power_off_displays: ["display-1", "display-2", "display-3"]
+      - power_off_sources: ["apple-tv", "stb-airtel"]

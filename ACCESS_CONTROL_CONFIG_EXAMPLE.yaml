@@ -1,0 +1,696 @@
+# MediaControl Door Access Control Configuration
+# Complete configuration example for NFC, RFID, face recognition, fingerprint, and PIN pad
+
+# ============================================================
+# GLOBAL ACCESS CONTROL SETTINGS
+# ============================================================
+
+access_control:
+  enabled: true
+  
+  # Logging
+  logging:
+    enabled: true
+    log_photos: true  # Store photos of face recognition attempts
+    log_videos: false  # Store videos (high storage requirement)
+    retention_days: 90  # Keep logs for 90 days
+    
+    # Log storage
+    storage:
+      type: "local"  # or "s3", "azure_blob"
+      path: "/var/log/access-control"
+  
+  # Emergency overrides
+  emergency:
+    lockdown:
+      enabled: true
+      pin: "999999"  # Change this!
+      lock_all_doors: true
+      notify:
+        - "security@company.com"
+        - "+1-555-911-1234"
+    
+    evacuation:
+      enabled: true
+      pin: "000000"  # Change this!
+      unlock_all_doors: true
+      notify:
+        - "security@company.com"
+
+
+# ============================================================
+# DOORS CONFIGURATION
+# ============================================================
+
+  doors:
+    # ========================================================
+    # Executive Office - MFA (Face + Fingerprint)
+    # ========================================================
+    - id: "door_executive"
+      name: "Executive Office"
+      location: "Floor 10, East Wing"
+      description: "CEO/Executive suite - highest security"
+      
+      # Lock hardware
+      lock:
+        type: "electric_strike"  # or "magnetic_lock", "motorized_lock"
+        relay_pin: 23  # GPIO pin number
+        unlock_duration: 5  # seconds
+        fail_secure: true  # Lock when power off (false = fail-safe)
+        
+        # For networked locks (Salto, ASSA ABLOY, etc.)
+        network:
+          enabled: false
+          api_url: "https://api.saltospace.com"
+          api_key: "your_salto_api_key"
+          lock_id: "lock_abc123"
+      
+      # Door sensor (detect if door is open/closed)
+      sensor:
+        enabled: true
+        gpio_pin: 24
+        normally_closed: true  # NC (default) or NO
+        alert_if_held_open: 30  # seconds
+        alert_if_forced_open: true  # Door opened without authorization
+      
+      # Request to Exit (REX) button
+      rex_button:
+        enabled: true
+        gpio_pin: 25
+        unlock_duration: 5  # seconds
+      
+      # Authentication methods
+      authentication:
+        # Multi-Factor Authentication (MFA)
+        mfa:
+          enabled: true
+          required_methods: 2  # Require 2 methods
+          timeout: 30  # Complete all methods within 30 seconds
+          order: "any"  # or "sequential" (must be in specific order)
+          allow_backup: true  # Allow PIN if biometric fails
+        
+        # Method 1: Face Recognition
+        face_recognition:
+          enabled: true
+          weight: 1  # Each method counts as 1 toward required_methods
+          
+          camera:
+            type: "hikvision_face"  # or "dahua_face", "zkteco", "custom"
+            ip: "192.168.1.150"
+            port: 80
+            username: "admin"
+            password: "password123"
+            
+            # For custom camera (e.g., USB webcam)
+            # device: "/dev/video0"
+            # resolution: "1920x1080"
+            # fps: 30
+          
+          # AI model
+          model:
+            algorithm: "arcface"  # or "facenet", "deepface"
+            accuracy_threshold: 0.95  # 95% confidence required
+            
+            # GPU acceleration (optional)
+            use_gpu: true
+            gpu_device: 0  # CUDA device ID
+            
+            # Model files
+            model_path: "/models/arcface_resnet100.onnx"
+          
+          # Liveness detection (anti-spoofing)
+          liveness:
+            enabled: true
+            methods:
+              - "ir_camera"  # Infrared camera
+              - "eye_blink"  # Blink detection
+              - "face_movement"  # Slight head turn
+              # - "3d_depth"  # Requires depth camera (Intel RealSense, Azure Kinect)
+            
+            reject_photos: true  # Reject printed photos
+            reject_videos: true  # Reject video replays
+            reject_masks: false  # Allow face masks (COVID-19)
+          
+          # Performance
+          max_faces_per_frame: 5
+          recognition_speed: "fast"  # or "balanced", "accurate"
+          max_recognition_time: 2  # seconds
+          
+          # Privacy
+          store_photos: false  # Only store face templates
+          encrypt_templates: true
+          encryption_key: "your_aes256_encryption_key"  # 32 bytes
+        
+        # Method 2: Fingerprint
+        fingerprint:
+          enabled: true
+          weight: 1
+          
+          scanner:
+            type: "zkteco_slk20r"  # or "suprema", "hid_dp", "custom"
+            interface: "ethernet"  # or "usb", "rs485"
+            ip: "192.168.1.160"
+            port: 4370
+            
+            # For USB scanners
+            # device: "/dev/usb/fingerprint0"
+          
+          # Sensor type
+          sensor:
+            type: "capacitive"  # or "optical", "ultrasonic"
+            resolution: 500  # DPI (500 recommended)
+          
+          # Matching algorithm
+          matching:
+            algorithm: "minutiae"  # or "pattern", "ridge"
+            threshold: 40  # Lower = stricter (0-100)
+            
+            # False Acceptance Rate (FAR)
+            far: "0.001%"  # 1 in 100,000
+            
+            # False Rejection Rate (FRR)
+            frr: "1%"  # 1 in 100
+          
+          # Security
+          liveness_detection: true  # Detect fake fingers
+          encryption: "aes256"
+          
+          # Enrollment
+          fingerprints_per_user: 2  # Left + right index finger
+          
+          # Performance
+          identification_speed: 1  # seconds
+          max_users: 10000
+        
+        # Backup: PIN pad
+        pin_pad:
+          enabled: true
+          backup_only: true  # Only if biometric fails
+          
+          keypad:
+            type: "integrated"  # Use built-in keypad on face/fingerprint terminal
+            # type: "hid_pivclass"  # External keypad
+            # interface: "wiegand"
+          
+          pin:
+            min_length: 6
+            max_length: 8
+            require_complex: true  # No repeated digits (1111, 1234)
+          
+          anti_brute_force:
+            enabled: true
+            max_attempts: 3
+            lockout_duration: 300  # 5 minutes
+      
+      # Access rules
+      access_rules:
+        # Time-based access
+        time_zones:
+          - name: "Business Hours"
+            days: ["MON", "TUE", "WED", "THU", "FRI"]
+            start_time: "08:00"
+            end_time: "18:00"
+            allow: true
+          
+          - name: "After Hours"
+            days: ["MON", "TUE", "WED", "THU", "FRI"]
+            start_time: "18:00"
+            end_time: "08:00"
+            allow: false
+            exceptions:
+              - user_role: "executive"
+                allow: true
+              - user_role: "security"
+                allow: true
+          
+          - name: "Weekends"
+            days: ["SAT", "SUN"]
+            allow: false
+            exceptions:
+              - user_role: "executive"
+                allow: true
+        
+        # Anti-passback (prevent tailgating)
+        anti_passback:
+          enabled: true
+          require_exit_scan: true
+          forgiveness_time: 300  # 5 minutes
+          soft_anti_passback: false  # Warn but allow (true) or deny (false)
+        
+        # Occupancy limits
+        occupancy:
+          enabled: false
+          max_occupancy: 10
+          alert_threshold: 8
+    
+    # ========================================================
+    # Main Entrance - NFC/RFID + Optional PIN
+    # ========================================================
+    - id: "door_main"
+      name: "Main Entrance"
+      location: "Ground Floor"
+      description: "Primary building entrance for employees"
+      
+      lock:
+        type: "magnetic_lock"
+        relay_pin: 26
+        unlock_duration: 3
+        fail_secure: false  # Fail-safe (unlock on power loss)
+      
+      sensor:
+        enabled: true
+        gpio_pin: 27
+        alert_if_held_open: 60  # 1 minute
+      
+      rex_button:
+        enabled: true
+        gpio_pin: 28
+      
+      authentication:
+        # NFC (smartphones, modern cards)
+        nfc:
+          enabled: true
+          
+          reader:
+            type: "acr122u"  # or "omnikey_5427", "twn4"
+            interface: "usb"  # or "ethernet"
+            device: "/dev/ttyUSB0"
+            
+            # For networked readers
+            # ip: "192.168.1.170"
+            # port: 8080
+          
+          # Supported card types
+          card_types:
+            - "mifare_desfire"  # Highest security
+            - "mifare_plus"
+            - "mifare_classic"
+            - "ntag"  # Low-cost tags
+          
+          # Security settings
+          encryption: "aes128"
+          mutual_authentication: true
+          
+          # Access rules
+          rules:
+            require_registered_card: true
+            max_attempts: 3
+            lockout_duration: 300  # 5 minutes
+        
+        # RFID (legacy cards)
+        rfid:
+          enabled: true
+          
+          reader:
+            type: "hid_proxpoint"  # or "hid_iclass"
+            frequency: "125khz"  # or "13.56mhz"
+            interface: "wiegand"  # or "rs485", "ethernet"
+            
+            # Wiegand configuration
+            wiegand:
+              data0_pin: 17  # GPIO pin for D0
+              data1_pin: 18  # GPIO pin for D1
+              format: "26bit"  # Standard Wiegand 26-bit
+              # format: "37bit"  # HID Corporate 1000
+          
+          # Supported card types
+          card_types:
+            - "hid_prox"
+            - "em4100"
+        
+        # PIN pad (optional, for backup + temporary access)
+        pin_pad:
+          enabled: true
+          backup_only: false  # Can be used as primary method
+          
+          keypad:
+            type: "hid_pivclass"
+            interface: "wiegand"
+            backlit: true
+            weatherproof: true  # IP67 rated
+          
+          pin:
+            min_length: 4
+            max_length: 8
+            
+            # Personal PINs
+            personal_pins:
+              enabled: true
+              expiry: null  # Never expire
+            
+            # Temporary PINs (for visitors, contractors)
+            temporary_pins:
+              enabled: true
+              max_uses: 1  # One-time use
+              max_duration: 86400  # 24 hours
+            
+            # Master PIN (admin override)
+            master_pin:
+              enabled: true
+              code: "123456789"  # Change this!
+              log_uses: true
+              alert_on_use: true
+          
+          # Security
+          anti_brute_force:
+            enabled: true
+            max_attempts: 3
+            lockout_duration: 300  # 5 minutes
+          
+          scrambled_keypad:
+            enabled: false  # Randomize key positions (security vs UX)
+          
+          # Duress code (silent alarm)
+          duress:
+            enabled: true
+            code: "999999"  # Change this!
+            silent_alarm: true  # Don't alert user
+            alert_security: true
+            grant_access: true  # Still unlock door
+      
+      # Visitor management
+      visitor_access:
+        enabled: true
+        qr_code_access: true  # Visitors can use QR codes
+        temporary_card_access: true  # Issue temporary NFC cards
+        escort_required: false
+        notify_host_on_arrival: true
+      
+      access_rules:
+        time_zones:
+          - name: "Business Hours"
+            days: ["MON", "TUE", "WED", "THU", "FRI"]
+            start_time: "07:00"
+            end_time: "19:00"
+            allow: true
+          
+          - name: "After Hours"
+            allow: false
+            exceptions:
+              - user_role: "employee"
+                allow: true
+              - user_role: "security"
+                allow: true
+        
+        anti_passback:
+          enabled: false  # Too busy for main entrance
+    
+    # ========================================================
+    # Server Room - 3FA (Card + Fingerprint + PIN)
+    # ========================================================
+    - id: "door_server_room"
+      name: "Server Room"
+      location: "Basement"
+      description: "Critical infrastructure - highest security"
+      
+      lock:
+        type: "electric_strike"
+        relay_pin: 29
+        unlock_duration: 3
+        fail_secure: true
+      
+      sensor:
+        enabled: true
+        gpio_pin: 30
+        alert_if_held_open: 15  # 15 seconds
+        alert_if_forced_open: true
+      
+      authentication:
+        mfa:
+          enabled: true
+          required_methods: 3  # Highest security
+          timeout: 60  # 1 minute
+          order: "sequential"  # Must be in order
+        
+        # Step 1: NFC card
+        nfc:
+          enabled: true
+          weight: 1
+          reader:
+            type: "acr122u"
+            device: "/dev/ttyUSB1"
+        
+        # Step 2: Fingerprint
+        fingerprint:
+          enabled: true
+          weight: 1
+          scanner:
+            type: "suprema"
+            ip: "192.168.1.165"
+        
+        # Step 3: PIN
+        pin_pad:
+          enabled: true
+          weight: 1
+          pin:
+            min_length: 6
+            max_length: 8
+      
+      # Mantrap / Airlock
+      mantrap:
+        enabled: true
+        exit_door: "door_server_room_exit"
+        max_occupancy: 1  # Only 1 person in airlock at a time
+        require_exit_before_entry: true
+        interlock_delay: 5  # seconds
+      
+      access_rules:
+        time_zones:
+          - name: "24/7"
+            allow: true
+            exceptions: []
+
+
+# ============================================================
+# USERS
+# ============================================================
+
+users:
+  # ========================================================
+  # Executive User (CEO)
+  # ========================================================
+  - id: "user_john_ceo"
+    name: "John Smith"
+    email: "john@company.com"
+    phone: "+1-555-123-4567"
+    role: "executive"
+    department: "Executive"
+    
+    # Photo (for face recognition)
+    photo: "/users/photos/john_smith.jpg"
+    
+    # Credentials
+    credentials:
+      # NFC cards
+      nfc_cards:
+        - card_id: "04:A1:B2:C3:D4:E5:F6"
+          card_type: "mifare_desfire"
+          card_number: "1234"
+          issued_date: "2026-01-15"
+          expiry_date: null  # Never expires
+      
+      # RFID cards (legacy)
+      rfid_cards:
+        - card_id: "0012345678"
+          card_type: "hid_prox"
+          card_number: "5678"
+      
+      # Face template (encrypted, base64)
+      face_template: "encrypted_base64_face_template_here"
+      face_enrolled_date: "2026-01-15"
+      
+      # Fingerprints
+      fingerprints:
+        - finger: "left_index"
+          template: "encrypted_base64_fingerprint_template_here"
+          enrolled_date: "2026-01-15"
+        - finger: "right_index"
+          template: "encrypted_base64_fingerprint_template_here"
+          enrolled_date: "2026-01-15"
+      
+      # PIN codes
+      personal_pin: "847392"
+    
+    # Access permissions
+    access:
+      doors:
+        - "door_executive"
+        - "door_main"
+        - "door_server_room"
+      
+      time_zones:
+        - "24/7"  # CEO has 24/7 access
+    
+    # Status
+    active: true
+    start_date: "2026-01-01"
+  
+  # ========================================================
+  # IT Administrator
+  # ========================================================
+  - id: "user_jane_it"
+    name: "Jane Doe"
+    email: "jane@company.com"
+    phone: "+1-555-234-5678"
+    role: "it_admin"
+    department: "IT"
+    
+    credentials:
+      nfc_cards:
+        - card_id: "04:B1:C2:D3:E4:F5:A6"
+          card_type: "mifare_desfire"
+      
+      fingerprints:
+        - finger: "right_index"
+          template: "encrypted_base64_fingerprint_template_here"
+      
+      personal_pin: "652841"
+    
+    access:
+      doors:
+        - "door_main"
+        - "door_server_room"
+      
+      time_zones:
+        - "Business Hours"
+    
+    active: true
+
+
+# ============================================================
+# VISITORS
+# ============================================================
+
+visitors:
+  - id: "visitor_123"
+    name: "Bob Johnson"
+    email: "bob@visitor.com"
+    phone: "+1-555-345-6789"
+    company: "Acme Corp"
+    purpose: "Business meeting"
+    
+    # Host (employee)
+    host_user_id: "user_jane_it"
+    host_name: "Jane Doe"
+    
+    # Temporary credentials
+    credentials:
+      temporary_pin: "394857"
+      qr_code: "https://access.company.com/v/394857"
+      
+      # Or temporary NFC card
+      # temporary_card_id: "04:C1:D2:E3:F4:A5:B6"
+    
+    # Access
+    access:
+      doors:
+        - "door_main"
+      
+      valid_from: "2026-07-31T09:00:00Z"
+      valid_until: "2026-07-31T17:00:00Z"
+      max_uses: 2  # Entry + exit
+      remaining_uses: 2
+    
+    # Status
+    active: true
+    checked_in: false
+    checked_in_at: null
+    checked_out_at: null
+
+
+# ============================================================
+# INTEGRATION WITH EXISTING SYSTEMS
+# ============================================================
+
+# Ubiquiti Access integration
+ubiquiti_access:
+  enabled: false
+  host: "192.168.1.100"
+  token: "your_unifi_access_token"
+  
+  # Map Ubiquiti doors to MediaControl doors
+  door_mapping:
+    "unifi_door_abc123": "door_main"
+
+# Salto Space integration
+salto:
+  enabled: false
+  api_url: "https://api.saltospace.com"
+  api_key: "your_salto_api_key"
+  
+  door_mapping:
+    "salto_lock_def456": "door_executive"
+
+# Active Directory / LDAP integration
+active_directory:
+  enabled: false
+  server: "ldap://ad.company.com:389"
+  base_dn: "DC=company,DC=com"
+  bind_dn: "CN=access-control,CN=Users,DC=company,DC=com"
+  bind_password: "your_password"
+  
+  # Sync users from AD
+  user_sync:
+    enabled: true
+    sync_interval: 3600  # 1 hour
+    attribute_mapping:
+      username: "sAMAccountName"
+      name: "displayName"
+      email: "mail"
+      department: "department"
+      role: "title"
+
+
+# ============================================================
+# NOTIFICATIONS
+# ============================================================
+
+notifications:
+  # Email
+  email:
+    enabled: true
+    smtp:
+      host: "smtp.gmail.com"
+      port: 587
+      username: "alerts@company.com"
+      password: "your_email_password"
+      from: "Access Control <alerts@company.com>"
+  
+  # SMS
+  sms:
+    enabled: true
+    provider: "twilio"
+    api_key: "your_twilio_api_key"
+    from_number: "+1-555-911-1234"
+  
+  # Push notifications
+  push:
+    enabled: false
+    firebase_api_key: "your_firebase_api_key"
+  
+  # Webhook
+  webhook:
+    enabled: false
+    url: "https://your-server.com/webhook/access-control"
+    secret: "your_webhook_secret"
+  
+  # Alert rules
+  alert_rules:
+    - event: "access_denied"
+      notify: ["security@company.com"]
+      threshold: 3  # Alert after 3 failed attempts
+    
+    - event: "door_held_open"
+      notify: ["security@company.com", "+1-555-911-1234"]
+    
+    - event: "door_forced_open"
+      notify: ["security@company.com", "+1-555-911-1234"]
+      priority: "high"
+    
+    - event: "duress_code_used"
+      notify: ["security@company.com", "+1-555-911-1234"]
+      priority: "critical"
+    
+    - event: "emergency_lockdown"
+      notify: ["security@company.com", "management@company.com"]
+      priority: "critical"

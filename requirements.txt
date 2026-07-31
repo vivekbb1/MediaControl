@@ -367,6 +367,36 @@ stripe>=7.0.0  # Stripe payment processing for credit card payments
 # square>=29.0.0  # Alternative: Square payment processing
 # adyen>=9.0.0  # Alternative: Adyen payment processing
 
+# === Door Access Control (Multi-Factor Authentication) ===
+
+# NFC/RFID Readers
+nfcpy>=1.0.4  # NFC library for ACR122U and similar readers
+# pyscard>=2.0.0  # Smart card library (alternative for NFC/RFID)
+
+# Face Recognition
+# opencv-python>=4.8.0  # Already included above (for camera access)
+# numpy>=1.24.0  # Already included above
+face-recognition>=1.3.0  # Face recognition library (based on dlib)
+# deepface>=0.0.79  # Alternative: DeepFace library (supports multiple models)
+# facenet-pytorch>=2.5.3  # Alternative: PyTorch implementation of FaceNet
+
+# Liveness Detection
+# opencv-contrib-python>=4.8.0  # OpenCV with contrib modules (for liveness detection)
+
+# Fingerprint Recognition
+# pyfingerprint>=2.0.0  # Fingerprint scanner library (ZKTeco, etc.)
+
+# Pin Pad / Keypad
+# RPi.GPIO>=0.7.1  # Raspberry Pi GPIO (for physical keypads)
+# adafruit-circuitpython-matrixkeypad>=1.2.0  # Matrix keypad library
+
+# Access Control Protocols
+# wiegand>=0.1.0  # Wiegand protocol for card readers
+# osdp>=2.3.0  # OSDP (Open Supervised Device Protocol)
+
+# Cryptography (for credential encryption)
+# cryptography>=41.0.0  # Already included above
+
 # === Development & Testing ===
 # pytest>=7.4.0
 # pytest-asyncio>=0.21.0

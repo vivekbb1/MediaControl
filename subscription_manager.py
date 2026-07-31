@@ -328,17 +328,78 @@ class SubscriptionManager:
         """Register a location to organization's subscription"""
         subscription = self.get_subscription(organization_id)
         if not subscription:
+            logger.error(f"No subscription found for organization {organization_id}")
             return False
         
         if not self.check_location_limit(organization_id):
+            limits = subscription.get_limits()
             logger.error(
                 f"Location limit reached for organization {organization_id} "
-                f"({subscription.location_count}/{subscription.get_limits().max_locations})"
+                f"({subscription.location_count}/{limits.max_locations}). "
+                f"Upgrade to a higher tier to add more locations."
             )
             return False
         
         subscription.location_count += 1
-        logger.info(f"Registered location for organization {organization_id}")
+        logger.info(
+            f"Registered location for organization {organization_id} "
+            f"({subscription.location_count}/{limits.max_locations})"
+        )
+        return True
+    
+    def unregister_location(self, organization_id: str) -> bool:
+        """Unregister a location from organization's subscription"""
+        subscription = self.get_subscription(organization_id)
+        if not subscription or subscription.location_count == 0:
+            return False
+        
+        subscription.location_count -= 1
+        logger.info(f"Unregistered location for organization {organization_id}")
+        return True
+    
+    def check_room_limit(self, organization_id: str) -> bool:
+        """Check if organization can add more rooms"""
+        subscription = self.get_subscription(organization_id)
+        if not subscription:
+            return False
+        
+        if not (subscription.is_active() or subscription.is_trial()):
+            return False
+        
+        limits = subscription.get_limits()
+        return subscription.room_count < limits.max_rooms
+    
+    def register_room(self, organization_id: str) -> bool:
+        """Register a room to organization's subscription"""
+        subscription = self.get_subscription(organization_id)
+        if not subscription:
+            logger.error(f"No subscription found for organization {organization_id}")
+            return False
+        
+        if not self.check_room_limit(organization_id):
+            limits = subscription.get_limits()
+            logger.error(
+                f"Room limit reached for organization {organization_id} "
+                f"({subscription.room_count}/{limits.max_rooms}). "
+                f"Upgrade to a higher tier to add more rooms."
+            )
+            return False
+        
+        subscription.room_count += 1
+        logger.info(
+            f"Registered room for organization {organization_id} "
+            f"({subscription.room_count}/{limits.max_rooms})"
+        )
+        return True
+    
+    def unregister_room(self, organization_id: str) -> bool:
+        """Unregister a room from organization's subscription"""
+        subscription = self.get_subscription(organization_id)
+        if not subscription or subscription.room_count == 0:
+            return False
+        
+        subscription.room_count -= 1
+        logger.info(f"Unregistered room for organization {organization_id}")
         return True
     
     def check_feature_access(self, organization_id: str, feature: str) -> bool:

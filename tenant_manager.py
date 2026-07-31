@@ -227,12 +227,13 @@ class OrganizationManager:
     - John Smith (residential) → Home → Living Room → TV, Apple TV
     """
     
-    def __init__(self):
+    def __init__(self, subscription_manager=None):
         self.organizations: Dict[str, Organization] = {}
         self.locations: Dict[str, Location] = {}
         self.rooms: Dict[str, Room] = {}
         self.devices: Dict[str, Device] = {}
         self.users: Dict[str, User] = {}
+        self.subscription_manager = subscription_manager  # Inject subscription manager
         logger.info("OrganizationManager initialized")
     
     def create_organization(
@@ -280,10 +281,27 @@ class OrganizationManager:
     ) -> Optional[Location]:
         """
         Create a new location (physical site) within an organization
+        Enforces subscription location limits
         """
         if organization_id not in self.organizations:
             logger.error(f"Organization not found: {organization_id}")
             return None
+        
+        # Check subscription limits
+        if self.subscription_manager:
+            if not self.subscription_manager.check_location_limit(organization_id):
+                subscription = self.subscription_manager.get_subscription(organization_id)
+                if subscription:
+                    limits = subscription.get_limits()
+                    logger.error(
+                        f"Cannot create location: limit reached "
+                        f"({subscription.location_count}/{limits.max_locations}). "
+                        f"Current tier: {subscription.tier.value}. "
+                        f"Please upgrade subscription to add more locations."
+                    )
+                else:
+                    logger.error(f"No active subscription found for organization {organization_id}")
+                return None
         
         location_id = self._generate_id("loc")
         
@@ -308,6 +326,11 @@ class OrganizationManager:
             url_slug=url_slug,
         )
         self.locations[location_id] = location
+        
+        # Register with subscription
+        if self.subscription_manager:
+            self.subscription_manager.register_location(organization_id)
+        
         logger.info(f"Created location: {name} ({location_id}) in organization {organization_id}")
         return location
     
@@ -321,10 +344,30 @@ class OrganizationManager:
     ) -> Optional[Room]:
         """
         Create a new room (zone) within a location
+        Enforces subscription room limits
         """
         if location_id not in self.locations:
             logger.error(f"Location not found: {location_id}")
             return None
+        
+        location = self.locations[location_id]
+        organization_id = location.organization_id
+        
+        # Check subscription limits
+        if self.subscription_manager:
+            if not self.subscription_manager.check_room_limit(organization_id):
+                subscription = self.subscription_manager.get_subscription(organization_id)
+                if subscription:
+                    limits = subscription.get_limits()
+                    logger.error(
+                        f"Cannot create room: limit reached "
+                        f"({subscription.room_count}/{limits.max_rooms}). "
+                        f"Current tier: {subscription.tier.value}. "
+                        f"Please upgrade subscription to add more rooms."
+                    )
+                else:
+                    logger.error(f"No active subscription found for organization {organization_id}")
+                return None
         
         room_id = self._generate_id("room")
         
@@ -348,6 +391,11 @@ class OrganizationManager:
             url_slug=url_slug,
         )
         self.rooms[room_id] = room
+        
+        # Register with subscription
+        if self.subscription_manager:
+            self.subscription_manager.register_room(organization_id)
+        
         logger.info(f"Created room: {name} ({room_id}) in location {location_id}")
         return room
     
@@ -359,11 +407,37 @@ class OrganizationManager:
         model: Optional[str] = None,
         connection_details: Optional[Dict] = None,
     ) -> Optional[Device]:
-        """Create a new device within a room"""
+        """
+        Create a new device within a room
+        Enforces subscription device limits
+        """
         room = self.rooms.get(room_id)
         if not room:
             logger.error(f"Room not found: {room_id}")
             return None
+        
+        location = self.locations.get(room.location_id)
+        if not location:
+            logger.error(f"Location not found: {room.location_id}")
+            return None
+        
+        organization_id = location.organization_id
+        
+        # Check subscription limits
+        if self.subscription_manager:
+            if not self.subscription_manager.check_device_limit(organization_id):
+                subscription = self.subscription_manager.get_subscription(organization_id)
+                if subscription:
+                    limits = subscription.get_limits()
+                    logger.error(
+                        f"Cannot create device: limit reached "
+                        f"({subscription.device_count}/{limits.max_devices}). "
+                        f"Current tier: {subscription.tier.value}. "
+                        f"Please upgrade subscription to add more devices."
+                    )
+                else:
+                    logger.error(f"No active subscription found for organization {organization_id}")
+                return None
         
         device_id = self._generate_id("dev")
         device = Device(
@@ -376,6 +450,11 @@ class OrganizationManager:
             connection_details=connection_details or {},
         )
         self.devices[device_id] = device
+        
+        # Register with subscription
+        if self.subscription_manager:
+            self.subscription_manager.register_device(organization_id)
+        
         logger.info(f"Created device: {name} ({device_id}) in room {room_id}")
         return device
     
@@ -477,7 +556,130 @@ class OrganizationManager:
         location_ids = [l.id for l in self.get_organization_locations(organization_id)]
         return [d for d in self.devices.values() if d.location_id in location_ids]
     
-    def restrict_user_to_locations(self, user_id: str, location_ids: List[str]):
+    def get_user_alarms(self, user_id: str) -> List[User]:
+        """Get all users for an organization (keeping method for compatibility)"""
+        # This method name seems wrong but keeping for backwards compatibility
+        return []
+    
+    def delete_location(self, location_id: str) -> bool:
+        """Delete a location and unregister from subscription"""
+        location = self.locations.get(location_id)
+        if not location:
+            logger.error(f"Location not found: {location_id}")
+            return False
+        
+        organization_id = location.organization_id
+        
+        # Delete all rooms in this location first
+        location_rooms = [r for r in self.rooms.values() if r.location_id == location_id]
+        for room in location_rooms:
+            self.delete_room(room.id)
+        
+        # Delete the location
+        del self.locations[location_id]
+        
+        # Unregister from subscription
+        if self.subscription_manager:
+            self.subscription_manager.unregister_location(organization_id)
+        
+        logger.info(f"Deleted location: {location_id}")
+        return True
+    
+    def delete_room(self, room_id: str) -> bool:
+        """Delete a room and unregister from subscription"""
+        room = self.rooms.get(room_id)
+        if not room:
+            logger.error(f"Room not found: {room_id}")
+            return False
+        
+        location = self.locations.get(room.location_id)
+        if not location:
+            logger.error(f"Location not found for room: {room_id}")
+            return False
+        
+        organization_id = location.organization_id
+        
+        # Delete all devices in this room first
+        room_devices = [d for d in self.devices.values() if d.room_id == room_id]
+        for device in room_devices:
+            self.delete_device(device.id)
+        
+        # Delete the room
+        del self.rooms[room_id]
+        
+        # Unregister from subscription
+        if self.subscription_manager:
+            self.subscription_manager.unregister_room(organization_id)
+        
+        logger.info(f"Deleted room: {room_id}")
+        return True
+    
+    def delete_device(self, device_id: str) -> bool:
+        """Delete a device and unregister from subscription"""
+        device = self.devices.get(device_id)
+        if not device:
+            logger.error(f"Device not found: {device_id}")
+            return False
+        
+        location = self.locations.get(device.location_id)
+        if not location:
+            logger.error(f"Location not found for device: {device_id}")
+            return False
+        
+        organization_id = location.organization_id
+        
+        # Delete the device
+        del self.devices[device_id]
+        
+        # Unregister from subscription
+        if self.subscription_manager:
+            self.subscription_manager.unregister_device(organization_id)
+        
+        logger.info(f"Deleted device: {device_id}")
+        return True
+    
+    def get_organization_usage(self, organization_id: str) -> Dict:
+        """Get current usage vs limits for an organization"""
+        if not self.subscription_manager:
+            return {"error": "Subscription manager not configured"}
+        
+        subscription = self.subscription_manager.get_subscription(organization_id)
+        if not subscription:
+            return {"error": "No subscription found"}
+        
+        limits = subscription.get_limits()
+        
+        return {
+            "organization_id": organization_id,
+            "tier": subscription.tier.value,
+            "status": subscription.status.value,
+            "locations": {
+                "current": subscription.location_count,
+                "limit": limits.max_locations,
+                "remaining": limits.max_locations - subscription.location_count,
+                "percentage": round((subscription.location_count / limits.max_locations) * 100, 1) if limits.max_locations > 0 else 0
+            },
+            "rooms": {
+                "current": subscription.room_count,
+                "limit": limits.max_rooms,
+                "remaining": limits.max_rooms - subscription.room_count,
+                "percentage": round((subscription.room_count / limits.max_rooms) * 100, 1) if limits.max_rooms > 0 else 0
+            },
+            "devices": {
+                "current": subscription.device_count,
+                "limit": limits.max_devices,
+                "remaining": limits.max_devices - subscription.device_count,
+                "percentage": round((subscription.device_count / limits.max_devices) * 100, 1) if limits.max_devices > 0 else 0
+            },
+            "can_add_location": subscription.location_count < limits.max_locations,
+            "can_add_room": subscription.room_count < limits.max_rooms,
+            "can_add_device": subscription.device_count < limits.max_devices,
+            "upgrade_recommended": (
+                subscription.location_count >= limits.max_locations * 0.8 or
+                subscription.room_count >= limits.max_rooms * 0.8 or
+                subscription.device_count >= limits.max_devices * 0.8
+            )
+        }
         """Restrict user to specific locations"""
         user = self.users.get(user_id)
         if user:

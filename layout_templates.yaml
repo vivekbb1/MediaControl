@@ -11,7 +11,9 @@ templates:
       - sources
       - wireless
       - volume
+      - channels
       - navigation
+      - transport
       - picture
       - status
       - builtin
@@ -37,6 +39,20 @@ templates:
         - vol_50
         - vol_75
         - vol_100
+        channels:
+        - num_1
+        - num_2
+        - num_3
+        - num_4
+        - num_5
+        - num_6
+        - num_7
+        - num_8
+        - num_9
+        - last
+        - num_0
+        - ch_up
+        - ch_down
         navigation:
         - up
         - left
@@ -48,6 +64,14 @@ templates:
         - exit
         - menu
         - info
+        - guide
+        transport:
+        - play
+        - pause
+        - stop
+        - rewind
+        - forward
+        - record
         picture:
         - screen_fit
         - aspect_16_9
@@ -89,6 +113,26 @@ templates:
         back: Back
         exit: Exit
         info: Info
+        guide: Guide
+        num_0: '0'
+        num_1: '1'
+        num_2: '2'
+        num_3: '3'
+        num_4: '4'
+        num_5: '5'
+        num_6: '6'
+        num_7: '7'
+        num_8: '8'
+        num_9: '9'
+        ch_up: CH+
+        ch_down: CH-
+        last: Last
+        play: Play
+        pause: Pause
+        stop: Stop
+        record: Record
+        rewind: Rewind
+        forward: Forward
         screen_fit: Screen Fit
         aspect_16_9: '16:9'
         aspect_4_3: '4:3'
@@ -130,6 +174,12 @@ templates:
         other:
           cols: 2
           rows: 0
+        channels:
+          cols: 3
+          rows: 0
+        transport:
+          cols: 6
+          rows: 0
         navigation:
           cols: 2
           rows: 0
@@ -141,7 +191,9 @@ templates:
         sources: icon
         wireless: icon
         volume: text
+        channels: both
         navigation: icon
+        transport: icon
         picture: icon
         status: icon
       button_icons:
@@ -157,6 +209,33 @@ templates:
         menu: settings
         home: home
         back: back
+        up: arrow_up
+        down: arrow_down
+        left: arrow_left
+        right: arrow_right
+        ok: enter
+        info: info
+        exit: exit
+        guide: guide
+        num_0: num_0
+        num_1: num_1
+        num_2: num_2
+        num_3: num_3
+        num_4: num_4
+        num_5: num_5
+        num_6: num_6
+        num_7: num_7
+        num_8: num_8
+        num_9: num_9
+        ch_up: ch_up
+        ch_down: ch_down
+        last: last
+        play: play
+        pause: pause
+        stop: stop
+        record: record
+        rewind: rewind
+        forward: forward
         screen_fit: screen_fit
         aspect_16_9: aspect_16_9
         aspect_4_3: aspect_4_3

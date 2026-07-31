@@ -10,6 +10,7 @@ from typing import Any
 
 import yaml
 
+from broadlink_client import BroadlinkClient, BroadlinkConfig, BROADLINK_AVAILABLE, load_ir_codes
 from button_icons import (
     DEFAULT_ICONS_BY_ID,
     MUTE_TOGGLE_BUTTON,
@@ -1046,6 +1047,65 @@ def mdc_config(display: dict[str, Any]) -> MdcConfig:
     )
 
 
+def broadlink_config(display: dict[str, Any]) -> BroadlinkConfig | None:
+    """Create Broadlink config from display if it has broadlink settings."""
+    broadlink_cfg = display.get("broadlink")
+    if not broadlink_cfg or not isinstance(broadlink_cfg, dict):
+        return None
+    
+    host = broadlink_cfg.get("host") or broadlink_cfg.get("ip")
+    if not host:
+        return None
+    
+    return BroadlinkConfig(
+        host=str(host),
+        port=int(broadlink_cfg.get("port", 80)),
+        mac=str(broadlink_cfg.get("mac", "")),
+        device_type=int(str(broadlink_cfg.get("device_type", "0x61A2")), 16) 
+            if isinstance(broadlink_cfg.get("device_type"), str) 
+            else int(broadlink_cfg.get("device_type", 0x61A2)),
+        name=display.get("title", "Broadlink Device"),
+    )
+
+
+def has_broadlink(display: dict[str, Any]) -> bool:
+    """Check if display has Broadlink IR/RF configuration."""
+    return broadlink_config(display) is not None
+
+
+def _send_broadlink_command(
+    display_id: str, cmd: str, bl_cfg: BroadlinkConfig, display: dict[str, Any]
+) -> dict[str, Any]:
+    """Send IR/RF command via Broadlink device."""
+    # Load IR codes from display config or external file
+    ir_codes = display.get("ir_codes", {})
+    
+    # Also try loading from external file if specified
+    ir_codes_file = display.get("ir_codes_file")
+    if ir_codes_file:
+        external_codes = load_ir_codes(ROOT / ir_codes_file)
+        ir_codes = {**external_codes, **ir_codes}  # Display config takes precedence
+    
+    if cmd not in ir_codes:
+        known = ", ".join(sorted(ir_codes.keys()))
+        raise KeyError(f"Unknown IR command {cmd!r}. Available: {known}")
+    
+    # Send the IR code
+    client = BroadlinkClient(bl_cfg)
+    ir_code = ir_codes[cmd]
+    send_result = client.send_code(ir_code)
+    
+    return {
+        "ok": send_result.get("ok", False),
+        "display_id": display_id,
+        "command": cmd,
+        "method": "broadlink_ir",
+        "device": bl_cfg.host,
+        "error": send_result.get("error"),
+        "message": send_result.get("message"),
+    }
+
+
 def parse_code(value: str | int) -> int:
     if isinstance(value, int):
         return value
@@ -1473,7 +1533,7 @@ def upsert_layout_template(template_id: str, body: dict[str, Any]) -> dict[str, 
 
 
 def send_room_command(display_id: str, cmd: str) -> dict[str, Any]:
-    """Send a named MDC command to a room (used by CLI / Home Assistant)."""
+    """Send a named command to a room (MDC for displays, or IR/RF via Broadlink for STBs)."""
     import time
 
     from discover import parse_response
@@ -1481,6 +1541,13 @@ def send_room_command(display_id: str, cmd: str) -> dict[str, Any]:
     display = get_display(display_id)
     if not display:
         raise KeyError(f"Unknown display: {display_id}")
+    
+    # Check if this display uses Broadlink for IR/RF control
+    bl_cfg = broadlink_config(display)
+    if bl_cfg and BROADLINK_AVAILABLE:
+        return _send_broadlink_command(display_id, cmd, bl_cfg, display)
+    
+    # Original MDC-based logic for Samsung displays
     discovered = load_display_map(display_id)
     commands = build_commands_for_display(display, discovered)
     if cmd not in commands:

@@ -1,0 +1,159 @@
+# Broadlink IR/RF Configuration Example for Set-Top Box Control
+
+# Add this configuration to your displays.yaml for a room with Broadlink-controlled STB:
+
+displays:
+  living_room:
+    title: Living Room
+    model: WM55B + STB
+    # Samsung Flip display connection (MDC over TCP)
+    ip: 192.168.1.100
+    port: 1515
+    device_id: 0
+    
+    # Broadlink RM4 Mini/Pro for STB IR control
+    broadlink:
+      host: 192.168.1.150  # Broadlink device IP
+      port: 80             # Usually 80
+      mac: "24:DF:A7:F9:4D:84"  # MAC address (optional but recommended)
+      device_type: 0x61A2  # RM4 Mini: 0x61A2, RM4 Pro: 0x648D
+    
+    # Option 1: Inline IR codes (hex strings learned from your STB remote)
+    ir_codes:
+      # Number pad for channel selection
+      num_0: "260050000001269213371337133713..."  # Captured from STB remote
+      num_1: "260050000001269213371337133713..."
+      num_2: "260050000001269213371337133713..."
+      num_3: "260050000001269213371337133713..."
+      num_4: "260050000001269213371337133713..."
+      num_5: "260050000001269213371337133713..."
+      num_6: "260050000001269213371337133713..."
+      num_7: "260050000001269213371337133713..."
+      num_8: "260050000001269213371337133713..."
+      num_9: "260050000001269213371337133713..."
+      
+      # Channel navigation
+      ch_up: "260050000001269213371337133713..."
+      ch_down: "260050000001269213371337133713..."
+      last: "260050000001269213371337133713..."
+      guide: "260050000001269213371337133713..."
+      
+      # D-pad navigation for STB menus
+      up: "260050000001269213371337133713..."
+      down: "260050000001269213371337133713..."
+      left: "260050000001269213371337133713..."
+      right: "260050000001269213371337133713..."
+      ok: "260050000001269213371337133713..."
+      back: "260050000001269213371337133713..."
+      menu: "260050000001269213371337133713..."
+      exit: "260050000001269213371337133713..."
+      info: "260050000001269213371337133713..."
+      
+      # Transport controls for DVR
+      play: "260050000001269213371337133713..."
+      pause: "260050000001269213371337133713..."
+      stop: "260050000001269213371337133713..."
+      rewind: "260050000001269213371337133713..."
+      forward: "260050000001269213371337133713..."
+      record: "260050000001269213371337133713..."
+      
+      # Power (can control both display and STB)
+      power_toggle: "260050000001269213371337133713..."
+    
+    # Option 2: Load IR codes from external file
+    # ir_codes_file: "ir_codes/living_room_stb.yaml"
+    
+    # Layout configuration - enable channel and transport sections
+    layout:
+      button_size: lg
+      columns: 2
+      section_order:
+        - master
+        - sources
+        - channels      # Number pad for channel selection
+        - navigation    # D-pad for STB menu navigation
+        - transport     # Play/pause/record controls
+        - volume
+        - picture
+        - status
+      
+      button_order:
+        channels:
+          - num_1
+          - num_2
+          - num_3
+          - num_4
+          - num_5
+          - num_6
+          - num_7
+          - num_8
+          - num_9
+          - last
+          - num_0
+          - guide
+          - ch_up
+          - ch_down
+        
+        navigation:
+          - up
+          - left
+          - ok
+          - right
+          - down
+          - menu
+          - back
+          - exit
+          - info
+        
+        transport:
+          - rewind
+          - play
+          - pause
+          - forward
+          - stop
+          - record
+
+# -----------------------------------------------------------------------------
+# Learning IR Codes
+# -----------------------------------------------------------------------------
+
+# Use the CLI tool to learn IR codes from your STB remote:
+
+# 1. Discover your Broadlink device:
+#    python3 broadlink_client.py --discover
+
+# 2. Learn an IR code (example: channel 1):
+#    python3 broadlink_client.py --learn --host 192.168.1.150 --mac "24DFA7F94D84"
+#    
+#    Then point your STB remote at the Broadlink and press the "1" button.
+#    The captured hex code will be displayed - copy it to ir_codes section above.
+
+# 3. Test a learned code:
+#    python3 broadlink_client.py --send "260050..." --host 192.168.1.150 --mac "24DFA7F94D84"
+
+# Repeat for all buttons you want to control!
+
+# -----------------------------------------------------------------------------
+# External IR Codes File (Option 2)
+# -----------------------------------------------------------------------------
+
+# Create ir_codes/living_room_stb.yaml:
+# ir_codes:
+#   num_0: "260050000001269213371337133713..."
+#   num_1: "260050000001269213371337133713..."
+#   # ... etc
+
+# Then reference it in displays.yaml:
+#   ir_codes_file: "ir_codes/living_room_stb.yaml"
+
+# -----------------------------------------------------------------------------
+# Device Types
+# -----------------------------------------------------------------------------
+# RM4 Mini:  0x61A2
+# RM4 Pro:   0x648D
+# RM Mini 3: 0x27D9
+# RM Pro:    0x2787
+# RM Plus:   0x61A4
+
+# Find your device type using:
+# python3 broadlink_client.py --discover

@@ -40,10 +40,13 @@ google-api-python-client>=2.0.0
 google-auth-httplib2>=0.1.0
 google-auth-oauthlib>=1.0.0
 
+# Tidal
+tidalapi>=0.7.0
+
 # Amazon Music (unofficial)
 # amazon-music-api>=0.1.0  # Community library (experimental)
 
-# === Screen Recording ===
+# === Screen Recording & Video Streaming ===
 # Requires FFmpeg to be installed on system
 # - macOS: brew install ffmpeg
 # - Linux: sudo apt-get install ffmpeg
@@ -63,6 +66,20 @@ twilio>=8.0.0
 croniter>=1.4.0  # For cron expression parsing
 pytz>=2023.3  # Timezone support
 
+# === Voice Control ===
+# Alexa Skills Kit SDK
+ask-sdk-core>=1.17.0
+ask-sdk-model>=1.35.0
+
+# Google Assistant (Actions on Google)
+actions-on-google>=1.0.0
+
+# === Audio DSP ===
+# For advanced audio processing
+# pydub>=0.25.1  # Audio manipulation
+# scipy>=1.11.0  # Signal processing
+# numpy>=1.24.0  # Numerical operations
+
 # === Database (Optional, for persistence) ===
 # sqlalchemy>=2.0.0  # SQL ORM
 # redis>=5.0.0  # For caching and real-time data
@@ -80,6 +97,9 @@ pillow>=10.0.0
 
 # QR code generation (for widget sharing)
 qrcode>=7.4.0
+
+# Lyrics API
+# musixmatch>=0.5.0  # Lyrics provider
 
 # === Development & Testing ===
 # pytest>=7.4.0

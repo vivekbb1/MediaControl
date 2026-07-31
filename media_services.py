@@ -1,6 +1,19 @@
 """
 Unified Media Service Integration Layer
 Supports: Spotify, Apple Music, YouTube, Amazon Music, SoundCloud, and more
+
+⚖️ LEGAL COMPLIANCE NOTICE:
+- This module provides control interfaces for streaming services
+- Users MUST have valid, paid subscriptions to all services
+- All integrations use official APIs and require user authentication
+- NO piracy, DRM bypass, or unauthorized content access
+- See LEGAL_COMPLIANCE.md for full requirements
+
+Integration Flow:
+1. User provides their own API credentials (client_id, client_secret)
+2. User completes OAuth authentication with service provider
+3. MediaControl controls playback on user's authorized devices
+4. User remains responsible for subscription and licensing compliance
 """
 
 from enum import Enum

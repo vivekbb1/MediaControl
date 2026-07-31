@@ -4,6 +4,19 @@ Complete guide to advanced media features: streaming services, screen recording,
 
 ---
 
+## ⚖️ LEGAL NOTICE
+
+**IMPORTANT:** MediaControl is a device control system, NOT a content provider.
+
+- ✅ Users MUST have valid subscriptions to all streaming services
+- ✅ Users MUST comply with copyright laws and service terms  
+- ✅ Content accessed through official APIs with user's credentials only
+- ❌ NO piracy tools, DRM bypass, or unauthorized content access
+
+**See [LEGAL_COMPLIANCE.md](../LEGAL_COMPLIANCE.md) for complete legal requirements.**
+
+---
+
 ## Table of Contents
 1. [Media Services Integration](#media-services-integration)
 2. [Screen Recording](#screen-recording)

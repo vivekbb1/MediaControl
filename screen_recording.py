@@ -1,6 +1,17 @@
 """
 Screen Recording System
 Capture video from displays, HDMI encoders, and sources
+
+⚖️ LEGAL COMPLIANCE NOTICE:
+- Screen recording is for PERSONAL, NON-COMMERCIAL use only
+- Users MUST comply with copyright laws and content provider terms
+- Prohibited uses: commercial redistribution, DRM bypass, piracy
+- Permitted uses: time-shifting, personal archiving, accessibility
+- Recording copyrighted content for redistribution is ILLEGAL
+- See LEGAL_COMPLIANCE.md for full requirements
+
+This feature does NOT bypass content protection (HDCP, DRM).
+Users are solely responsible for their content usage.
 """
 
 from enum import Enum

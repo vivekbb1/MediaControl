@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MediaControl Widget</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--bg-color, #000000);
+            color: var(--text-color, #ffffff);
+            overflow: hidden;
+        }
+        
+        .widget-container {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        /* Header */
+        .widget-header {
+            padding: 1rem;
+            background: var(--header-bg, #1a1a1a);
+            border-bottom: 1px solid var(--border-color, #333);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .widget-logo img {
+            height: 32px;
+        }
+        
+        .location-name {
+            font-size: 0.9rem;
+            color: var(--secondary-text, #888);
+        }
+        
+        /* Main content */
+        .widget-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1rem;
+        }
+        
+        /* Source grid */
+        .source-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .source-button {
+            aspect-ratio: 1;
+            background: var(--button-bg, #2a2a2a);
+            border: 2px solid var(--border-color, #333);
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            transition: all 0.2s;
+        }
+        
+        .source-button:hover {
+            background: var(--button-hover, #3a3a3a);
+            transform: scale(1.05);
+        }
+        
+        .source-button.active {
+            background: var(--primary-color, #0066cc);
+            border-color: var(--primary-color, #0066cc);
+        }
+        
+        .source-icon {
+            width: 48px;
+            height: 48px;
+            object-fit: contain;
+        }
+        
+        .source-label {
+            font-size: 0.85rem;
+            text-align: center;
+        }
+        
+        /* Control pad */
+        .control-section {
+            margin-bottom: 2rem;
+        }
+        
+        .section-title {
+            font-size: 0.9rem;
+            color: var(--secondary-text, #888);
+            margin-bottom: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        .dpad-container {
+            display: grid;
+            grid-template-columns: repeat(3, 60px);
+            grid-template-rows: repeat(3, 60px);
+            gap: 8px;
+            justify-content: center;
+            margin-bottom: 1rem;
+        }
+        
+        .dpad-button {
+            background: var(--button-bg, #2a2a2a);
+            border: none;
+            border-radius: 8px;
+            color: var(--text-color, #fff);
+            cursor: pointer;
+            font-size: 1.5rem;
+            transition: all 0.1s;
+        }
+        
+        .dpad-button:active {
+            background: var(--primary-color, #0066cc);
+            transform: scale(0.95);
+        }
+        
+        .dpad-button.center {
+            background: var(--primary-color, #0066cc);
+        }
+        
+        /* Volume controls */
+        .volume-container {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            justify-content: center;
+        }
+        
+        .volume-button {
+            width: 48px;
+            height: 48px;
+            background: var(--button-bg, #2a2a2a);
+            border: none;
+            border-radius: 50%;
+            color: var(--text-color, #fff);
+            cursor: pointer;
+            font-size: 1.2rem;
+        }
+        
+        .volume-slider {
+            flex: 1;
+            max-width: 200px;
+        }
+        
+        .volume-value {
+            min-width: 40px;
+            text-align: center;
+        }
+        
+        /* Video stream (optional) */
+        .video-container {
+            width: 100%;
+            aspect-ratio: 16/9;
+            background: #000;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 1rem;
+        }
+        
+        .video-container video {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .source-grid {
+                grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+                gap: 0.75rem;
+            }
+            
+            .widget-content {
+                padding: 0.75rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="widget-container">
+        <!-- Header -->
+        <div class="widget-header">
+            <div class="widget-logo">
+                <img id="logo" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 40'%3E%3Ctext x='10' y='30' font-family='Arial' font-size='24' font-weight='bold' fill='%23fff'%3EMediaControl%3C/text%3E%3C/svg%3E" alt="Logo">
+            </div>
+            <div class="location-name" id="locationName">Loading...</div>
+        </div>
+        
+        <!-- Main content -->
+        <div class="widget-content">
+            <!-- Video stream (optional) -->
+            <div class="video-container" id="videoContainer" style="display: none;">
+                <video id="videoPlayer" autoplay muted playsinline></video>
+            </div>
+            
+            <!-- Source grid -->
+            <div class="control-section">
+                <h3 class="section-title">Sources</h3>
+                <div class="source-grid" id="sourceGrid">
+                    <!-- Populated dynamically -->
+                </div>
+            </div>
+            
+            <!-- D-pad navigation -->
+            <div class="control-section">
+                <h3 class="section-title">Navigation</h3>
+                <div class="dpad-container">
+                    <div></div>
+                    <button class="dpad-button" data-command="up">▲</button>
+                    <div></div>
+                    <button class="dpad-button" data-command="left">◀</button>
+                    <button class="dpad-button center" data-command="select">OK</button>
+                    <button class="dpad-button" data-command="right">▶</button>
+                    <div></div>
+                    <button class="dpad-button" data-command="down">▼</button>
+                    <div></div>
+                </div>
+                <div class="dpad-container" style="grid-template-columns: repeat(2, 60px);">
+                    <button class="dpad-button" data-command="back">←</button>
+                    <button class="dpad-button" data-command="home">⌂</button>
+                </div>
+            </div>
+            
+            <!-- Volume controls -->
+            <div class="control-section">
+                <h3 class="section-title">Volume</h3>
+                <div class="volume-container">
+                    <button class="volume-button" data-command="volume_down">-</button>
+                    <input type="range" class="volume-slider" id="volumeSlider" min="0" max="100" value="50">
+                    <span class="volume-value" id="volumeValue">50</span>
+                    <button class="volume-button" data-command="mute">🔇</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Configuration from query params or localStorage
+        const config = {
+            apiUrl: getQueryParam('api_url') || 'https://api.mediacontrol.com',
+            tenantId: getQueryParam('tenant') || localStorage.getItem('tenant_id'),
+            locationId: getQueryParam('location') || localStorage.getItem('location_id'),
+            authToken: getQueryParam('token') || localStorage.getItem('auth_token'),
+            theme: {
+                primaryColor: getQueryParam('primary_color') || '#0066cc',
+                bgColor: getQueryParam('bg_color') || '#000000',
+                textColor: getQueryParam('text_color') || '#ffffff',
+            },
+            features: {
+                showVideo: getQueryParam('show_video') === 'true',
+                showEPG: getQueryParam('show_epg') !== 'false',
+            },
+        };
+        
+        // Apply theme
+        document.documentElement.style.setProperty('--primary-color', config.theme.primaryColor);
+        document.documentElement.style.setProperty('--bg-color', config.theme.bgColor);
+        document.documentElement.style.setProperty('--text-color', config.theme.textColor);
+        
+        // Helper functions
+        function getQueryParam(name) {
+            const params = new URLSearchParams(window.location.search);
+            return params.get(name);
+        }
+        
+        async function apiRequest(endpoint, method = 'GET', data = null) {
+            const headers = {
+                'Authorization': `Bearer ${config.authToken}`,
+                'Content-Type': 'application/json',
+            };
+            
+            const options = {
+                method,
+                headers,
+            };
+            
+            if (data && method !== 'GET') {
+                options.body = JSON.stringify(data);
+            }
+            
+            const response = await fetch(`${config.apiUrl}${endpoint}`, options);
+            return response.json();
+        }
+        
+        // Load location data
+        async function loadLocation() {
+            try {
+                const data = await apiRequest(`/api/locations/${config.locationId}`);
+                document.getElementById('locationName').textContent = data.name;
+                loadSources(data.sources);
+            } catch (error) {
+                console.error('Failed to load location:', error);
+                document.getElementById('locationName').textContent = 'Error loading';
+            }
+        }
+        
+        // Load sources
+        function loadSources(sources) {
+            const grid = document.getElementById('sourceGrid');
+            grid.innerHTML = '';
+            
+            sources.forEach(source => {
+                const button = document.createElement('button');
+                button.className = 'source-button';
+                button.dataset.sourceId = source.id;
+                
+                const icon = document.createElement('img');
+                icon.className = 'source-icon';
+                icon.src = source.icon || `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Ctext x='24' y='30' text-anchor='middle' font-size='32'%3E${source.name[0]}%3C/text%3E%3C/svg%3E`;
+                icon.alt = source.name;
+                
+                const label = document.createElement('span');
+                label.className = 'source-label';
+                label.textContent = source.name;
+                
+                button.appendChild(icon);
+                button.appendChild(label);
+                
+                button.addEventListener('click', () => selectSource(source.id));
+                
+                grid.appendChild(button);
+            });
+        }
+        
+        // Select source
+        async function selectSource(sourceId) {
+            try {
+                await apiRequest(
+                    `/api/locations/${config.locationId}/activate-source`,
+                    'POST',
+                    { source_id: sourceId }
+                );
+                
+                // Update UI
+                document.querySelectorAll('.source-button').forEach(btn => {
+                    btn.classList.toggle('active', btn.dataset.sourceId === sourceId);
+                });
+            } catch (error) {
+                console.error('Failed to activate source:', error);
+            }
+        }
+        
+        // Send command
+        async function sendCommand(command) {
+            try {
+                await apiRequest(
+                    `/api/locations/${config.locationId}/command`,
+                    'POST',
+                    { command }
+                );
+            } catch (error) {
+                console.error('Failed to send command:', error);
+            }
+        }
+        
+        // Event listeners
+        document.querySelectorAll('.dpad-button').forEach(btn => {
+            btn.addEventListener('click', () => {
+                sendCommand(btn.dataset.command);
+            });
+        });
+        
+        document.querySelectorAll('.volume-button').forEach(btn => {
+            btn.addEventListener('click', () => {
+                sendCommand(btn.dataset.command);
+            });
+        });
+        
+        const volumeSlider = document.getElementById('volumeSlider');
+        const volumeValue = document.getElementById('volumeValue');
+        
+        volumeSlider.addEventListener('input', (e) => {
+            volumeValue.textContent = e.target.value;
+        });
+        
+        volumeSlider.addEventListener('change', (e) => {
+            sendCommand(`volume_set:${e.target.value}`);
+        });
+        
+        // Initialize
+        loadLocation();
+        
+        // Handle custom logo
+        const logoUrl = getQueryParam('logo_url');
+        if (logoUrl) {
+            document.getElementById('logo').src = logoUrl;
+        }
+        
+        // Video streaming (if enabled)
+        if (config.features.showVideo) {
+            const videoContainer = document.getElementById('videoContainer');
+            const videoPlayer = document.getElementById('videoPlayer');
+            videoContainer.style.display = 'block';
+            
+            // Load stream URL
+            apiRequest(`/api/locations/${config.locationId}/stream`).then(data => {
+                if (data.stream_url) {
+                    videoPlayer.src = data.stream_url;
+                }
+            });
+        }
+    </script>
+</body>
+</html>

@@ -157,8 +157,25 @@
 - ✅ Samsung Wallet (Galaxy phones, watches) - NFC, SmartThings integration
 - ✅ Multi-room key support (suites, adjoining rooms)
 - ✅ Key sharing via iMessage/messaging apps
-- ✅ Auto-activation on check-in, auto-deactivation on check-out
+- ✅ **Automatic key activation at check-in time** 🆕
+- ✅ **Automatic key deactivation at check-out time + grace period (2 hours)** 🆕
+- ✅ **Pre-check-in key provisioning (24 hours before arrival)** 🆕
+- ✅ **Late checkout extension with approval workflow** 🆕
+- ✅ **Early check-in when room ready** 🆕
 - ✅ Common area access (pool, gym, elevators, lounge)
+
+**Staff Master Keys:** 🆕
+- ✅ **Master key hierarchy (5 levels):**
+  - Level 1: Guest key (single room)
+  - Level 2: Section master (one floor - housekeeping)
+  - Level 3: Building master (all guest rooms - maintenance)
+  - Level 4: Grand master (all rooms + restricted areas - managers)
+  - Level 5: Emergency master (override everything - GM/owner)
+- ✅ **Shift hour enforcement** (housekeeping 8AM-4PM, security 24/7, etc.)
+- ✅ **Access logging with photo capture**
+- ✅ **Supervisor alerts** (after-hours access, restricted areas, daily limit)
+- ✅ **Max rooms per day limit** (prevent abuse, e.g., 20 rooms/day max)
+- ✅ **Department-based access** (housekeeping, maintenance, security, management)
 - ✅ Key lifecycle management (pre-arrival provisioning, post-checkout grace period)
 
 **Hotel Room Key Integration:**

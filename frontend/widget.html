@@ -11,11 +11,35 @@
             box-sizing: border-box;
         }
         
+        /* Theme System */
+        [data-theme="light"] {
+            --bg-color: #fafafa;
+            --surface-color: #ffffff;
+            --text-color: #1a1a1a;
+            --text-secondary: #666666;
+            --border-color: #e0e0e0;
+            --button-bg: #f5f5f5;
+            --button-hover: #e0e0e0;
+            --primary-color: #0066cc;
+        }
+        
+        [data-theme="dark"] {
+            --bg-color: #000000;
+            --surface-color: #0d0d0d;
+            --text-color: #ffffff;
+            --text-secondary: #cccccc;
+            --border-color: #333333;
+            --button-bg: #1a1a1a;
+            --button-hover: #2a2a2a;
+            --primary-color: #0066cc;
+        }
+        
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background: var(--bg-color, #000000);
-            color: var(--text-color, #ffffff);
+            background: var(--bg-color);
+            color: var(--text-color);
             overflow: hidden;
+            transition: background-color 0.3s ease, color 0.3s ease;
         }
         
         .widget-container {
@@ -28,11 +52,29 @@
         /* Header */
         .widget-header {
             padding: 1rem;
-            background: var(--header-bg, #1a1a1a);
-            border-bottom: 1px solid var(--border-color, #333);
+            background: var(--surface-color);
+            border-bottom: 1px solid var(--border-color);
             display: flex;
             justify-content: space-between;
             align-items: center;
+        }
+        
+        .theme-toggle-widget {
+            width: 32px;
+            height: 32px;
+            padding: 0;
+            background: var(--button-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 50%;
+            color: var(--text-color);
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .theme-toggle-widget:hover {
+            background: var(--button-hover);
+            transform: scale(1.1);
         }
         
         .widget-logo img {
@@ -61,8 +103,8 @@
         
         .source-button {
             aspect-ratio: 1;
-            background: var(--button-bg, #2a2a2a);
-            border: 2px solid var(--border-color, #333);
+            background: var(--button-bg);
+            border: 2px solid var(--border-color);
             border-radius: 8px;
             cursor: pointer;
             display: flex;
@@ -74,13 +116,14 @@
         }
         
         .source-button:hover {
-            background: var(--button-hover, #3a3a3a);
+            background: var(--button-hover);
             transform: scale(1.05);
         }
         
         .source-button.active {
-            background: var(--primary-color, #0066cc);
-            border-color: var(--primary-color, #0066cc);
+            background: var(--primary-color);
+            border-color: var(--primary-color);
+            color: #ffffff;
         }
         
         .source-icon {
@@ -101,7 +144,7 @@
         
         .section-title {
             font-size: 0.9rem;
-            color: var(--secondary-text, #888);
+            color: var(--text-secondary);
             margin-bottom: 0.75rem;
             text-transform: uppercase;
             letter-spacing: 0.05em;
@@ -117,22 +160,30 @@
         }
         
         .dpad-button {
-            background: var(--button-bg, #2a2a2a);
-            border: none;
+            background: var(--button-bg);
+            border: 1px solid var(--border-color);
             border-radius: 8px;
-            color: var(--text-color, #fff);
+            color: var(--text-color);
             cursor: pointer;
             font-size: 1.5rem;
             transition: all 0.1s;
         }
         
+        .dpad-button:hover {
+            background: var(--button-hover);
+        }
+        
         .dpad-button:active {
-            background: var(--primary-color, #0066cc);
+            background: var(--primary-color);
+            border-color: var(--primary-color);
+            color: #ffffff;
             transform: scale(0.95);
         }
         
         .dpad-button.center {
-            background: var(--primary-color, #0066cc);
+            background: var(--primary-color);
+            border-color: var(--primary-color);
+            color: #ffffff;
         }
         
         /* Volume controls */
@@ -146,12 +197,17 @@
         .volume-button {
             width: 48px;
             height: 48px;
-            background: var(--button-bg, #2a2a2a);
-            border: none;
+            background: var(--button-bg);
+            border: 1px solid var(--border-color);
             border-radius: 50%;
-            color: var(--text-color, #fff);
+            color: var(--text-color);
             cursor: pointer;
             font-size: 1.2rem;
+            transition: all 0.2s;
+        }
+        
+        .volume-button:hover {
+            background: var(--button-hover);
         }
         
         .volume-slider {
@@ -201,6 +257,9 @@
                 <img id="logo" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 40'%3E%3Ctext x='10' y='30' font-family='Arial' font-size='24' font-weight='bold' fill='%23fff'%3EMediaControl%3C/text%3E%3C/svg%3E" alt="Logo">
             </div>
             <div class="location-name" id="locationName">Loading...</div>
+            <button class="theme-toggle-widget" id="themeToggle" title="Toggle theme">
+                <span id="themeIcon">🌙</span>
+            </button>
         </div>
         
         <!-- Main content -->
@@ -252,6 +311,76 @@
     </div>
     
     <script>
+        // Theme Manager
+        class WidgetThemeManager {
+            constructor() {
+                this.theme = this.loadTheme();
+                this.init();
+            }
+            
+            init() {
+                this.applyTheme();
+                
+                // Listen for system theme changes
+                if (window.matchMedia) {
+                    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+                        if (this.theme === 'system') {
+                            this.applyTheme();
+                        }
+                    });
+                }
+            }
+            
+            loadTheme() {
+                const saved = localStorage.getItem('widget_theme');
+                const param = getQueryParam('theme');
+                return param || saved || 'system';
+            }
+            
+            saveTheme(theme) {
+                localStorage.setItem('widget_theme', theme);
+                this.theme = theme;
+            }
+            
+            getEffectiveTheme() {
+                if (this.theme === 'system') {
+                    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+                }
+                return this.theme;
+            }
+            
+            setTheme(theme) {
+                this.saveTheme(theme);
+                this.applyTheme();
+            }
+            
+            applyTheme() {
+                const effective = this.getEffectiveTheme();
+                document.documentElement.setAttribute('data-theme', effective);
+                this.updateIcon();
+            }
+            
+            toggle() {
+                const modes = ['light', 'dark', 'system'];
+                const current = modes.indexOf(this.theme);
+                const next = modes[(current + 1) % modes.length];
+                this.setTheme(next);
+            }
+            
+            updateIcon() {
+                const icon = document.getElementById('themeIcon');
+                if (icon) {
+                    if (this.theme === 'system') {
+                        icon.textContent = '🖥️';
+                    } else if (this.theme === 'dark') {
+                        icon.textContent = '🌙';
+                    } else {
+                        icon.textContent = '☀️';
+                    }
+                }
+            }
+        }
+        
         // Configuration from query params or localStorage
         const config = {
             apiUrl: getQueryParam('api_url') || 'https://api.mediacontrol.com',
@@ -260,8 +389,6 @@
             authToken: getQueryParam('token') || localStorage.getItem('auth_token'),
             theme: {
                 primaryColor: getQueryParam('primary_color') || '#0066cc',
-                bgColor: getQueryParam('bg_color') || '#000000',
-                textColor: getQueryParam('text_color') || '#ffffff',
             },
             features: {
                 showVideo: getQueryParam('show_video') === 'true',
@@ -269,10 +396,8 @@
             },
         };
         
-        // Apply theme
+        // Apply custom primary color
         document.documentElement.style.setProperty('--primary-color', config.theme.primaryColor);
-        document.documentElement.style.setProperty('--bg-color', config.theme.bgColor);
-        document.documentElement.style.setProperty('--text-color', config.theme.textColor);
         
         // Helper functions
         function getQueryParam(name) {
@@ -392,6 +517,14 @@
         
         volumeSlider.addEventListener('change', (e) => {
             sendCommand(`volume_set:${e.target.value}`);
+        });
+        
+        // Initialize theme
+        const widgetTheme = new WidgetThemeManager();
+        
+        // Theme toggle handler
+        document.getElementById('themeToggle').addEventListener('click', () => {
+            widgetTheme.toggle();
         });
         
         // Initialize

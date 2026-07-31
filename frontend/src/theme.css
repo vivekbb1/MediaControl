@@ -1,0 +1,274 @@
+/* Global Theme Styles */
+
+/* Light Theme (Day Mode) */
+[data-theme="light"] {
+    /* Backgrounds */
+    --background: #fafafa;
+    --background-secondary: #f0f0f0;
+    --surface: #ffffff;
+    --surface-elevated: #fafafa;
+    --border: #e0e0e0;
+    
+    /* Text */
+    --text-primary: #1a1a1a;
+    --text-secondary: #666666;
+    --text-tertiary: #999999;
+    --text-inverse: #ffffff;
+    
+    /* Primary colors */
+    --primary: #0066cc;
+    --primary-hover: #0052a3;
+    --primary-light: #e6f2ff;
+    --primary-dark: #004080;
+    
+    /* Status colors */
+    --success: #10b981;
+    --success-light: #d1fae5;
+    --warning: #f59e0b;
+    --warning-light: #fef3c7;
+    --error: #ef4444;
+    --error-light: #fee2e2;
+    --info: #3b82f6;
+    --info-light: #dbeafe;
+    
+    /* Shadows & overlays */
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+    --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.15);
+    --overlay: rgba(0, 0, 0, 0.5);
+    
+    /* Components */
+    --button-bg: #ffffff;
+    --button-hover: #f5f5f5;
+    --button-active: #e0e0e0;
+    --button-disabled: #f5f5f5;
+    
+    --input-bg: #ffffff;
+    --input-border: #d0d0d0;
+    --input-focus: #0066cc;
+    --input-disabled: #f5f5f5;
+    
+    --card-bg: #ffffff;
+    --card-border: #e0e0e0;
+    
+    /* Remote control specific */
+    --remote-bg: #ffffff;
+    --remote-button: #f5f5f5;
+    --remote-button-hover: #e0e0e0;
+    --remote-button-active: #0066cc;
+    --remote-display: #000000;
+}
+
+/* Dark Theme (Night Mode) */
+[data-theme="dark"] {
+    /* Backgrounds */
+    --background: #000000;
+    --background-secondary: #0a0a0a;
+    --surface: #0d0d0d;
+    --surface-elevated: #1a1a1a;
+    --border: #333333;
+    
+    /* Text */
+    --text-primary: #ffffff;
+    --text-secondary: #cccccc;
+    --text-tertiary: #888888;
+    --text-inverse: #000000;
+    
+    /* Primary colors */
+    --primary: #0066cc;
+    --primary-hover: #0080ff;
+    --primary-light: #001a33;
+    --primary-dark: #0099ff;
+    
+    /* Status colors */
+    --success: #10b981;
+    --success-light: #064e3b;
+    --warning: #f59e0b;
+    --warning-light: #78350f;
+    --error: #ef4444;
+    --error-light: #7f1d1d;
+    --info: #3b82f6;
+    --info-light: #1e3a8a;
+    
+    /* Shadows & overlays */
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.3);
+    --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.3);
+    --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.4);
+    --overlay: rgba(0, 0, 0, 0.75);
+    
+    /* Components */
+    --button-bg: #1a1a1a;
+    --button-hover: #2a2a2a;
+    --button-active: #333333;
+    --button-disabled: #0a0a0a;
+    
+    --input-bg: #0d0d0d;
+    --input-border: #333333;
+    --input-focus: #0080ff;
+    --input-disabled: #0a0a0a;
+    
+    --card-bg: #0d0d0d;
+    --card-border: #1a1a1a;
+    
+    /* Remote control specific */
+    --remote-bg: #000000;
+    --remote-button: #1a1a1a;
+    --remote-button-hover: #2a2a2a;
+    --remote-button-active: #0066cc;
+    --remote-display: #0d0d0d;
+}
+
+/* Base styles */
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+        'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    background-color: var(--background);
+    color: var(--text-primary);
+}
+
+/* Smooth theme transitions */
+body,
+.theme-transition {
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+button,
+input,
+select,
+textarea {
+    transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+}
+
+/* Component base styles */
+.button {
+    background: var(--button-bg);
+    color: var(--text-primary);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: all 0.2s;
+}
+
+.button:hover {
+    background: var(--button-hover);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+}
+
+.button:active {
+    background: var(--button-active);
+    transform: translateY(0);
+}
+
+.button.primary {
+    background: var(--primary);
+    color: var(--text-inverse);
+    border-color: var(--primary);
+}
+
+.button.primary:hover {
+    background: var(--primary-hover);
+}
+
+.input {
+    background: var(--input-bg);
+    color: var(--text-primary);
+    border: 1px solid var(--input-border);
+    border-radius: 8px;
+    padding: 0.5rem 0.75rem;
+    font-size: 1rem;
+}
+
+.input:focus {
+    outline: none;
+    border-color: var(--input-focus);
+    box-shadow: 0 0 0 3px var(--primary-light);
+}
+
+.card {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: var(--shadow-sm);
+}
+
+/* Theme toggle button */
+.theme-toggle {
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    z-index: 1000;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text-primary);
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: var(--shadow-md);
+}
+
+.theme-toggle:hover {
+    background: var(--surface-elevated);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+}
+
+.theme-toggle:active {
+    transform: translateY(0);
+}
+
+.theme-icon {
+    font-size: 1.25rem;
+    line-height: 1;
+}
+
+.theme-label {
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+/* Utility classes */
+.text-primary { color: var(--text-primary); }
+.text-secondary { color: var(--text-secondary); }
+.text-tertiary { color: var(--text-tertiary); }
+
+.bg-surface { background: var(--surface); }
+.bg-elevated { background: var(--surface-elevated); }
+
+.border-default { border-color: var(--border); }
+
+/* Responsive */
+@media (max-width: 768px) {
+    .theme-toggle {
+        padding: 0.4rem 0.8rem;
+        font-size: 0.8125rem;
+    }
+    
+    .theme-icon {
+        font-size: 1.125rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .theme-toggle .theme-label {
+        display: none;
+    }
+}

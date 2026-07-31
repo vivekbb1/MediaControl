@@ -1,26 +1,88 @@
-# Multi-Device Control Requirements
+# Media Control System - Complete Requirements
 
-# Core device abstraction
-# (no new dependencies needed)
+# === Core Dependencies ===
+requests>=2.31.0
+pyyaml>=6.0
+aiohttp>=3.8.0  # Async HTTP client
+asyncio-mqtt>=0.16.0  # For MQTT notifications (optional)
 
-# Apple TV control
+# === Device Control ===
+
+# Apple TV & AirPlay
 pyatv>=0.14.0
 
-# Android TV control uses 'adb' command-line tool
+# Android TV control (requires 'adb' command-line tool)
 # Install Android SDK Platform Tools separately:
 # - macOS: brew install android-platform-tools
 # - Linux: sudo apt-get install android-tools-adb
 # - Windows: Download from https://developer.android.com/studio/releases/platform-tools
-
-# Optional: Pure Python ADB (alternative to command-line adb)
+# Optional pure Python alternatives:
 # adb-shell>=0.4.0
 # pure-python-adb>=0.3.0
 
 # Audio devices
 soco>=0.30.0  # Sonos control
-# Note: pyatv (already listed above) also handles AirPlay
 
-# Existing requirements
+# IR/RF control
 broadlink>=0.19.0
-requests>=2.31.0
-pyyaml>=6.0
+
+# === Media Services Integration ===
+
+# Spotify
+spotipy>=2.23.0
+
+# Apple Music (MusicKit)
+# Requires JWT token generation (see docs)
+# musickit>=1.0.0  # Optional library for Apple Music
+
+# YouTube
+google-api-python-client>=2.0.0
+google-auth-httplib2>=0.1.0
+google-auth-oauthlib>=1.0.0
+
+# Amazon Music (unofficial)
+# amazon-music-api>=0.1.0  # Community library (experimental)
+
+# === Screen Recording ===
+# Requires FFmpeg to be installed on system
+# - macOS: brew install ffmpeg
+# - Linux: sudo apt-get install ffmpeg
+# - Windows: Download from https://ffmpeg.org/download.html
+
+# === Notifications ===
+# Email
+aiosmtplib>=2.0.0
+
+# Push notifications
+firebase-admin>=6.0.0  # For Firebase Cloud Messaging
+
+# SMS (Twilio)
+twilio>=8.0.0
+
+# === Scheduling & Alarms ===
+croniter>=1.4.0  # For cron expression parsing
+pytz>=2023.3  # Timezone support
+
+# === Database (Optional, for persistence) ===
+# sqlalchemy>=2.0.0  # SQL ORM
+# redis>=5.0.0  # For caching and real-time data
+
+# === Additional Features ===
+
+# KNX smart home integration
+xknx>=2.11.0
+
+# Video streaming
+# opencv-python>=4.8.0  # For video processing (optional)
+
+# Image processing (for artwork, thumbnails)
+pillow>=10.0.0
+
+# QR code generation (for widget sharing)
+qrcode>=7.4.0
+
+# === Development & Testing ===
+# pytest>=7.4.0
+# pytest-asyncio>=0.21.0
+# black>=23.0.0
+# flake8>=6.0.0

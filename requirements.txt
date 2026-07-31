@@ -344,6 +344,29 @@ onvif-zeep>=0.2.12  # Already included above (ONVIF protocol for IP cameras/door
 # pyserial>=3.5  # Already included above (serial port communication)
 # Used for: Pentair IntelliTouch, Hayward ProLogic via RS-485
 
+# === Hospitality & Luxury Residence Management ===
+
+# Digital Wallet Keys
+# No additional dependencies - uses HTTP APIs
+# - Apple Wallet (PassKit)
+# - Google Wallet (Google Pay API)
+# - Samsung Wallet (Samsung Wallet SDK)
+
+# PMS Integration
+# aiohttp>=3.9.0  # Already included above (async HTTP client)
+# Used for: OPERA Cloud, Protel, Mews, Cloudbeds, Apaleo APIs
+
+# In-Room Dining
+# aiohttp>=3.9.0  # Already included above
+# QR code generation (optional)
+qrcode>=7.4.2  # QR code generation for menu QR codes
+Pillow>=10.0.0  # Image processing for QR code customization
+
+# Payment Processing
+stripe>=7.0.0  # Stripe payment processing for credit card payments
+# square>=29.0.0  # Alternative: Square payment processing
+# adyen>=9.0.0  # Alternative: Adyen payment processing
+
 # === Development & Testing ===
 # pytest>=7.4.0
 # pytest-asyncio>=0.21.0

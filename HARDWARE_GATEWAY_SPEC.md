@@ -178,6 +178,20 @@ The **MediaControl Gateway** is a professional-grade, single-device solution tha
   - Digital signage
 - **Cost:** +$50 for Android license + software
 
+**Touch Panel Integration**
+- **USB touch panels:** Logitech Tap, Crestron Flex, Poly G100 (via USB ports)
+- **IP touch panels:** Crestron TSW, Extron TouchLink, AMX Modero (via Ethernet)
+- **Protocol support:**
+  - Crestron CH5 (port 41794)
+  - Extron SIS (port 23, telnet)
+  - AMX NetLinx (port 1319)
+  - WebSocket (port 8765, for web panels)
+- **Features:**
+  - Touch input routing (USB panels to sources)
+  - Bidirectional feedback (panel displays room state)
+  - Multiple panels per room supported
+- **Cost:** Included (no additional hardware needed)
+
 #### 9. Power Supply
 
 **Input:** 12V DC, 6A (72W max) - *Increased for USB-C power delivery*

@@ -185,6 +185,76 @@ ring-doorbell>=0.8.0  # Ring doorbell API client
 # ONVIF (generic IP cameras)
 onvif-zeep>=0.2.12  # ONVIF protocol for IP cameras/doorbells
 
+# === AI Studio Effects (Video & Audio) ===
+
+# AI/ML Frameworks
+# ONNX Runtime (recommended - cross-platform, GPU/NPU support)
+onnxruntime>=1.16.0  # CPU version
+# onnxruntime-gpu>=1.16.0  # GPU version (NVIDIA CUDA)
+# onnxruntime-directml>=1.16.0  # DirectML version (Windows GPU - NVIDIA/AMD/Intel)
+
+# TensorFlow Lite (for edge devices, NPU support)
+# tflite-runtime>=2.14.0  # Lightweight TensorFlow for inference
+
+# PyTorch (alternative, research-grade models)
+# torch>=2.0.0  # CPU version
+# torchvision>=0.15.0  # Computer vision models
+
+# OpenCV (video processing, background segmentation)
+opencv-python>=4.8.0  # Computer vision library
+opencv-contrib-python>=4.8.0  # Additional modules (tracking, segmentation)
+
+# Image processing
+numpy>=1.24.0  # Numerical operations (required by OpenCV, TensorFlow)
+scipy>=1.11.0  # Scientific computing (signal processing)
+scikit-image>=0.21.0  # Image processing algorithms
+
+# AI Models & Pretrained Weights
+# mediapipe>=0.10.0  # Google MediaPipe (face detection, pose estimation, segmentation)
+# face-recognition>=1.3.0  # Face detection and recognition
+# dlib>=19.24.0  # Face landmarks, eye gaze (requires CMake to build)
+
+# Background Segmentation (pre-trained models)
+# rembg>=2.0.0  # Background removal using U2-Net
+# backgroundremover>=0.2.0  # Alternative background removal
+
+# Audio AI
+# noisereduce>=3.0.0  # Spectral gating noise reduction
+# speechbrain>=0.5.0  # Speech processing (enhancement, separation, recognition)
+# demucs>=4.0.0  # Music/speech source separation (Meta's Demucs)
+
+# Speech Recognition & Transcription
+# faster-whisper>=0.9.0  # OpenAI Whisper (optimized for CPU/GPU)
+# vosk>=0.3.45  # Offline speech recognition (40+ languages)
+# deepgram-sdk>=3.0.0  # Deepgram API (real-time transcription, commercial)
+
+# Azure Cognitive Services (Microsoft Teams Premium integration)
+# azure-cognitiveservices-speech>=1.31.0  # Azure Speech Services (transcription, translation)
+# azure-ai-textanalytics>=5.3.0  # Text Analytics (sentiment, key phrases, action items)
+
+# Translation
+# googletrans>=4.0.0  # Google Translate (unofficial)
+# deep-translator>=1.11.0  # Multi-provider translation (Google, Microsoft, etc.)
+
+# Natural Language Processing (for meeting recap)
+# transformers>=4.35.0  # Hugging Face Transformers (BERT, GPT, summarization)
+# openai>=1.0.0  # OpenAI API (GPT-4 for intelligent recap)
+# anthropic>=0.5.0  # Anthropic Claude API (alternative to GPT-4)
+
+# === Hardware Acceleration ===
+
+# Intel OpenVINO (for Intel CPUs, GPUs, NPUs)
+# openvino>=2023.0.0  # Intel AI inference toolkit
+
+# NVIDIA TensorRT (for NVIDIA GPUs)
+# tensorrt>=8.6.0  # Requires NVIDIA TensorRT SDK
+
+# DirectML (Windows GPU - NVIDIA/AMD/Intel)
+# Already handled by onnxruntime-directml above
+
+# Coral TPU (Google Edge TPU)
+# pycoral>=2.0.0  # Edge TPU runtime (requires Edge TPU hardware)
+
 # === Development & Testing ===
 # pytest>=7.4.0
 # pytest-asyncio>=0.21.0

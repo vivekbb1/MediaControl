@@ -255,6 +255,32 @@ scikit-image>=0.21.0  # Image processing algorithms
 # Coral TPU (Google Edge TPU)
 # pycoral>=2.0.0  # Edge TPU runtime (requires Edge TPU hardware)
 
+# === Smart Home Ecosystem Integration ===
+
+# Home Assistant
+homeassistant>=2024.1.0  # Home Assistant Core (for integration)
+# aiohttp>=3.9.0  # Already included above
+# paho-mqtt>=1.6.1  # Already included above
+
+# Matter Protocol
+python-matter-server>=5.0.0  # Matter protocol server
+# chip-tool  # Matter CLI tool (install separately via package manager)
+
+# Zigbee (Zigbee2MQTT)
+# paho-mqtt>=1.6.1  # Already included above
+# pyserial>=3.5  # Already included above (for Zigbee USB coordinator)
+
+# Ubiquiti UniFi API
+aiounifi>=55  # UniFi Controller API client
+pyunifiprotect>=4.0.0  # UniFi Protect API client (for cameras, doorbells)
+
+# Nuki
+# Uses HTTP REST API (aiohttp already included)
+
+# Aqara
+# Uses MQTT (paho-mqtt already included)
+# python-miio>=0.5.12  # For Xiaomi/Aqara devices (alternative to MQTT)
+
 # === Development & Testing ===
 # pytest>=7.4.0
 # pytest-asyncio>=0.21.0

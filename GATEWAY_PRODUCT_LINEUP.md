@@ -28,6 +28,64 @@ Every MediaControl Gateway includes:
 
 ---
 
+## Smart Home Ecosystem Integration
+
+**ALL MediaControl Gateways** support seamless integration with major smart home ecosystems:
+
+### Supported Platforms
+
+| Platform | Purpose | Integration Method |
+|----------|---------|-------------------|
+| **Ubiquiti Access** | Enterprise access control, door locks, card readers | HTTP API, Webhooks |
+| **Aqara** | Affordable doorbells, locks, sensors | MQTT (via Aqara Hub M2/M3), Zigbee |
+| **Nuki** | Premium European smart locks | HTTP API (Bridge), Matter |
+| **Home Assistant** | Open-source home automation hub | MQTT, REST API, WebSocket (bidirectional) |
+| **Matter** | Universal smart home standard | Local network (works with Apple, Google, Amazon) |
+| **Zigbee** | Low-power mesh network | MQTT (via Zigbee2MQTT, ZHA, deCONZ) |
+
+### Bidirectional Control
+
+**MediaControl → Smart Home:**
+- Control locks, lights, switches, climate from MediaControl interface
+- Trigger smart home scenes based on MediaControl events (e.g., meeting started → Do Not Disturb)
+- Manage access codes and permissions
+
+**Smart Home → MediaControl:**
+- Doorbell pressed → MediaControl shows video + notification
+- Door sensor triggered → MediaControl logs event
+- Home Assistant bedtime scene → MediaControl turns off all displays
+- Zigbee motion sensor → MediaControl auto-turns on display
+
+### Supported Devices
+
+✅ **Smart Locks:** Ubiquiti UA-G2-Pro, Aqara U100, Nuki Smart Lock Pro, Yale Assure Lock 2, Schlage Encode Plus (Matter)  
+✅ **Video Doorbells:** Aqara G4/G220, Ring Battery Doorbell Plus (Matter), Google Nest Doorbell (Matter), UniFi Protect doorbells  
+✅ **Door Sensors:** Aqara, Eve Door & Window (Matter), any Zigbee contact sensor  
+✅ **Motion Sensors:** Aqara, Philips Hue Motion (Zigbee), any Zigbee motion sensor  
+✅ **Lights & Switches:** Philips Hue (Zigbee), IKEA TRÅDFRI (Zigbee), Sonoff (Zigbee), any Matter/Zigbee device  
+✅ **Access Control:** Ubiquiti door readers, electric strikes, maglocks, garage door openers  
+
+### Use Cases
+
+**Residential:**
+- "Front doorbell pressed → Turn on porch light (Home Assistant) + Show video on MediaControl TVs + Unlock door (Nuki)"
+- "Bedtime scene → Turn off all lights (Zigbee) + Turn off all MediaControl displays + Lock doors (Aqara)"
+- "Motion detected in hallway → Turn on hallway display + Lights (Philips Hue)"
+
+**Commercial:**
+- "Employee badge scanned (Ubiquiti Access) → MediaControl logs entry + Show security notification"
+- "Meeting room occupied (Zigbee sensor) → MediaControl auto-turns on display + Adjust thermostat (Home Assistant)"
+- "Door forced open → MediaControl emergency paging + Home Assistant alarm"
+
+### Why This Matters
+
+🏆 **Best-in-class integration** - MediaControl works with ALL major smart home ecosystems, not just one  
+🏆 **Future-proof** - Matter support ensures compatibility with Apple HomeKit, Google Home, Amazon Alexa  
+🏆 **Flexibility** - Use Aqara for affordability, Ubiquiti for enterprise security, Nuki for premium locks  
+🏆 **Unified control** - Manage everything from one MediaControl interface, or use Home Assistant as hub  
+
+---
+
 ## 1. MCG-Lite (Entry Level)
 
 **Target:** Homes, home offices, small businesses, single meeting room

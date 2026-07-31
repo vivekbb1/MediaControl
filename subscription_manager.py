@@ -35,7 +35,7 @@ class SubscriptionStatus(Enum):
 class TierLimits:
     """Limits for each subscription tier"""
     max_devices: int
-    max_locations: int
+    max_rooms: int  # Rooms (zones) within the location
     max_users: int
     max_encoders: int
     features: List[str] = field(default_factory=list)

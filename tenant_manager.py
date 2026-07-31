@@ -107,23 +107,34 @@ ROLE_PERMISSIONS: Dict[UserRole, Set[Permission]] = {
 
 
 @dataclass
-class Tenant:
-    """Organization/company"""
+class Location:
+    """
+    Location = Tenant/Customer/Organization
+    Top-level entity that subscribes to the service
+    Each location gets its own URL: app.mediacontrol.com/location/{location_id}
+    """
     id: str
     name: str
     created_at: datetime
+    address: Optional[str] = None
     settings: Dict = None
     subscription_id: Optional[str] = None
+    url_slug: Optional[str] = None  # For friendly URLs: /location/my-hotel
 
 
 @dataclass
-class Location:
-    """Physical location (room, building, site)"""
+class Room:
+    """
+    Room = Zone within a location
+    Contains devices (displays, STBs, etc.)
+    Each room gets its own URL: app.mediacontrol.com/location/{location_id}/room/{room_id}
+    """
     id: str
-    tenant_id: str
+    location_id: str
     name: str
-    address: Optional[str] = None
-    parent_location_id: Optional[str] = None  # For hierarchical locations
+    description: Optional[str] = None
+    floor: Optional[str] = None
+    url_slug: Optional[str] = None  # For friendly URLs: /room/conference-a
 
 
 @dataclass

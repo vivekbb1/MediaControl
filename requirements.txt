@@ -281,6 +281,30 @@ pyunifiprotect>=4.0.0  # UniFi Protect API client (for cameras, doorbells)
 # Uses MQTT (paho-mqtt already included)
 # python-miio>=0.5.12  # For Xiaomi/Aqara devices (alternative to MQTT)
 
+# === Consumer Smart Home Platforms ===
+
+# Apple HomeKit (HAP - HomeKit Accessory Protocol)
+HAP-python>=4.9.0  # HomeKit Accessory Protocol implementation
+# pyqrcode>=1.2.1  # QR code generation for HomeKit pairing
+# pypng>=0.20220715.0  # PNG backend for QR codes
+
+# Google Home
+# aiohttp>=3.9.0  # Already included above (for Google Home API)
+# zeroconf>=0.131.0  # Already included above (for mDNS discovery)
+# google-auth>=2.23.0  # Google OAuth authentication
+# google-auth-oauthlib>=1.1.0  # OAuth 2.0 flow
+
+# Xiaomi Mi Home
+python-miio>=0.5.12  # Xiaomi & Aqara device control
+# yeelight>=0.7.13  # Yeelight bulb control (alternative to python-miio)
+
+# Amazon Alexa
+# boto3>=1.28.0  # AWS SDK (for Alexa Smart Home Skill Lambda)
+# ask-sdk-core>=1.19.0  # Already included above (for Alexa Skills)
+
+# Samsung SmartThings
+pysmartthings>=0.7.8  # SmartThings API client
+
 # === Development & Testing ===
 # pytest>=7.4.0
 # pytest-asyncio>=0.21.0

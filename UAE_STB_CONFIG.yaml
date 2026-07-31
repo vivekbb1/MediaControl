@@ -1,0 +1,428 @@
+# UAE STB CONFIGURATION - e&/du/OSN
+# Complete setup for UAE set-top boxes with EPG and channel logos
+
+displays:
+  # ============================================================================
+  # E& (ETISALAT) SETUP
+  # ============================================================================
+  living_room_etisalat:
+    title: Living Room (e& / Etisalat)
+    model: WM55B + e& eLife STB
+    ip: 192.168.1.100
+    location: home
+    
+    # Broadlink IR Control for e& STB
+    broadlink:
+      host: 192.168.1.150
+      mac: "24:DF:A7:F9:4D:84"
+      device_type: 0x648D  # RM4 Pro (supports IR + RF)
+    
+    # EPG Configuration for UAE
+    epg:
+      enabled: true
+      country_code: "ae"
+      timezone: "Asia/Dubai"  # UAE Standard Time (UTC+4)
+      
+      # UAE EPG Sources
+      sources:
+        # OSN English (primary for international channels)
+        - url: "https://iptv-org.github.io/epg/guides/ae-en/osn.com.epg.xml"
+          priority: 1
+        
+        # OSN Arabic (for Arabic channels)
+        - url: "https://iptv-org.github.io/epg/guides/ae-ar/osn.com.epg.xml"
+          priority: 2
+        
+        # General UAE EPG (iptv-org)
+        - url: "https://iptv-org.github.io/epg/guides/ae.xml.gz"
+          priority: 3
+      
+      # Popular e&/OSN Channels
+      channels:
+        # English Entertainment
+        - name: "Star World HD"
+          epg_id: "StarWorld.uk@SD"
+          channel_number: 188
+          ir_command: "num_1,num_8,num_8"
+          category: "English Entertainment"
+        
+        - name: "Comedy Central"
+          epg_id: "ComedyCentral.uk@SD"
+          channel_number: 360
+          ir_command: "num_3,num_6,num_0"
+          category: "English Entertainment"
+        
+        - name: "OSNtv Showcase"
+          epg_id: "OSNtvShowcase.ae@SD"
+          channel_number: 646
+          ir_command: "num_6,num_4,num_6"
+          category: "English Entertainment"
+        
+        # Arabic Entertainment
+        - name: "OSNtv Yahala"
+          epg_id: "OSNtvYahala.ae@SD"
+          channel_number: 171
+          ir_command: "num_1,num_7,num_1"
+          category: "Arabic Entertainment"
+        
+        - name: "MBC Drama"
+          epg_id: "MBCDrama.ae@SD"
+          channel_number: 401
+          ir_command: "num_4,num_0,num_1"
+          category: "Arabic Entertainment"
+        
+        # Sports
+        - name: "beIN Sports 1"
+          epg_id: "beINSports1.ae@SD"
+          channel_number: 700
+          ir_command: "num_7,num_0,num_0"
+          category: "Sports"
+        
+        - name: "AD Sports 1"
+          epg_id: "ADSports1.ae@SD"
+          channel_number: 201
+          ir_command: "num_2,num_0,num_1"
+          category: "Sports"
+        
+        - name: "Star Sports Select 1 HD"
+          epg_id: "StarSportsSelect1.in@SD"
+          channel_number: 461
+          ir_command: "num_4,num_6,num_1"
+          category: "Sports"
+        
+        # News
+        - name: "Sky News HD"
+          epg_id: "SkyNews.uk@SD"
+          channel_number: 503
+          ir_command: "num_5,num_0,num_3"
+          category: "News"
+        
+        - name: "BBC World News"
+          epg_id: "BBCWorldNews.uk@SD"
+          channel_number: 501
+          ir_command: "num_5,num_0,num_1"
+          category: "News"
+        
+        - name: "Sky News Arabia"
+          epg_id: "SkyNewsArabia.ae@SD"
+          channel_number: 502
+          ir_command: "num_5,num_0,num_2"
+          category: "News"
+        
+        - name: "Al Jazeera English"
+          epg_id: "AlJazeeraEnglish.qa@SD"
+          channel_number: 512
+          ir_command: "num_5,num_1,num_2"
+          category: "News"
+        
+        # Movies
+        - name: "OSNtv Movies Hollywood"
+          epg_id: "OSNtvMoviesHollywood.ae@SD"
+          channel_number: 634
+          ir_command: "num_6,num_3,num_4"
+          category: "Movies"
+        
+        - name: "OSNtv Movies Action"
+          epg_id: "OSNtvMoviesAction.ae@SD"
+          channel_number: 636
+          ir_command: "num_6,num_3,num_6"
+          category: "Movies"
+        
+        - name: "OSNtv Movies Family"
+          epg_id: "OSNtvMoviesFamily.ae@SD"
+          channel_number: 638
+          ir_command: "num_6,num_3,num_8"
+          category: "Movies"
+        
+        - name: "Star Movies HD"
+          epg_id: "StarMovies.in@SD"
+          channel_number: 303
+          ir_command: "num_3,num_0,num_3"
+          category: "Movies"
+        
+        # Kids
+        - name: "Disney Channel HD"
+          epg_id: "DisneyChannel.us@SD"
+          channel_number: 319
+          ir_command: "num_3,num_1,num_9"
+          category: "Kids"
+        
+        - name: "Nickelodeon HD"
+          epg_id: "Nickelodeon.us@SD"
+          channel_number: 329
+          ir_command: "num_3,num_2,num_9"
+          category: "Kids"
+        
+        - name: "OSNtv Kids"
+          epg_id: "OSNtvKids.ae@SD"
+          channel_number: 323
+          ir_command: "num_3,num_2,num_3"
+          category: "Kids"
+        
+        # Documentaries
+        - name: "National Geographic HD"
+          epg_id: "NationalGeographic.us@SD"
+          channel_number: 369
+          ir_command: "num_3,num_6,num_9"
+          category: "Documentary"
+        
+        - name: "Discovery HD"
+          epg_id: "Discovery.us@SD"
+          channel_number: 360
+          ir_command: "num_3,num_6,num_0"
+          category: "Documentary"
+        
+        - name: "History Channel HD"
+          epg_id: "History.us@SD"
+          channel_number: 366
+          ir_command: "num_3,num_6,num_6"
+          category: "Documentary"
+        
+        # Music
+        - name: "MTV Live HD"
+          epg_id: "MTVLive.us@SD"
+          channel_number: 461
+          ir_command: "num_4,num_6,num_1"
+          category: "Music"
+        
+        # Indian Channels (Popular with expats)
+        - name: "Star Plus HD"
+          epg_id: "StarPlus.in@SD"
+          channel_number: 701
+          ir_command: "num_7,num_0,num_1"
+          category: "Indian Entertainment"
+        
+        - name: "Sony TV HD"
+          epg_id: "SonyTV.in@SD"
+          channel_number: 704
+          ir_command: "num_7,num_0,num_4"
+          category: "Indian Entertainment"
+        
+        - name: "Zee TV HD"
+          epg_id: "ZeeTV.in@SD"
+          channel_number: 702
+          ir_command: "num_7,num_0,num_2"
+          category: "Indian Entertainment"
+  
+  # ============================================================================
+  # DU SETUP
+  # ============================================================================
+  bedroom_du:
+    title: Bedroom (du)
+    model: WM55B + du STB
+    ip: 192.168.1.101
+    location: home
+    
+    broadlink:
+      host: 192.168.1.151
+      mac: "24:DF:A7:F9:4D:85"
+      device_type: 0x648D  # RM4 Pro
+    
+    epg:
+      enabled: true
+      country_code: "ae"
+      timezone: "Asia/Dubai"
+      
+      sources:
+        - url: "https://iptv-org.github.io/epg/guides/ae-en/osn.com.epg.xml"
+          priority: 1
+        - url: "https://iptv-org.github.io/epg/guides/ae-ar/osn.com.epg.xml"
+          priority: 2
+      
+      # du uses similar channel numbers to e& for OSN content
+      channels:
+        - name: "Star World HD"
+          epg_id: "StarWorld.uk@SD"
+          channel_number: 300
+          ir_command: "num_3,num_0,num_0"
+        
+        - name: "OSNtv Showcase"
+          epg_id: "OSNtvShowcase.ae@SD"
+          channel_number: 646
+          ir_command: "num_6,num_4,num_6"
+  
+  # ============================================================================
+  # OSN STANDALONE SETUP
+  # ============================================================================
+  living_room_osn:
+    title: Living Room (OSN)
+    model: WM55B + OSN+ STB
+    ip: 192.168.1.102
+    location: home
+    
+    broadlink:
+      host: 192.168.1.152
+      mac: "24:DF:A7:F9:4D:86"
+      device_type: 0x648D
+    
+    epg:
+      enabled: true
+      country_code: "ae"
+      timezone: "Asia/Dubai"
+      
+      sources:
+        # OSN-specific EPG
+        - url: "https://iptv-org.github.io/epg/guides/ae-en/osn.com.epg.xml"
+          priority: 1
+        - url: "https://iptv-org.github.io/epg/guides/ae-ar/osn.com.epg.xml"
+          priority: 2
+        
+        # Saudi Arabia OSN (same content)
+        - url: "https://iptv-org.github.io/epg/guides/sa-en/osn.com.epg.xml"
+          priority: 3
+        - url: "https://iptv-org.github.io/epg/guides/sa-ar/osn.com.epg.xml"
+          priority: 4
+      
+      channels:
+        # Full OSN lineup (similar to e& channels above)
+        - name: "OSNtv Showcase"
+          epg_id: "OSNtvShowcase.ae@SD"
+          channel_number: 301
+          ir_command: "num_3,num_0,num_1"
+
+# ==============================================================================
+# CHANNEL LOGO SOURCES (Automatic)
+# ==============================================================================
+
+# Channel logos are automatically fetched from:
+# https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/united-arab-emirates/
+
+# Popular UAE Channel Logos:
+# MBC:       https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/saudi-arabia/mbc-1-sa.png
+# beIN:      https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/qatar/bein-sports-1-qa.png
+# OSN:       https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/united-arab-emirates/osn-ae.png
+# Dubai TV:  https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/united-arab-emirates/dubai-tv-ae.png
+
+# International channels use their country-specific logos:
+# Star World: https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/united-kingdom/star-world-uk.png
+# BBC:        https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/united-kingdom/bbc-world-news-uk.png
+# Sky News:   https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/united-kingdom/sky-news-uk.png
+
+# ==============================================================================
+# OSN CHANNEL IDS (for EPG Mapping)
+# ==============================================================================
+
+# English Entertainment:
+#   Star World: StarWorld.uk@SD
+#   Comedy Central: ComedyCentral.uk@SD
+#   OSNtv Showcase: OSNtvShowcase.ae@SD
+#   OSNtv Comedy: OSNtvComedy.ae@SD
+#   OSNtv Now: OSNtvNow.ae@SD
+
+# Arabic Entertainment:
+#   OSNtv Yahala: OSNtvYahala.ae@SD
+#   OSNtv Yahala Bil Arabi: OSNtvYahalaBilArabi.ae@SD
+#   OSNtv Yahala Aflam: OSNtvYahalaAflam.ae@SD
+#   MBC Drama: MBCDrama.ae@SD
+#   MBC Max: MBCMax.ae@SD
+
+# Sports:
+#   beIN Sports 1-6: beINSports1-6.ae@SD
+#   AD Sports 1-5: ADSports1-5.ae@SD
+#   Star Sports Select: StarSportsSelect1.in@SD
+
+# Movies:
+#   OSNtv Movies Hollywood: OSNtvMoviesHollywood.ae@SD
+#   OSNtv Movies Action: OSNtvMoviesAction.ae@SD
+#   OSNtv Movies Family: OSNtvMoviesFamily.ae@SD
+#   OSNtv Movies First: OSNtvMoviesFirst.ae@SD
+#   Star Movies: StarMovies.in@SD
+
+# Kids:
+#   Disney Channel: DisneyChannel.us@SD
+#   Disney Junior: DisneyJunior.us@SD
+#   Nickelodeon: Nickelodeon.us@SD
+#   OSNtv Kids: OSNtvKids.ae@SD
+#   Cartoon Network: CartoonNetwork.us@SD
+
+# News:
+#   Sky News: SkyNews.uk@SD
+#   Sky News Arabia: SkyNewsArabia.ae@SD
+#   BBC World News: BBCWorldNews.uk@SD
+#   Al Jazeera English: AlJazeeraEnglish.qa@SD
+#   CNN International: CNNInternational.us@SD
+
+# Documentary:
+#   National Geographic: NationalGeographic.us@SD
+#   Nat Geo Wild: NatGeoWild.us@SD
+#   Discovery: Discovery.us@SD
+#   History: History.us@SD
+#   BBC Earth: BBCEarth.uk@SD
+
+# ==============================================================================
+# E& / DU CHANNEL PACKAGES
+# ==============================================================================
+
+# e& (Etisalat) Packages:
+#   - eLife Plans: Basic entertainment channels
+#   - OSN Add On: Premium OSN channels
+#   - Western Pack: International channels
+#   - Sports Pack: beIN Sports, AD Sports
+#   - Pinoy Pack: Filipino channels
+#   - Asiana Pack: Asian channels
+
+# du Packages:
+#   - Basic: Local channels + basic entertainment
+#   - Entertainment Plus: OSN channels
+#   - Sports: beIN Sports
+#   - Premium: All channels
+
+# OSN Packages:
+#   - OSN Starter: Basic channels
+#   - OSN Ultimate: All channels
+#   - OSN Sports: beIN Sports
+#   - Individual channel subscriptions available
+
+# ==============================================================================
+# TIMEZONE NOTES
+# ==============================================================================
+
+# UAE uses a single timezone: Asia/Dubai (GST - UTC+4)
+# All EPG times are automatically converted to GST
+# No daylight saving time adjustments
+
+# ==============================================================================
+# LANGUAGE SUPPORT
+# ==============================================================================
+
+# EPG available in:
+#   - English: ae-en/osn.com.epg.xml
+#   - Arabic: ae-ar/osn.com.epg.xml
+
+# Set language in display config:
+# epg:
+#   language: "en"  # or "ar" for Arabic
+#   sources:
+#     - url: "https://iptv-org.github.io/epg/guides/ae-en/osn.com.epg.xml"  # English
+#     # or
+#     - url: "https://iptv-org.github.io/epg/guides/ae-ar/osn.com.epg.xml"  # Arabic
+
+# ==============================================================================
+# TESTING
+# ==============================================================================
+
+# Test EPG fetching:
+# python3 epg_client.py https://iptv-org.github.io/epg/guides/ae-en/osn.com.epg.xml
+
+# Test channel logo:
+# python3 epg_client.py logo "OSN" ae
+
+# View e& channel list:
+# https://www.etisalat.ae/en/mshop/home/plans/details/channel-list/osn.html
+
+# View du channel list:
+# https://www.du.ae/personal/tv/channel-list
+
+# View OSN channel guide:
+# https://www.osn.com/en-ae/watch/tv-schedule
+
+# ==============================================================================
+# IMPORTANT NOTES
+# ==============================================================================
+
+# 1. e& and du both use OSN for premium content
+# 2. Channel numbers may vary between providers - check your STB guide
+# 3. OSN EPG includes both Arabic and English metadata
+# 4. Some channels may require specific package subscriptions
+# 5. beIN Sports EPG may be limited due to live sports variations
+# 6. IR codes for UAE STBs may vary - learn your specific remote codes

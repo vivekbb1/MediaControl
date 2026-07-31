@@ -26,6 +26,9 @@ soco>=0.30.0  # Sonos control
 # IR/RF control
 broadlink>=0.19.0
 
+# RS232/Serial communication (for legacy devices)
+pyserial>=3.5
+
 # === Media Services Integration ===
 
 # Spotify

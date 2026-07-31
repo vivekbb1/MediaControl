@@ -34,27 +34,41 @@ class SubscriptionStatus(Enum):
 @dataclass
 class TierLimits:
     """Limits for each subscription tier"""
-    max_devices: int
     max_locations: int  # Number of physical locations/buildings
     max_rooms: int  # Total rooms across all locations
+    max_gateways: int  # Intermediary devices (Broadlink, RS232 controllers, etc.)
+    max_devices: int  # All multimedia & legacy sub-devices (TVs, ACs, fans, etc.)
     max_users: int
-    max_encoders: int
+    max_encoders: int  # HDMI-to-IP encoders
     features: List[str] = field(default_factory=list)
+    
+    # Subscription factors:
+    # 1. Locations - Physical buildings/sites
+    # 2. Rooms - Zones within locations
+    # 3. Gateways - Control hubs (Broadlink, serial controllers)
+    # 4. Devices - All controlled equipment (TVs, STBs, ACs, fans, switches, etc.)
+    # 5. Users - Number of users with access
 
 
+# Subscription model with dual device tracking:
+# - Gateways: Broadlink, RS232/RS485 controllers, KNX interfaces (control hubs)
+# - Devices: ALL multimedia & legacy equipment (TVs, STBs, ACs, fans, switches, etc.)
+# This provides fair billing based on infrastructure complexity
 TIER_CONFIGS = {
     SubscriptionTier.FREE: TierLimits(
-        max_devices=3,
-        max_locations=1,  # Single location only
+        max_locations=1,  # Single location
         max_rooms=1,  # 1 room only
+        max_gateways=1,  # 1 gateway (e.g., 1 Broadlink RM4)
+        max_devices=5,  # 5 total devices (e.g., 1 TV + 1 STB + 1 AC + 1 fan + 1 switch)
         max_users=1,
         max_encoders=0,
-        features=["basic_control", "epg"],
+        features=["basic_control", "epg", "legacy_devices"],
     ),
     SubscriptionTier.HOME: TierLimits(
-        max_devices=5,
         max_locations=1,  # Single home
-        max_rooms=2,  # 2 rooms (e.g., living room + bedroom)
+        max_rooms=2,  # 2 rooms
+        max_gateways=2,  # 2 gateways (e.g., Broadlink per room)
+        max_devices=10,  # 10 devices total (5 per room avg)
         max_users=2,
         max_encoders=0,
         features=[
@@ -63,12 +77,14 @@ TIER_CONFIGS = {
             "apple_tv",
             "android_tv",
             "presets",
+            "legacy_devices",
         ],
     ),
     SubscriptionTier.HOME_PRO: TierLimits(
-        max_devices=15,
         max_locations=1,  # Single home
         max_rooms=5,  # 5 rooms (whole home)
+        max_gateways=5,  # 5 gateways
+        max_devices=30,  # 30 devices (6 per room avg)
         max_users=5,
         max_encoders=1,
         features=[
@@ -81,12 +97,14 @@ TIER_CONFIGS = {
             "video_streaming",
             "advanced_automation",
             "voice_control",
+            "legacy_devices",
         ],
     ),
     SubscriptionTier.BUSINESS: TierLimits(
-        max_devices=30,
-        max_locations=3,  # 3 locations (e.g., office, retail stores)
-        max_rooms=10,  # 10 rooms total across all locations
+        max_locations=3,  # 3 locations
+        max_rooms=10,  # 10 rooms total
+        max_gateways=10,  # 10 gateways
+        max_devices=100,  # 100 devices (10 per room avg)
         max_users=10,
         max_encoders=3,
         features=[
@@ -102,12 +120,14 @@ TIER_CONFIGS = {
             "analytics",
             "centralized_management",
             "role_based_access",
+            "legacy_devices",
         ],
     ),
     SubscriptionTier.ENTERPRISE: TierLimits(
-        max_devices=300,
-        max_locations=20,  # 20 locations (hotel chain, corporate offices)
+        max_locations=20,  # 20 locations
         max_rooms=150,  # 150 rooms total
+        max_gateways=50,  # 50 gateways (not 1:1 with rooms - can share)
+        max_devices=500,  # 500 devices (~3-4 per room avg)
         max_users=50,
         max_encoders=10,
         features=[
@@ -128,12 +148,14 @@ TIER_CONFIGS = {
             "api_access",
             "sso",
             "sla",
+            "legacy_devices",
         ],
     ),
     SubscriptionTier.INTEGRATOR: TierLimits(
-        max_devices=999999,
         max_locations=999999,  # Unlimited locations
         max_rooms=999999,
+        max_gateways=999999,  # Unlimited gateways
+        max_devices=999999,  # Unlimited devices
         max_users=999999,
         max_encoders=999,
         features=[
@@ -159,6 +181,7 @@ TIER_CONFIGS = {
             "embeddable_widget",
             "reseller_program",
             "custom_development",
+            "legacy_devices",
         ],
     ),
 }
@@ -171,9 +194,10 @@ class Subscription:
     organization_id: str  # Organization that owns this subscription
     tier: SubscriptionTier
     status: SubscriptionStatus
-    device_count: int
     location_count: int  # Number of locations (buildings/sites)
     room_count: int  # Total rooms across all locations
+    gateway_count: int  # Number of gateways (Broadlink, RS232 controllers, etc.)
+    device_count: int  # All devices including sub-devices (TVs, STBs, ACs, fans, etc.)
     start_date: datetime
     end_date: Optional[datetime] = None
     trial_ends: Optional[datetime] = None
@@ -233,9 +257,10 @@ class SubscriptionManager:
             organization_id=organization_id,
             tier=tier,
             status=SubscriptionStatus.TRIAL,
-            device_count=0,
             location_count=0,
             room_count=0,
+            gateway_count=0,
+            device_count=0,
             start_date=datetime.now(),
             trial_ends=datetime.now() + timedelta(days=14),
         )
@@ -255,9 +280,10 @@ class SubscriptionManager:
             organization_id=organization_id,
             tier=tier,
             status=SubscriptionStatus.ACTIVE,
-            device_count=0,
             location_count=0,
             room_count=0,
+            gateway_count=0,
+            device_count=0,
             start_date=datetime.now(),
             stripe_subscription_id=stripe_subscription_id,
         )
@@ -402,6 +428,52 @@ class SubscriptionManager:
         logger.info(f"Unregistered room for organization {organization_id}")
         return True
     
+    def check_gateway_limit(self, organization_id: str) -> bool:
+        """Check if organization can add more gateways"""
+        subscription = self.get_subscription(organization_id)
+        if not subscription:
+            return False
+        
+        if not (subscription.is_active() or subscription.is_trial()):
+            return False
+        
+        limits = subscription.get_limits()
+        return subscription.gateway_count < limits.max_gateways
+    
+    def register_gateway(self, organization_id: str) -> bool:
+        """Register a gateway to organization's subscription"""
+        subscription = self.get_subscription(organization_id)
+        if not subscription:
+            logger.error(f"No subscription found for organization {organization_id}")
+            return False
+        
+        if not self.check_gateway_limit(organization_id):
+            limits = subscription.get_limits()
+            logger.error(
+                f"Gateway limit reached for organization {organization_id} "
+                f"({subscription.gateway_count}/{limits.max_gateways}). "
+                f"Current tier: {subscription.tier.value}. "
+                f"Upgrade to a higher tier to add more gateways."
+            )
+            return False
+        
+        subscription.gateway_count += 1
+        logger.info(
+            f"Registered gateway for organization {organization_id} "
+            f"({subscription.gateway_count}/{limits.max_gateways})"
+        )
+        return True
+    
+    def unregister_gateway(self, organization_id: str) -> bool:
+        """Unregister a gateway from organization's subscription"""
+        subscription = self.get_subscription(organization_id)
+        if not subscription or subscription.gateway_count == 0:
+            return False
+        
+        subscription.gateway_count -= 1
+        logger.info(f"Unregistered gateway for organization {organization_id}")
+        return True
+    
     def check_feature_access(self, organization_id: str, feature: str) -> bool:
         """Check if organization has access to a feature"""
         subscription = self.get_subscription(organization_id)
@@ -459,11 +531,6 @@ class SubscriptionManager:
             "organization_id": organization_id,
             "tier": subscription.tier.value,
             "status": subscription.status.value,
-            "devices": {
-                "current": subscription.device_count,
-                "limit": limits.max_devices,
-                "remaining": limits.max_devices - subscription.device_count,
-            },
             "locations": {
                 "current": subscription.location_count,
                 "limit": limits.max_locations,
@@ -473,6 +540,16 @@ class SubscriptionManager:
                 "current": subscription.room_count,
                 "limit": limits.max_rooms,
                 "remaining": limits.max_rooms - subscription.room_count,
+            },
+            "gateways": {
+                "current": subscription.gateway_count,
+                "limit": limits.max_gateways,
+                "remaining": limits.max_gateways - subscription.gateway_count,
+            },
+            "devices": {
+                "current": subscription.device_count,
+                "limit": limits.max_devices,
+                "remaining": limits.max_devices - subscription.device_count,
             },
             "trial": {
                 "is_trial": subscription.is_trial(),

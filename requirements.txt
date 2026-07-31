@@ -309,6 +309,19 @@ pysmartthings>=0.7.8  # SmartThings API client
 aiocoap>=0.4.7  # CoAP client for DIRIGERA hub (local control)
 # pytradfri>=9.0.0  # Alternative library for IKEA TRÅDFRI (via CoAP)
 
+# === KNX Integration & Cloud Bridge ===
+
+# KNX/IP Protocol
+xknx>=2.12.0  # KNX/IP library (Tunneling, Routing, Group Address R/W)
+# knxdclient>=0.4.0  # Alternative KNX library (simpler API)
+
+# WebSocket (Cloud Bridge)
+websockets>=12.0  # WebSocket client/server for cloud connection
+# aiohttp>=3.9.0  # Already included above (for HTTP API)
+
+# XML parsing (ETS import)
+# xml.etree.ElementTree (built-in Python module)
+
 # === Development & Testing ===
 # pytest>=7.4.0
 # pytest-asyncio>=0.21.0

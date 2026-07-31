@@ -104,6 +104,59 @@ qrcode>=7.4.0
 # Lyrics API
 # musixmatch>=0.5.0  # Lyrics provider
 
+# === Wireless Presentation ===
+# AirPlay receiver (requires system package: shairport-sync)
+# Install shairport-sync:
+# - macOS: brew install shairport-sync
+# - Linux: sudo apt-get install shairport-sync
+# Python integration via subprocess
+
+# mDNS/Bonjour for device discovery
+zeroconf>=0.100.0  # For mDNS/Bonjour (AirPlay/Chromecast discovery)
+
+# Chromecast receiver (Google Cast SDK)
+# Requires Cast Receiver SDK installation
+# pychromecast>=13.0.0  # For Chromecast integration (sender side)
+
+# WebRTC for browser-based screen sharing
+aiortc>=1.5.0  # WebRTC implementation (optional, for web-based sharing)
+
+# === Universal RTC (Video Conferencing) ===
+# Microsoft Graph API for Teams/Calendar
+msal>=1.24.0  # Microsoft Authentication Library
+msgraph-sdk>=1.0.0  # Microsoft Graph SDK
+
+# Zoom API
+# zoom-python>=1.0.0  # Zoom SDK (unofficial, community)
+
+# Cisco Webex API
+webexteamssdk>=1.6.0  # Webex Teams SDK
+
+# Google Meet/Calendar API (uses google-api-python-client above)
+# google-api-python-client>=2.0.0  # Already listed
+
+# === Native Apps & Android Runtime ===
+# Android app control (requires Android Debug Bridge - adb)
+# Already listed under Device Control
+
+# === Video Wall & Digital Signage ===
+# Content management
+Flask>=2.3.0  # For CMS web interface
+Flask-SQLAlchemy>=3.0.0  # Database for content library
+
+# Video processing (for video wall bezel correction)
+# opencv-python>=4.8.0  # Already listed as optional
+
+# === Multi-User Frontend ===
+# WebSocket for real-time multi-user sync
+websockets>=11.0.0  # WebSocket server/client
+python-socketio>=5.9.0  # Socket.IO (alternative to WebSockets)
+
+# === Whiteboard & Collaboration ===
+# Drawing libraries
+cairo>=1.0.0  # For rendering whiteboard annotations (requires system libcairo)
+# Install libcairo2-dev (Linux) or cairo (macOS)
+
 # === Development & Testing ===
 # pytest>=7.4.0
 # pytest-asyncio>=0.21.0

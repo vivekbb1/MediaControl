@@ -1,0 +1,321 @@
+# EPG (Electronic Program Guide) Configuration Example
+
+# Add this to your displays.yaml to enable EPG guide with channel logos
+
+displays:
+  living_room:
+    title: Living Room
+    model: WM55B + IPTV
+    ip: 192.168.1.100
+    
+    # Broadlink for STB control
+    broadlink:
+      host: 192.168.1.150
+      mac: "24:DF:A7:F9:4D:84"
+      device_type: 0x61A2
+    
+    # EPG Configuration
+    epg:
+      enabled: true
+      country_code: "us"  # For channel logo matching
+      timezone: "America/New_York"  # Local timezone for show times
+      
+      # EPG Data Sources (XMLTV format)
+      sources:
+        # Official iptv-org EPG (recommended)
+        - url: "https://iptv-org.github.io/epg/guides/us.xml"
+          priority: 1
+        
+        # Alternative: Compressed format (faster)
+        - url: "https://iptv-org.github.io/epg/guides/us.xml.gz"
+          priority: 2
+        
+        # You can add multiple sources - they'll be merged
+        - url: "https://iptv-org.github.io/epg/guides/ca.xml"
+          priority: 3
+      
+      # Channel Mapping (link EPG channel IDs to your IR commands)
+      channels:
+        - name: "CNN"
+          epg_id: "CNN.us"  # XMLTV channel ID
+          channel_number: 202  # Your STB channel number
+          ir_command: "num_2,num_0,num_2"  # IR sequence to tune
+          logo_override: null  # Optional: custom logo URL
+        
+        - name: "ESPN"
+          epg_id: "ESPN.us"
+          channel_number: 206
+          ir_command: "num_2,num_0,num_6"
+        
+        - name: "HBO"
+          epg_id: "HBO.us"
+          channel_number: 300
+          ir_command: "num_3,num_0,num_0"
+        
+        - name: "Discovery Channel"
+          epg_id: "DiscoveryChannel.us"
+          channel_number: 278
+          ir_command: "num_2,num_7,num_8"
+        
+        - name: "National Geographic"
+          epg_id: "NationalGeographic.us"
+          channel_number: 276
+          ir_command: "num_2,num_7,num_6"
+        
+        - name: "Fox News"
+          epg_id: "FoxNews.us"
+          channel_number: 205
+          ir_command: "num_2,num_0,num_5"
+        
+        - name: "NBC"
+          epg_id: "NBC.us"
+          channel_number: 4
+          ir_command: "num_4"
+        
+        - name: "ABC"
+          epg_id: "ABC.us"
+          channel_number: 7
+          ir_command: "num_7"
+      
+      # Update Schedule
+      update:
+        interval_hours: 6  # Update EPG every 6 hours
+        auto_update: true
+        retry_on_failure: true
+      
+      # Cache Settings
+      cache:
+        enabled: true
+        max_age_hours: 12
+        directory: "./epg_cache"
+      
+      # Display Options
+      display:
+        show_now_next: true  # Show current & next programme
+        hours_ahead: 8  # Show programmes for next 8 hours
+        show_descriptions: true
+        show_categories: true
+        show_episode_numbers: true
+
+# -----------------------------------------------------------------------------
+# Multi-Room EPG Setup
+# -----------------------------------------------------------------------------
+
+displays:
+  bedroom:
+    title: Bedroom
+    epg:
+      enabled: true
+      country_code: "us"
+      timezone: "America/Los_Angeles"  # Pacific time
+      sources:
+        - url: "https://iptv-org.github.io/epg/guides/us.xml.gz"
+      channels:
+        - name: "Local News"
+          epg_id: "KABC.us"
+          channel_number: 7
+          ir_command: "num_7"
+
+  guest_room:
+    title: Guest Room
+    epg:
+      enabled: true
+      country_code: "uk"  # UK channels
+      timezone: "Europe/London"
+      sources:
+        - url: "https://iptv-org.github.io/epg/guides/uk.xml.gz"
+      channels:
+        - name: "BBC One"
+          epg_id: "BBCOne.uk"
+          channel_number: 101
+          ir_command: "num_1,num_0,num_1"
+
+# -----------------------------------------------------------------------------
+# EPG Sources by Country/Region
+# -----------------------------------------------------------------------------
+
+# United States:
+#   https://iptv-org.github.io/epg/guides/us.xml.gz
+
+# United Kingdom:
+#   https://iptv-org.github.io/epg/guides/uk.xml.gz
+
+# Canada:
+#   https://iptv-org.github.io/epg/guides/ca.xml.gz
+
+# Australia:
+#   https://iptv-org.github.io/epg/guides/au.xml.gz
+
+# Germany:
+#   https://iptv-org.github.io/epg/guides/de.xml.gz
+
+# France:
+#   https://iptv-org.github.io/epg/guides/fr.xml.gz
+
+# Spain:
+#   https://iptv-org.github.io/epg/guides/es.xml.gz
+
+# Italy:
+#   https://iptv-org.github.io/epg/guides/it.xml.gz
+
+# Netherlands:
+#   https://iptv-org.github.io/epg/guides/nl.xml.gz
+
+# Brazil:
+#   https://iptv-org.github.io/epg/guides/br.xml.gz
+
+# India:
+#   https://iptv-org.github.io/epg/guides/in.xml.gz
+
+# Full list: https://github.com/iptv-org/epg
+
+# -----------------------------------------------------------------------------
+# Channel Logo Sources
+# -----------------------------------------------------------------------------
+
+# Logos are automatically fetched from:
+# https://github.com/tv-logo/tv-logos
+
+# Format: https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/{country}/{channel-name-country.png}
+
+# Examples:
+# US:  https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/united-states/cnn-us.png
+# UK:  https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/united-kingdom/bbc-one-hd-uk.png
+# CA:  https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/canada/ctv-ca.png
+
+# HD logos (when available):
+# https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/united-states/hd/espn-us.png
+
+# -----------------------------------------------------------------------------
+# Timezone Support
+# -----------------------------------------------------------------------------
+
+# All show times are automatically converted to your local timezone.
+# Use standard timezone names (IANA Time Zone Database):
+
+# Americas:
+#   - America/New_York (EST/EDT)
+#   - America/Chicago (CST/CDT)
+#   - America/Denver (MST/MDT)
+#   - America/Los_Angeles (PST/PDT)
+#   - America/Toronto
+#   - America/Vancouver
+#   - America/Mexico_City
+
+# Europe:
+#   - Europe/London
+#   - Europe/Paris
+#   - Europe/Berlin
+#   - Europe/Rome
+#   - Europe/Madrid
+#   - Europe/Amsterdam
+
+# Asia:
+#   - Asia/Dubai
+#   - Asia/Kolkata
+#   - Asia/Tokyo
+#   - Asia/Seoul
+#   - Asia/Shanghai
+#   - Asia/Singapore
+
+# Oceania:
+#   - Australia/Sydney
+#   - Australia/Melbourne
+#   - Pacific/Auckland
+
+# Full list: https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
+
+# -----------------------------------------------------------------------------
+# Finding EPG Channel IDs
+# -----------------------------------------------------------------------------
+
+# Method 1: Download and inspect the XMLTV file
+# wget https://iptv-org.github.io/epg/guides/us.xml
+# grep -A 2 '<channel id=' us.xml | head -30
+
+# Method 2: Use the EPG client tool
+# python3 epg_client.py https://iptv-org.github.io/epg/guides/us.xml.gz
+
+# Method 3: Browse the iptv-org database
+# https://github.com/iptv-org/database
+
+# -----------------------------------------------------------------------------
+# Custom EPG Sources
+# -----------------------------------------------------------------------------
+
+# You can use any XMLTV-format EPG source:
+
+epg:
+  sources:
+    # Local file
+    - url: "file:///path/to/custom_epg.xml"
+      priority: 1
+    
+    # Custom web source
+    - url: "https://your-epg-provider.com/guide.xml.gz"
+      priority: 2
+    
+    # Multiple sources are merged automatically
+    - url: "https://iptv-org.github.io/epg/guides/us.xml.gz"
+      priority: 3
+
+# -----------------------------------------------------------------------------
+# IR Command Sequences
+# -----------------------------------------------------------------------------
+
+# For multi-digit channels, use comma-separated IR commands:
+
+channels:
+  - name: "Channel 202"
+    ir_command: "num_2,num_0,num_2"  # Press 2, then 0, then 2
+  
+  - name: "Channel 1005"
+    ir_command: "num_1,num_0,num_0,num_5"  # Press 1, 0, 0, 5
+  
+  # Some STBs need a delay between digits
+  - name: "Channel 50"
+    ir_command: "num_5,wait_100ms,num_0"  # Wait 100ms between digits
+  
+  # Some STBs require pressing OK/Enter after channel number
+  - name: "Channel 123"
+    ir_command: "num_1,num_2,num_3,ok"  # Then press OK
+
+# -----------------------------------------------------------------------------
+# Advanced: Channel Favorites
+# -----------------------------------------------------------------------------
+
+epg:
+  favorites:
+    - epg_id: "CNN.us"
+    - epg_id: "ESPN.us"
+    - epg_id: "HBO.us"
+  
+  # Favorites appear first in channel list
+
+# -----------------------------------------------------------------------------
+# Advanced: Genre Filtering
+# -----------------------------------------------------------------------------
+
+epg:
+  genre_filter:
+    show: ["News", "Sports", "Movies"]  # Only show these genres
+    hide: ["Shopping", "Infomercials"]  # Hide these genres
+
+# -----------------------------------------------------------------------------
+# Testing EPG Setup
+# -----------------------------------------------------------------------------
+
+# 1. Test EPG fetching:
+#    python3 epg_client.py https://iptv-org.github.io/epg/guides/us.xml.gz
+
+# 2. Test logo fetching:
+#    python3 epg_client.py logo "CNN" us
+
+# 3. Restart server:
+#    python3 server.py 8080
+
+# 4. Check API endpoint:
+#    curl http://localhost:8080/api/epg/channels
+#    curl http://localhost:8080/api/epg/programme/CNN.us/now
+
+# 5. Open remote in browser and verify EPG guide displays

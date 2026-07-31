@@ -1,0 +1,402 @@
+# CROSS-TIMEZONE STB CONFIGURATION
+# Indian STB (Airtel/Jio) installed in Dubai with time adjustment
+
+# ==============================================================================
+# USE CASE: Indian STB in Dubai
+# ==============================================================================
+# - STB broadcasts in IST (Indian Standard Time - UTC+5:30)
+# - Viewer location: Dubai (GST - Gulf Standard Time - UTC+4:00)
+# - Time difference: IST is 1.5 hours ahead of GST
+# - Example: 8:00 PM IST = 6:30 PM GST
+#
+# The EPG client automatically converts all show times from IST to GST!
+# ==============================================================================
+
+displays:
+  # ============================================================================
+  # INDIAN STB IN DUBAI - AUTOMATIC TIME CONVERSION
+  # ============================================================================
+  dubai_living_room:
+    title: Dubai Living Room (Indian STB)
+    model: WM55B + Airtel/Jio STB
+    ip: 192.168.1.100
+    location: dubai
+    
+    # Broadlink IR Control
+    broadlink:
+      host: 192.168.1.150
+      mac: "24:DF:A7:F9:4D:84"
+      device_type: 0x61A2  # RM4 Mini
+    
+    # EPG Configuration with CROSS-TIMEZONE Support
+    epg:
+      enabled: true
+      
+      # IMPORTANT: Set country_code to India for logo fetching
+      country_code: "in"
+      
+      # CRITICAL: Set timezone to YOUR LOCAL TIME (Dubai)
+      # All EPG times will be automatically converted from IST to GST!
+      timezone: "Asia/Dubai"  # GST (UTC+4) - Your viewing location
+      
+      # EPG sources are in IST (Indian time) - will be auto-converted
+      sources:
+        # JioTV EPG - times are in IST
+        - url: "https://avkb.short.gy/epg.xml.gz"
+          priority: 1
+          source_timezone: "Asia/Kolkata"  # Optional: explicitly set source timezone
+        
+        # Backup EPG
+        - url: "https://github.com/arnab8820/JioTV-epg/raw/main/epg.xml.gz"
+          priority: 2
+      
+      # Display options
+      display:
+        show_timezone: true  # Show "GST" or "Dubai Time" in UI
+        time_format: "12h"   # 12-hour format (8:30 PM) or "24h" (20:30)
+        show_now_next: true
+        hours_ahead: 8
+      
+      # Indian channels with Airtel channel numbers
+      channels:
+        # Hindi Entertainment
+        - name: "Star Plus HD"
+          epg_id: "461"
+          channel_number: 109
+          ir_command: "num_1,num_0,num_9"
+          category: "Hindi Entertainment"
+          # EPG shows: "Mon 8:00 PM IST" → displays as "Mon 6:30 PM GST"
+        
+        - name: "Sony Entertainment HD"
+          epg_id: "291"
+          channel_number: 107
+          ir_command: "num_1,num_0,num_7"
+          category: "Hindi Entertainment"
+        
+        - name: "Zee TV HD"
+          epg_id: "473"
+          channel_number: 105
+          ir_command: "num_1,num_0,num_5"
+          category: "Hindi Entertainment"
+        
+        - name: "Colors HD"
+          epg_id: "144"
+          channel_number: 111
+          ir_command: "num_1,num_1,num_1"
+          category: "Hindi Entertainment"
+        
+        # Hindi Movies
+        - name: "Sony MAX HD"
+          epg_id: "476"
+          channel_number: 404
+          ir_command: "num_4,num_0,num_4"
+          category: "Hindi Movies"
+        
+        - name: "Zee Cinema HD"
+          epg_id: "821"
+          channel_number: 401
+          ir_command: "num_4,num_0,num_1"
+          category: "Hindi Movies"
+        
+        # Sports
+        - name: "Sony Ten 1 HD"
+          epg_id: "284"
+          channel_number: 277
+          ir_command: "num_2,num_7,num_7"
+          category: "Sports"
+        
+        - name: "Star Sports 1 HD"
+          epg_id: "480"
+          channel_number: 272
+          ir_command: "num_2,num_7,num_2"
+          category: "Sports"
+        
+        # News
+        - name: "Aaj Tak HD"
+          epg_id: "216"
+          channel_number: 313
+          ir_command: "num_3,num_1,num_3"
+          category: "News"
+        
+        - name: "NDTV India"
+          epg_id: "156"
+          channel_number: 317
+          ir_command: "num_3,num_1,num_7"
+          category: "News"
+
+# ==============================================================================
+# HOW IT WORKS - TIME CONVERSION EXAMPLES
+# ==============================================================================
+
+# Indian EPG broadcasts times in IST (UTC+5:30)
+# You're viewing in Dubai with GST (UTC+4:00)
+# Difference: 1 hour 30 minutes
+
+# Conversion Examples:
+#
+#   IST (Mumbai)  →  GST (Dubai)
+#   ────────────────────────────
+#   6:00 AM       →  4:30 AM
+#   8:00 AM       →  6:30 AM
+#   12:00 PM      →  10:30 AM
+#   3:00 PM       →  1:30 PM
+#   6:00 PM       →  4:30 PM
+#   8:00 PM       →  6:30 PM  (Prime time!)
+#   10:00 PM      →  8:30 PM
+#   12:00 AM      →  10:30 PM
+
+# Popular Indian Prime Time Shows (IST → GST):
+#   - "Anupamaa" on Star Plus: 8:00 PM IST → 6:30 PM GST
+#   - "Kundali Bhagya" on Zee TV: 9:30 PM IST → 8:00 PM GST
+#   - "Kaun Banega Crorepati": 9:00 PM IST → 7:30 PM GST
+
+# ==============================================================================
+# REVERSE SCENARIO: UAE STB IN INDIA
+# ==============================================================================
+
+# If you have a UAE STB (e&/du/OSN) installed in India:
+
+displays:
+  mumbai_living_room_uae_stb:
+    title: Mumbai (UAE STB)
+    location: mumbai
+    
+    broadlink:
+      host: 192.168.1.151
+      mac: "24:DF:A7:F9:4D:85"
+    
+    epg:
+      enabled: true
+      country_code: "ae"  # For UAE channel logos
+      timezone: "Asia/Kolkata"  # IST - Your viewing location (Mumbai)
+      
+      sources:
+        # OSN EPG - times are in GST
+        - url: "https://iptv-org.github.io/epg/guides/ae-en/osn.com.epg.xml"
+          source_timezone: "Asia/Dubai"  # Source is in GST
+      
+      # Times will convert: GST → IST (add 1.5 hours)
+      #   6:00 PM GST → 7:30 PM IST
+      #   8:00 PM GST → 9:30 PM IST
+      
+      channels:
+        - name: "Star World HD"
+          epg_id: "StarWorld.uk@SD"
+          channel_number: 188
+          ir_command: "num_1,num_8,num_8"
+
+# ==============================================================================
+# MULTI-ROOM WITH DIFFERENT TIMEZONES
+# ==============================================================================
+
+# Example: You have homes in multiple countries
+
+displays:
+  # Home in Dubai - Indian STB
+  dubai_home:
+    title: Dubai Home
+    location: dubai
+    epg:
+      country_code: "in"
+      timezone: "Asia/Dubai"  # GST
+      sources:
+        - url: "https://avkb.short.gy/epg.xml.gz"
+    broadlink:
+      host: 192.168.1.150
+  
+  # Home in Mumbai - Indian STB
+  mumbai_home:
+    title: Mumbai Home
+    location: mumbai
+    epg:
+      country_code: "in"
+      timezone: "Asia/Kolkata"  # IST
+      sources:
+        - url: "https://avkb.short.gy/epg.xml.gz"
+    broadlink:
+      host: 192.168.2.150
+  
+  # Home in London - Indian STB
+  london_home:
+    title: London Home
+    location: london
+    epg:
+      country_code: "in"
+      timezone: "Europe/London"  # GMT/BST
+      sources:
+        - url: "https://avkb.short.gy/epg.xml.gz"
+    # IST to GMT: subtract 5.5 hours (or 4.5 during BST)
+    # 8:00 PM IST → 2:30 PM GMT (1:30 PM BST)
+    broadlink:
+      host: 192.168.3.150
+
+# ==============================================================================
+# TESTING TIME CONVERSION
+# ==============================================================================
+
+# Test EPG with timezone conversion:
+# python3 epg_client.py https://avkb.short.gy/epg.xml.gz
+
+# The EPG client will show times in YOUR system's local timezone
+# To test specific timezone conversion:
+# 
+# import datetime
+# from epg_client import EPGClient
+# 
+# client = EPGClient()
+# 
+# # Fetch EPG
+# xmltv_file = client.fetch_xmltv("https://avkb.short.gy/epg.xml.gz")
+# 
+# # Parse with Dubai timezone
+# from datetime import timezone, timedelta
+# dubai_tz = timezone(timedelta(hours=4))
+# channels, programmes = client.parse_xmltv(xmltv_file, dubai_tz)
+# 
+# # Check a specific show
+# for prog in programmes:
+#     if prog.channel == "461":  # Star Plus
+#         print(f"{prog.title}: {prog.start.strftime('%I:%M %p GST')}")
+
+# ==============================================================================
+# TIMEZONE REFERENCE
+# ==============================================================================
+
+# Common timezones for Indian expats:
+
+# UAE (Dubai, Abu Dhabi):
+timezone: "Asia/Dubai"           # GST (UTC+4)
+# Difference from IST: -1:30
+
+# Saudi Arabia:
+timezone: "Asia/Riyadh"          # AST (UTC+3)
+# Difference from IST: -2:30
+
+# Qatar:
+timezone: "Asia/Qatar"           # AST (UTC+3)
+# Difference from IST: -2:30
+
+# Oman:
+timezone: "Asia/Muscat"          # GST (UTC+4)
+# Difference from IST: -1:30
+
+# Kuwait:
+timezone: "Asia/Kuwait"          # AST (UTC+3)
+# Difference from IST: -2:30
+
+# Bahrain:
+timezone: "Asia/Bahrain"         # AST (UTC+3)
+# Difference from IST: -2:30
+
+# UK:
+timezone: "Europe/London"        # GMT/BST (UTC+0/+1)
+# Difference from IST: -5:30 (GMT) or -4:30 (BST)
+
+# USA East Coast:
+timezone: "America/New_York"     # EST/EDT (UTC-5/-4)
+# Difference from IST: -10:30 (EST) or -9:30 (EDT)
+
+# Singapore:
+timezone: "Asia/Singapore"       # SGT (UTC+8)
+# Difference from IST: +2:30
+
+# Australia (Sydney):
+timezone: "Australia/Sydney"     # AEDT/AEST (UTC+11/+10)
+# Difference from IST: +5:30 (AEST) or +6:30 (AEDT)
+
+# ==============================================================================
+# IMPORTANT NOTES
+# ==============================================================================
+
+# 1. XMLTV Format Already Includes Timezone
+#    - EPG data includes timezone offset: "20260731200000 +0530"
+#    - The +0530 means IST (UTC+5:30)
+#    - Our parser automatically converts this to your target timezone
+#
+# 2. No Manual Calculation Needed
+#    - Just set "timezone" to your viewing location
+#    - The system handles all conversions automatically
+#
+# 3. Daylight Saving Time (DST)
+#    - Some regions use DST (UK, USA, Australia)
+#    - The system automatically handles DST transitions
+#    - India and UAE don't use DST (no changes year-round)
+#
+# 4. Channel Logos
+#    - Use country_code: "in" for Indian channel logos
+#    - Use country_code: "ae" for UAE channel logos
+#    - The country_code only affects logos, not time conversion
+#
+# 5. Multiple EPG Sources
+#    - You can mix Indian EPG + UAE EPG in same config
+#    - Each source can have different timezone
+#    - All times convert to your target timezone
+#
+# 6. UI Display
+#    - Show times display in your local timezone
+#    - Optionally show timezone label ("GST", "IST")
+#    - "Now Playing" detection uses your local time
+
+# ==============================================================================
+# EXAMPLE OUTPUT
+# ==============================================================================
+
+# When viewing EPG in Dubai with Indian STB:
+#
+# Star Plus HD (109)
+# ══════════════════════════════════════
+# Now Playing:
+#   Anupamaa
+#   6:30 PM - 7:00 PM GST
+#   (Originally 8:00 PM - 8:30 PM IST)
+#
+# Coming Up:
+#   Yeh Rishta Kya Kehlata Hai
+#   7:00 PM - 7:30 PM GST
+#   (Originally 8:30 PM - 9:00 PM IST)
+#
+#   Ghum Hai Kisikey Pyaar Meiin
+#   7:30 PM - 8:00 PM GST
+#   (Originally 9:00 PM - 9:30 PM IST)
+
+# ==============================================================================
+# QUICK START - INDIAN STB IN DUBAI
+# ==============================================================================
+
+# 1. Copy this configuration to displays.yaml
+
+# 2. Update IPs and MAC addresses:
+#    - Flip display IP
+#    - Broadlink device IP and MAC
+
+# 3. Verify timezone is set to Dubai:
+#    timezone: "Asia/Dubai"
+
+# 4. Install dependencies:
+#    pip3 install -r requirements.txt
+
+# 5. Test EPG:
+#    python3 epg_client.py https://avkb.short.gy/epg.xml.gz
+
+# 6. Learn IR codes for your STB:
+#    python3 broadlink_client.py --learn --host 192.168.1.150
+
+# 7. Start server:
+#    python3 server.py 8080
+
+# 8. Access from browser:
+#    http://192.168.1.100:8080/app/
+
+# 9. Verify times are showing in GST (Dubai time)
+#    - Check "Now Playing" matches your wall clock
+#    - Prime time shows should be around 6:30-8:30 PM GST
+
+# ==============================================================================
+# SUPPORT
+# ==============================================================================
+
+# If times are not converting correctly:
+# 1. Check timezone setting matches your location exactly
+# 2. Verify EPG source is loading (check logs)
+# 3. Confirm system time is correct: date
+# 4. Test timezone: python3 -c "from zoneinfo import ZoneInfo; print(ZoneInfo('Asia/Dubai'))"

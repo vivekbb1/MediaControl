@@ -35,7 +35,8 @@ class SubscriptionStatus(Enum):
 class TierLimits:
     """Limits for each subscription tier"""
     max_devices: int
-    max_rooms: int  # Rooms (zones) within the location
+    max_locations: int  # Number of physical locations/buildings
+    max_rooms: int  # Total rooms across all locations
     max_users: int
     max_encoders: int
     features: List[str] = field(default_factory=list)
@@ -44,15 +45,17 @@ class TierLimits:
 TIER_CONFIGS = {
     SubscriptionTier.FREE: TierLimits(
         max_devices=3,
-        max_locations=1,
+        max_locations=1,  # Single location only
+        max_rooms=1,  # 1 room only
         max_users=1,
         max_encoders=0,
         features=["basic_control", "epg"],
     ),
     SubscriptionTier.HOME: TierLimits(
         max_devices=5,
-        max_locations=1,
-        max_users=1,
+        max_locations=1,  # Single home
+        max_rooms=2,  # 2 rooms (e.g., living room + bedroom)
+        max_users=2,
         max_encoders=0,
         features=[
             "basic_control",
@@ -64,8 +67,9 @@ TIER_CONFIGS = {
     ),
     SubscriptionTier.HOME_PRO: TierLimits(
         max_devices=15,
-        max_locations=2,
-        max_users=3,
+        max_locations=1,  # Single home
+        max_rooms=5,  # 5 rooms (whole home)
+        max_users=5,
         max_encoders=1,
         features=[
             "basic_control",
@@ -81,7 +85,8 @@ TIER_CONFIGS = {
     ),
     SubscriptionTier.BUSINESS: TierLimits(
         max_devices=30,
-        max_locations=5,
+        max_locations=3,  # 3 locations (e.g., office, retail stores)
+        max_rooms=10,  # 10 rooms total across all locations
         max_users=10,
         max_encoders=3,
         features=[
@@ -100,9 +105,10 @@ TIER_CONFIGS = {
         ],
     ),
     SubscriptionTier.ENTERPRISE: TierLimits(
-        max_devices=100,
-        max_locations=999,
-        max_users=999,
+        max_devices=300,
+        max_locations=20,  # 20 locations (hotel chain, corporate offices)
+        max_rooms=150,  # 150 rooms total
+        max_users=50,
         max_encoders=10,
         features=[
             "basic_control",
@@ -126,7 +132,8 @@ TIER_CONFIGS = {
     ),
     SubscriptionTier.INTEGRATOR: TierLimits(
         max_devices=999999,
-        max_locations=999999,
+        max_locations=999999,  # Unlimited locations
+        max_rooms=999999,
         max_users=999999,
         max_encoders=999,
         features=[
@@ -148,7 +155,7 @@ TIER_CONFIGS = {
             "api_access",
             "sso",
             "sla",
-            "multi_tenant",
+            "multi_location",
             "embeddable_widget",
             "reseller_program",
             "custom_development",
@@ -159,12 +166,14 @@ TIER_CONFIGS = {
 
 @dataclass
 class Subscription:
-    """Subscription instance"""
+    """Subscription instance for an organization"""
     id: str
-    tenant_id: str
+    organization_id: str  # Organization that owns this subscription
     tier: SubscriptionTier
     status: SubscriptionStatus
     device_count: int
+    location_count: int  # Number of locations (buildings/sites)
+    room_count: int  # Total rooms across all locations
     start_date: datetime
     end_date: Optional[datetime] = None
     trial_ends: Optional[datetime] = None
@@ -215,93 +224,126 @@ class SubscriptionManager:
     
     def create_trial(
         self,
-        tenant_id: str,
+        organization_id: str,
         tier: SubscriptionTier = SubscriptionTier.HOME,
     ) -> Subscription:
         """Create a trial subscription (14 days)"""
         subscription = Subscription(
-            id=f"sub_{tenant_id}",
-            tenant_id=tenant_id,
+            id=f"sub_{organization_id}",
+            organization_id=organization_id,
             tier=tier,
             status=SubscriptionStatus.TRIAL,
             device_count=0,
+            location_count=0,
+            room_count=0,
             start_date=datetime.now(),
             trial_ends=datetime.now() + timedelta(days=14),
         )
-        self.subscriptions[tenant_id] = subscription
-        logger.info(f"Created trial subscription for tenant {tenant_id}")
+        self.subscriptions[organization_id] = subscription
+        logger.info(f"Created trial subscription for organization {organization_id}")
         return subscription
     
     def activate_subscription(
         self,
-        tenant_id: str,
+        organization_id: str,
         tier: SubscriptionTier,
         stripe_subscription_id: str,
     ) -> Subscription:
         """Activate paid subscription"""
         subscription = Subscription(
-            id=f"sub_{tenant_id}",
-            tenant_id=tenant_id,
+            id=f"sub_{organization_id}",
+            organization_id=organization_id,
             tier=tier,
             status=SubscriptionStatus.ACTIVE,
             device_count=0,
+            location_count=0,
+            room_count=0,
             start_date=datetime.now(),
             stripe_subscription_id=stripe_subscription_id,
         )
-        self.subscriptions[tenant_id] = subscription
-        logger.info(f"Activated {tier.value} subscription for tenant {tenant_id}")
+        self.subscriptions[organization_id] = subscription
+        logger.info(f"Activated {tier.value} subscription for organization {organization_id}")
         return subscription
     
-    def get_subscription(self, tenant_id: str) -> Optional[Subscription]:
-        """Get subscription for tenant"""
-        return self.subscriptions.get(tenant_id)
+    def get_subscription(self, organization_id: str) -> Optional[Subscription]:
+        """Get subscription for organization"""
+        return self.subscriptions.get(organization_id)
     
-    def check_device_limit(self, tenant_id: str) -> bool:
-        """Check if tenant can add more devices"""
-        subscription = self.get_subscription(tenant_id)
+    def check_device_limit(self, organization_id: str) -> bool:
+        """Check if organization can add more devices"""
+        subscription = self.get_subscription(organization_id)
         if not subscription:
-            logger.warning(f"No subscription found for tenant {tenant_id}")
+            logger.warning(f"No subscription found for organization {organization_id}")
             return False
         
         if not (subscription.is_active() or subscription.is_trial()):
-            logger.warning(f"Subscription not active for tenant {tenant_id}")
+            logger.warning(f"Subscription not active for organization {organization_id}")
             return False
         
         return subscription.can_add_device()
     
-    def register_device(self, tenant_id: str) -> bool:
-        """Register a device to tenant's subscription"""
-        subscription = self.get_subscription(tenant_id)
+    def check_location_limit(self, organization_id: str) -> bool:
+        """Check if organization can add more locations"""
+        subscription = self.get_subscription(organization_id)
+        if not subscription:
+            return False
+        
+        if not (subscription.is_active() or subscription.is_trial()):
+            return False
+        
+        limits = subscription.get_limits()
+        return subscription.location_count < limits.max_locations
+    
+    def register_device(self, organization_id: str) -> bool:
+        """Register a device to organization's subscription"""
+        subscription = self.get_subscription(organization_id)
         if not subscription:
             return False
         
         if not subscription.can_add_device():
             logger.error(
-                f"Device limit reached for tenant {tenant_id} "
+                f"Device limit reached for organization {organization_id} "
                 f"({subscription.device_count}/{subscription.get_limits().max_devices})"
             )
             return False
         
         subscription.device_count += 1
         logger.info(
-            f"Registered device for tenant {tenant_id} "
+            f"Registered device for organization {organization_id} "
             f"({subscription.device_count}/{subscription.get_limits().max_devices})"
         )
         return True
     
-    def unregister_device(self, tenant_id: str) -> bool:
-        """Unregister a device from tenant's subscription"""
-        subscription = self.get_subscription(tenant_id)
+    def unregister_device(self, organization_id: str) -> bool:
+        """Unregister a device from organization's subscription"""
+        subscription = self.get_subscription(organization_id)
         if not subscription or subscription.device_count == 0:
             return False
         
         subscription.device_count -= 1
-        logger.info(f"Unregistered device for tenant {tenant_id}")
+        logger.info(f"Unregistered device for organization {organization_id}")
         return True
     
-    def check_feature_access(self, tenant_id: str, feature: str) -> bool:
-        """Check if tenant has access to a feature"""
-        subscription = self.get_subscription(tenant_id)
+    def register_location(self, organization_id: str) -> bool:
+        """Register a location to organization's subscription"""
+        subscription = self.get_subscription(organization_id)
+        if not subscription:
+            return False
+        
+        if not self.check_location_limit(organization_id):
+            logger.error(
+                f"Location limit reached for organization {organization_id} "
+                f"({subscription.location_count}/{subscription.get_limits().max_locations})"
+            )
+            return False
+        
+        subscription.location_count += 1
+        logger.info(f"Registered location for organization {organization_id}")
+        return True
+    
+    def check_feature_access(self, organization_id: str, feature: str) -> bool:
+        """Check if organization has access to a feature"""
+        subscription = self.get_subscription(organization_id)
         if not subscription:
             return False
         
@@ -312,12 +354,12 @@ class SubscriptionManager:
     
     def upgrade_subscription(
         self,
-        tenant_id: str,
+        organization_id: str,
         new_tier: SubscriptionTier,
         stripe_subscription_id: Optional[str] = None,
     ) -> bool:
         """Upgrade subscription tier"""
-        subscription = self.get_subscription(tenant_id)
+        subscription = self.get_subscription(organization_id)
         if not subscription:
             return False
         
@@ -328,38 +370,48 @@ class SubscriptionManager:
             subscription.stripe_subscription_id = stripe_subscription_id
         
         logger.info(
-            f"Upgraded subscription for tenant {tenant_id}: "
+            f"Upgraded subscription for organization {organization_id}: "
             f"{old_tier.value} → {new_tier.value}"
         )
         return True
     
-    def cancel_subscription(self, tenant_id: str) -> bool:
+    def cancel_subscription(self, organization_id: str) -> bool:
         """Cancel subscription (end of billing period)"""
-        subscription = self.get_subscription(tenant_id)
+        subscription = self.get_subscription(organization_id)
         if not subscription:
             return False
         
         subscription.status = SubscriptionStatus.CANCELED
         subscription.end_date = datetime.now() + timedelta(days=30)  # Grace period
-        logger.info(f"Canceled subscription for tenant {tenant_id}")
+        logger.info(f"Canceled subscription for organization {organization_id}")
         return True
     
-    def get_usage_summary(self, tenant_id: str) -> Dict[str, Any]:
-        """Get usage summary for tenant"""
-        subscription = self.get_subscription(tenant_id)
+    def get_usage_summary(self, organization_id: str) -> Dict[str, Any]:
+        """Get usage summary for organization"""
+        subscription = self.get_subscription(organization_id)
         if not subscription:
             return {}
         
         limits = subscription.get_limits()
         
         return {
-            "tenant_id": tenant_id,
+            "organization_id": organization_id,
             "tier": subscription.tier.value,
             "status": subscription.status.value,
             "devices": {
                 "current": subscription.device_count,
                 "limit": limits.max_devices,
                 "remaining": limits.max_devices - subscription.device_count,
+            },
+            "locations": {
+                "current": subscription.location_count,
+                "limit": limits.max_locations,
+                "remaining": limits.max_locations - subscription.location_count,
+            },
+            "rooms": {
+                "current": subscription.room_count,
+                "limit": limits.max_rooms,
+                "remaining": limits.max_rooms - subscription.room_count,
             },
             "trial": {
                 "is_trial": subscription.is_trial(),

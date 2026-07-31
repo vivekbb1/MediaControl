@@ -16,6 +16,10 @@ pyatv>=0.14.0
 # adb-shell>=0.4.0
 # pure-python-adb>=0.3.0
 
+# Audio devices
+soco>=0.30.0  # Sonos control
+# Note: pyatv (already listed above) also handles AirPlay
+
 # Existing requirements
 broadlink>=0.19.0
 requests>=2.31.0

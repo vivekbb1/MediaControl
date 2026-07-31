@@ -8,12 +8,16 @@
 
 The **MediaControl Gateway** is a professional-grade, single-device solution that consolidates:
 - HDMI switching & encoding
+- **KVM switching (Keyboard/Video/Mouse)**
+- **USB-C/USB-A accessory switching**
 - Legacy device control (IR/RF/RS232/RS485)
+- **Wireless keyboard/mouse support**
 - Local web server for KNX integration
 - Cloud synchronization & remote access
 - Audio/video distribution
+- **Microsoft Teams Room & thin client PC integration**
 
-**One device per room** replaces: Raspberry Pi + Broadlink + HDMI encoder + serial controller + network bridge.
+**One device per room** replaces: Raspberry Pi + Broadlink + HDMI encoder + serial controller + network bridge + KVM switch + USB hub.
 
 ---
 
@@ -115,20 +119,77 @@ The **MediaControl Gateway** is a professional-grade, single-device solution tha
 - **Cost:** ~$5-8
 
 **Bluetooth:** BLE 5.0
-- **Use cases:** Audio streaming, proximity detection
+- **Use cases:** Audio streaming, proximity detection, **wireless keyboard/mouse**
 - **Cost:** Integrated with Wi-Fi module
 
-#### 6. Power Supply
+#### 7. KVM Switching Module
 
-**Input:** 12V DC, 5A (60W max)
+**USB Host Controller with Switching**
+- **Chipset:** Cypress CY7C65632 or Microchip USB5537
+- **Features:**
+  - 4-port USB 3.0 hub per source
+  - USB switching between sources (keyboard/mouse routing)
+  - Wireless keyboard/mouse receiver (Bluetooth 5.0)
+  - USB device emulation for seamless switching
+  - Hotkey switching support (Scroll Lock 2x, etc.)
+- **Cost:** ~$8-12 per unit
+
+**USB-C/USB-A Accessory Ports (Switchable)**
+- **2× USB-C ports** (USB 3.2, 10Gbps, 15W power)
+  - Switchable between connected sources
+  - Use cases: webcams, USB drives, charging
+- **2× USB-A 3.0 ports** (5Gbps)
+  - Switchable between sources
+  - Use cases: peripherals, storage, dongles
+- **Switching IC:** Analogix ANX7418 or similar
+- **Cost:** ~$15-20 for all USB switching
+
+**Wireless Keyboard/Mouse Support**
+- **Bluetooth 5.0 receiver** (integrated with Wi-Fi module)
+- **2.4GHz wireless dongle support** (USB)
+- **Auto-pairing with gateway**
+- **Multi-device support** (switch keyboard/mouse between sources)
+- **Cost:** Included in BT module
+
+#### 8. Collaboration Features
+
+**Microsoft Teams Room Integration**
+- **Use case:** Gateway acts as peripheral hub for Android Teams Room devices
+- **Connection:** HDMI input + USB-C for control
+- **Features:**
+  - Route Teams Room video to displays
+  - Share USB peripherals (camera, mic, speaker) with Teams device
+  - Touch screen support (via USB HID)
+
+**Thin Client PC Support**
+- **Use case:** Gateway provides KVM access to thin client PCs (Windows 10 IoT, ThinOS, etc.)
+- **Connection:** HDMI + USB
+- **Features:**
+  - Switch between thin client and other sources
+  - Share keyboard/mouse with thin client
+  - USB peripheral access
+
+**Embedded Compute Module (Optional)**
+- **Option:** Built-in Android or Linux compute module
+- **Chipset:** Same RK3588 can run Android/Linux guest OS
+- **Use cases:**
+  - Native Teams/Zoom client (no external device)
+  - Wireless presentation (Miracast, AirPlay)
+  - Digital signage
+- **Cost:** +$50 for Android license + software
+
+#### 9. Power Supply
+
+**Input:** 12V DC, 6A (72W max) - *Increased for USB-C power delivery*
 - **Distribution:** Multiple voltage rails (5V, 3.3V, 12V)
 - **Features:**
   - Over-current protection
   - Soft-start circuitry
-  - Optional PoE (802.3at, 25W)
-- **Cost:** ~$8-12
+  - Optional PoE++ (802.3bt, 60W)
+  - USB-C PD 3.0 support (15W per port)
+- **Cost:** ~$12-18
 
-#### 7. Enclosure & Physical
+#### 10. Enclosure & Physical
 
 **Dimensions:** Rack-mountable 1U or compact desktop unit
 - **Size:** 220mm × 150mm × 45mm (approximately)
@@ -146,12 +207,16 @@ The **MediaControl Gateway** is a professional-grade, single-device solution tha
 
 ### Model Lineup
 
-| Model | HDMI In | HDMI Out | Audio Out | IR | RF | RS232/485 | Price (Est.) |
-|-------|---------|----------|-----------|----|----|-----------|--------------|
-| **MCG-200** | 2 | 1 | Stereo | 2 | Yes | 1 | $299 |
-| **MCG-400** | 4 | 2 | Stereo | 4 | Yes | 2 | $449 |
-| **MCG-600** | 6 | 2 | 5.1 | 4 | Yes | 2 | $599 |
-| **MCG-Pro** | 6 | 2 | 5.1 | 4 | Yes | 2 + PoE | $799 |
+| Model | HDMI In | HDMI Out | KVM | USB-C/A | Audio Out | IR | RF | RS232/485 | Price (Est.) |
+|-------|---------|----------|-----|---------|-----------|----|----|-----------|--------------|
+| **MCG-200** | 2 | 1 | ❌ | - | Stereo | 2 | Yes | 1 | $299 |
+| **MCG-400** | 4 | 2 | ❌ | - | Stereo | 4 | Yes | 2 | $449 |
+| **MCG-400K** | 4 | 2 | ✅ | 2C + 2A | Stereo | 4 | Yes | 2 | **$599** |
+| **MCG-600** | 6 | 2 | ❌ | - | 5.1 | 4 | Yes | 2 | $649 |
+| **MCG-600K** | 6 | 2 | ✅ | 2C + 2A | 5.1 | 4 | Yes | 2 | **$799** |
+| **MCG-Pro** | 6 | 2 | ✅ | 4C + 4A | 5.1 | 4 | Yes | 2 + PoE++ | **$999** |
+
+**K = KVM Edition** (adds USB switching, wireless keyboard/mouse, collaboration features)
 
 ---
 
@@ -165,6 +230,7 @@ The **MediaControl Gateway** is a professional-grade, single-device solution tha
 │  • KNX Integration UI                       │
 │  • Room Control Interface                   │
 │  • Configuration Dashboard                  │
+│  • KVM Switching UI (source selection)     │
 ├─────────────────────────────────────────────┤
 │         Local API Server (Python/Go)        │
 │  • REST API endpoints                       │
@@ -173,12 +239,16 @@ The **MediaControl Gateway** is a professional-grade, single-device solution tha
 ├─────────────────────────────────────────────┤
 │         Control Layer (Python)              │
 │  • HDMI switching logic                     │
+│  • KVM switching (keyboard/mouse routing)   │
+│  • USB accessory switching                  │
 │  • IR/RF command dispatcher                 │
 │  • RS232/485 communication                  │
 │  • Audio routing                            │
 ├─────────────────────────────────────────────┤
 │         Hardware Abstraction Layer          │
 │  • HDMI encoder drivers                     │
+│  • USB host controller drivers              │
+│  • HID device emulation (keyboard/mouse)    │
 │  • GPIO control (IR/RF)                     │
 │  • Serial port management                   │
 │  • Audio codec control                      │
@@ -194,6 +264,7 @@ The **MediaControl Gateway** is a professional-grade, single-device solution tha
 │  • Minimal footprint                        │
 │  • Read-only root filesystem                │
 │  • Secure boot                              │
+│  • USB Gadget mode for HID emulation        │
 └─────────────────────────────────────────────┘
 ```
 
@@ -294,7 +365,142 @@ class CloudBridge:
         self.cloud_api.post_status(status)
 ```
 
-#### 4. Local + Remote Access
+#### 4. KVM Switching Control
+```python
+# KVM switching for keyboard/mouse/video/USB routing
+
+class KVMController:
+    def __init__(self):
+        self.active_source = 1  # Currently active source (1-4)
+        self.usb_hub_controller = USBHubController()
+        self.hdmi_switcher = HDMISwitcher()
+        
+    def switch_to_source(self, source_id: int):
+        """Switch keyboard, mouse, video, and USB to specified source"""
+        # Switch HDMI video
+        self.hdmi_switcher.set_active_input(source_id)
+        
+        # Route keyboard/mouse to source
+        self.usb_hub_controller.route_hid_to_port(source_id)
+        
+        # Switch USB-C/USB-A accessories to source
+        self.usb_hub_controller.route_accessories_to_port(source_id)
+        
+        # Update active source
+        self.active_source = source_id
+        
+        logger.info(f"KVM switched to source {source_id}")
+    
+    def get_wireless_devices(self):
+        """Get list of paired wireless keyboards/mice"""
+        return self.usb_hub_controller.get_bluetooth_devices()
+    
+    def pair_wireless_device(self, device_type: str):
+        """Put gateway into pairing mode for keyboard/mouse"""
+        if device_type == "keyboard":
+            self.usb_hub_controller.pair_keyboard()
+        elif device_type == "mouse":
+            self.usb_hub_controller.pair_mouse()
+
+class USBHubController:
+    """Control USB switching and routing"""
+    
+    def route_hid_to_port(self, port: int):
+        """Route keyboard/mouse (HID devices) to specified port"""
+        # USB switching IC command (via I2C or GPIO)
+        self.switch_ic.set_hid_route(port)
+    
+    def route_accessories_to_port(self, port: int):
+        """Route USB-C/USB-A accessories to specified port"""
+        # Switch USB-C ports
+        self.switch_ic.set_usbc_route(port)
+        # Switch USB-A ports
+        self.switch_ic.set_usba_route(port)
+    
+    def get_connected_devices(self):
+        """List all USB devices connected to accessory ports"""
+        return {
+            "usb_c_1": self.get_device_info("/dev/usbc1"),
+            "usb_c_2": self.get_device_info("/dev/usbc2"),
+            "usb_a_1": self.get_device_info("/dev/usba1"),
+            "usb_a_2": self.get_device_info("/dev/usba2")
+        }
+```
+
+#### 5. Teams Room & Thin Client Integration
+```python
+# Integration with Microsoft Teams Room and thin client PCs
+
+class CollaborationIntegration:
+    def configure_teams_room(self, hdmi_port: int):
+        """Configure gateway to work with Teams Room device"""
+        config = {
+            "device_type": "microsoft_teams_room",
+            "hdmi_input": hdmi_port,
+            "usb_connection": "usb_c_1",  # Teams Room connects via USB-C
+            "features": {
+                "camera_sharing": True,    # Share USB webcam with Teams device
+                "audio_routing": True,     # Route audio from Teams to room speakers
+                "touch_screen": True       # Pass touch input to Teams device
+            }
+        }
+        
+        # Configure USB routing for Teams Room
+        self.kvm.usb_hub_controller.dedicate_port_to_device(
+            port="usb_c_1",
+            device=config["device_type"]
+        )
+        
+        return config
+    
+    def configure_thin_client(self, hdmi_port: int, os_type: str):
+        """Configure gateway to provide KVM access to thin client PC"""
+        config = {
+            "device_type": "thin_client",
+            "os": os_type,  # "windows_iot", "thinos", "igel", "wyse", etc.
+            "hdmi_input": hdmi_port,
+            "kvm_enabled": True,
+            "wireless_keyboard_mouse": True
+        }
+        
+        # Enable KVM switching for thin client
+        self.kvm.add_source(hdmi_port, config)
+        
+        return config
+    
+    def switch_to_teams_room(self):
+        """Quick switch to Teams Room for video calls"""
+        teams_port = self.get_teams_room_port()
+        self.kvm.switch_to_source(teams_port)
+        
+        # Optionally mute other sources
+        self.audio_router.mute_all_except(teams_port)
+
+class EmbeddedComputeModule:
+    """Optional: Run Android/Linux directly on gateway"""
+    
+    def __init__(self):
+        self.android_vm = None  # Android container
+        self.apps = []
+    
+    def start_teams_client(self):
+        """Launch Microsoft Teams on embedded Android"""
+        if not self.android_vm:
+            self.android_vm = self.launch_android_container()
+        
+        # Launch Teams app
+        self.android_vm.launch_app("com.microsoft.teams")
+        
+        # Route video to HDMI output
+        self.hdmi_out.set_source("android_vm")
+    
+    def wireless_presentation_mode(self):
+        """Enable Miracast/AirPlay for wireless screen sharing"""
+        self.android_vm.enable_miracast()
+        self.android_vm.enable_airplay()
+```
+
+#### 6. Local + Remote Access
 ```python
 # Device runs local web server for KNX
 # Also proxies to cloud for remote access
@@ -314,7 +520,7 @@ class AccessManager:
 
 ## Bill of Materials (BOM)
 
-### MCG-400 Model (4 HDMI In, 2 Out)
+### MCG-400 Model (4 HDMI In, 2 Out) - Standard
 
 | Component | Description | Qty | Unit Cost | Total |
 |-----------|-------------|-----|-----------|-------|
@@ -341,23 +547,59 @@ class AccessManager:
 
 ---
 
+### MCG-400K Model (4 HDMI In, 2 Out + KVM) - **NEW**
+
+| Component | Description | Qty | Unit Cost | Total |
+|-----------|-------------|-----|-----------|-------|
+| **Main Board** | RK3588 SoM + carrier | 1 | $75 | $75 |
+| **HDMI Input** | TC358870 encoder | 4 | $18 | $72 |
+| **HDMI Output** | ADV7513 driver | 2 | $10 | $20 |
+| **Audio Codec** | CS42448 | 1 | $6 | $6 |
+| **USB Hub/Switch** | CY7C65632 (4-port USB 3.0 hub with switching) | 1 | $10 | $10 |
+| **USB-C Ports** | 2× USB-C 3.2 w/ PD (15W) | 2 | $8 | $16 |
+| **USB-A Ports** | 2× USB-A 3.0 | 2 | $2 | $4 |
+| **USB Switching IC** | Analogix ANX7418 (USB-C/A switching) | 1 | $12 | $12 |
+| **Wireless Receiver** | Bluetooth 5.0 (integrated) | - | - | $0 |
+| **IR Emitters** | LED + driver circuit | 4 | $2.50 | $10 |
+| **RF Module** | CC1101 433MHz | 1 | $4 | $4 |
+| **RS232/485** | MAX3232 + MAX485 | 2 | $5 | $10 |
+| **Ethernet** | Gigabit PHY | 1 | $4 | $4 |
+| **Wi-Fi/BT** | RTL8822CE module | 1 | $7 | $7 |
+| **Power Supply** | 12V 6A adapter (72W for USB-C PD) | 1 | $15 | $15 |
+| **Enclosure** | Aluminum case (larger) | 1 | $25 | $25 |
+| **PCB** | 6-layer custom (more complex routing) | 1 | $22 | $22 |
+| **Connectors** | HDMI, USB-C, USB-A, RCA, DB9, etc. | - | $18 | $18 |
+| **Misc** | Capacitors, resistors | - | $10 | $10 |
+| **Assembly** | PCB assembly (SMT) | 1 | $35 | $35 |
+| | | | **TOTAL:** | **$375** |
+
+**Wholesale Cost:** ~$375 per unit (volume 1000+)  
+**Retail Price:** $599  
+**Margin:** ~37%
+
+---
+
 ## Business Model
 
 ### Revenue Streams
 
 #### 1. Hardware Sales
 
-| Model | Wholesale | Retail | Margin |
-|-------|-----------|--------|--------|
-| MCG-200 | $180 | $299 | 40% |
-| MCG-400 | $300 | $449 | 33% |
-| MCG-600 | $380 | $599 | 37% |
-| MCG-Pro | $510 | $799 | 36% |
+| Model | Wholesale | Retail | Margin | Target Market |
+|-------|-----------|--------|--------|---------------|
+| MCG-200 | $180 | $299 | 40% | Home users, small rooms |
+| MCG-400 | $300 | $449 | 33% | Hotels, conference rooms |
+| **MCG-400K** | **$375** | **$599** | **37%** | **Collaboration spaces, hot desks** |
+| MCG-600 | $380 | $599 | 37% | Multi-display rooms |
+| **MCG-600K** | **$490** | **$799** | **39%** | **Executive offices, Teams Rooms** |
+| **MCG-Pro** | **$580** | **$999** | **42%** | **Enterprise meeting rooms, boardrooms** |
 
-**Projected Hardware Revenue:**
-- Year 1: 1,000 units × $350 avg = $350,000
-- Year 2: 5,000 units × $350 avg = $1,750,000
-- Year 3: 15,000 units × $350 avg = $5,250,000
+**Projected Hardware Revenue** (including KVM models):
+- Year 1: 1,000 units × $400 avg = $400,000
+- Year 2: 5,000 units × $450 avg = $2,250,000
+- Year 3: 20,000 units × $450 avg = $9,000,000
+
+*KVM models expected to represent 40-50% of sales due to collaboration/workspace demand*
 
 #### 2. Subscription Model
 
@@ -372,18 +614,31 @@ class AccessManager:
 - 100 devices × $10/month = $1,000/month
 - Annual recurring revenue: $12,000 per hotel
 
+**Example Corporate Office (KVM Focus):**
+- 50 meeting rooms + 200 hot desks = 250 devices (MCG-400K/600K)
+- 250 devices × $12/month = $3,000/month
+- Annual recurring revenue: $36,000 per office
+
 **Projected Subscription Revenue:**
-- Year 1: 500 active devices × $8 avg × 12 months = $48,000
-- Year 2: 3,000 active devices × $8 avg × 12 months = $288,000
-- Year 3: 10,000 active devices × $8 avg × 12 months = $960,000
+- Year 1: 600 active devices × $9 avg × 12 months = $64,800
+- Year 2: 4,000 active devices × $9 avg × 12 months = $432,000
+- Year 3: 15,000 active devices × $10 avg × 12 months = $1,800,000
+
+*Higher ARPU expected due to KVM/collaboration use cases (enterprise pricing)*
 
 #### 3. Total Projected Revenue
 
 | Year | Hardware | Subscription | Total |
 |------|----------|--------------|-------|
-| Year 1 | $350K | $48K | **$398K** |
-| Year 2 | $1,750K | $288K | **$2,038K** |
-| Year 3 | $5,250K | $960K | **$6,210K** |
+| Year 1 | $400K | $65K | **$465K** |
+| Year 2 | $2,250K | $432K | **$2,682K** |
+| Year 3 | $9,000K | $1,800K | **$10,800K** |
+
+**Revenue Growth Drivers:**
+- KVM models command 33% higher ASP ($599 vs $449)
+- Collaboration/workspace market (Teams Rooms, hot desks) is rapidly growing
+- Enterprise customers pay premium subscriptions ($12-15/device vs $8-10)
+- Hot desk market: 40M+ desks globally, growing 15% annually
 
 ### Competitive Advantages
 
@@ -407,6 +662,13 @@ class AccessManager:
 - Cloud management
 - KNX integration
 - All-in-one solution
+
+✅ **vs. Generic KVM Switch (Belkin, IOGEAR):**
+- KVM + HDMI encoding + control in one device
+- Wireless keyboard/mouse support (not just wired)
+- Teams Room integration
+- Cloud management
+- 5x cheaper than enterprise KVM ($599 vs $2,000+)
 
 ---
 
@@ -519,11 +781,20 @@ class AccessManager:
 - 32GB storage
 - Linux-based OS
 
+**KVM (MCG-400K only):**
+- USB 3.0 switching (keyboard/mouse routing)
+- Wireless keyboard/mouse support (Bluetooth 5.0)
+- 2× USB-C ports (switchable, 15W PD)
+- 2× USB-A 3.0 ports (switchable)
+- Hotkey switching (Scroll Lock 2x)
+- Microsoft Teams Room integration
+- Thin client PC support
+
 **Physical:**
-- Dimensions: 220 × 150 × 45mm
-- Weight: 800g
-- Mounting: Desktop, rack, VESA, DIN rail
-- Power: 12V DC, 5A (60W max)
+- Dimensions: 220 × 150 × 45mm (standard), 240 × 180 × 50mm (KVM models)
+- Weight: 800g (standard), 1000g (KVM)
+- Mounting: Desktop, rack, VESA, DIN rail, under-desk
+- Power: 12V DC, 5A (60W, standard), 12V DC, 6A (72W, KVM)
 - Operating temp: 0-40°C
 
 **Software:**
@@ -532,24 +803,32 @@ class AccessManager:
 - Local + remote access
 - OTA firmware updates
 - REST API + WebSocket
+- KVM control API (source switching, USB routing)
+- Teams Room API integration
 
 ---
 
 ## Competitive Analysis
 
-| Feature | MediaControl Gateway | Control4 | Crestron | Savant | Raspberry Pi + DIY |
-|---------|---------------------|----------|----------|--------|--------------------|
-| **Price** | $449 | $4,000+ | $5,000+ | $3,500+ | $200-300 (no HDMI encoding) |
-| **HDMI Encoding** | ✅ Built-in | ❌ Separate | ❌ Separate | ❌ Separate | ❌ Extra hardware needed |
-| **IR/RF/RS232** | ✅ All included | ✅ Extra modules | ✅ Extra modules | ✅ Extra modules | ✅ Broadlink needed |
-| **Cloud Management** | ✅ Included | ❌ Dealer only | ❌ Dealer only | ❌ Dealer only | ❌ Self-hosted |
-| **KNX Integration** | ✅ Direct | ✅ Via driver | ✅ Via driver | ✅ Via driver | ❌ Manual |
-| **Audio-Only Mode** | ✅ Native | ❌ | ❌ | ❌ | ❌ |
-| **Dealer Required** | ❌ No | ✅ Yes | ✅ Yes | ✅ Yes | ❌ No |
-| **Warranty** | 2 years | 1-3 years | 1-3 years | 1-3 years | None |
-| **Support** | Email/Chat | Dealer | Dealer | Dealer | Community |
+| Feature | MediaControl Gateway | MediaControl Gateway KVM | Control4 | Crestron | KVM Switch (IOGEAR) |
+|---------|---------------------|--------------------------|----------|----------|---------------------|
+| **Price** | $449 | **$599** | $4,000+ | $5,000+ | $2,000+ |
+| **HDMI Encoding** | ✅ Built-in | ✅ Built-in | ❌ Separate | ❌ Separate | ❌ Video only |
+| **KVM Switching** | ❌ | ✅ USB 3.0 + wireless | ❌ | ❌ | ✅ Wired only |
+| **USB-C/A Switching** | ❌ | ✅ 2C + 2A | ❌ | ❌ | ❌ Limited |
+| **Wireless KB/Mouse** | ❌ | ✅ Bluetooth 5.0 | ❌ | ❌ | ❌ No |
+| **Teams Room Support** | ❌ | ✅ Native | ❌ | ❌ | ❌ No |
+| **IR/RF/RS232** | ✅ All included | ✅ All included | ✅ Extra modules | ✅ Extra modules | ❌ No |
+| **Cloud Management** | ✅ Included | ✅ Included | ❌ Dealer only | ❌ Dealer only | ❌ No |
+| **KNX Integration** | ✅ Direct | ✅ Direct | ✅ Via driver | ✅ Via driver | ❌ No |
+| **Audio-Only Mode** | ✅ Native | ✅ Native | ❌ | ❌ | ❌ No |
+| **Dealer Required** | ❌ No | ❌ No | ✅ Yes | ✅ Yes | ❌ No |
+| **Warranty** | 2 years | 2 years | 1-3 years | 1-3 years | 1 year |
+| **Support** | Email/Chat | Email/Chat | Dealer | Dealer | Email only |
 
 **Market Position:** Professional features at prosumer pricing
+
+**Key Differentiator:** Only device combining HDMI matrix + KVM + IR/RF/RS232 + streaming + Teams integration in single unit
 
 ---
 
@@ -557,22 +836,32 @@ class AccessManager:
 
 ### Target Markets
 
-1. **Hospitality (Primary)**
+1. **Corporate Workspace (Primary)** - *KVM models*
+   - Meeting rooms & conference centers
+   - Hot desks & flexible workspaces
+   - Executive offices
+   - Microsoft Teams Rooms deployments
+   - Coworking spaces (WeWork, Regus, etc.)
+   - Hybrid work setups
+
+2. **Hospitality (Primary)**
    - Hotels (100-500 rooms)
    - Resorts
    - Vacation rentals
    - Airbnb hosts (luxury)
+   - Business centers
 
-2. **Residential (Secondary)**
+3. **Education (Secondary)** - *KVM models*
+   - Classrooms with Teams/Zoom
+   - Lecture halls
+   - Computer labs (thin client deployments)
+   - Library study rooms
+
+4. **Residential (Tertiary)**
    - Luxury homes
    - Smart home enthusiasts
    - Home theater integrators
-
-3. **Commercial (Tertiary)**
-   - Conference rooms
-   - Corporate offices
-   - Retail spaces
-   - Restaurants/bars
+   - Home offices (remote work)
 
 ### Sales Channels
 
@@ -629,26 +918,49 @@ class AccessManager:
 
 The MediaControl Gateway consolidates:
 ✅ HDMI switching & encoding (2-6 inputs)
+✅ **KVM switching (keyboard/video/mouse routing)**
+✅ **USB-C/USB-A accessory switching**
+✅ **Wireless keyboard/mouse support (Bluetooth)**
 ✅ Legacy device control (IR, RF, RS232, RS485)
 ✅ Audio distribution with audio-only mode
+✅ **Microsoft Teams Room integration**
+✅ **Thin client PC support**
 ✅ Local web server for KNX
 ✅ Cloud bridge for remote access
 ✅ Configuration storage & sync
 
 **Business Model:**
-- Hardware: $299-799 per device
+- Hardware: $299-999 per device (KVM models $599-999)
 - Subscription: $5-15/device/month
-- Target: Hotels, luxury homes, commercial
+- Target: **Corporate workspaces, meeting rooms, hot desks**, hotels, luxury homes
 
 **Competitive Advantage:**
 - 10x cheaper than Control4/Crestron
-- All-in-one (no Raspberry Pi + Broadlink)
+- 3x cheaper than enterprise KVM switches
+- **Only device with HDMI matrix + KVM + control in one unit**
+- **Wireless keyboard/mouse (no competitor has this)**
+- **Native Teams Room integration**
+- All-in-one (replaces: HDMI matrix + KVM switch + Broadlink + encoder + USB hub)
 - Professional grade
 - Cloud-managed
 - Open ecosystem
 
 **Time to Market:** 12-18 months
 **Initial Investment:** $700K
-**Revenue Potential:** $6M+ by year 3
+**Revenue Potential:** $10.8M by year 3 (higher due to KVM/workspace market)
 
-**This is a WINNING product!** 🎯
+**Target Markets Expanded:**
+1. **Corporate workspace & collaboration** (primary - high growth, high margin)
+2. Hospitality (primary - established market)
+3. Education (secondary - Teams/Zoom adoption)
+4. Residential (tertiary - remote work trend)
+
+**KVM Features Enable NEW Markets:**
+- Hot desks & flexible workspaces (40M+ desks globally)
+- Microsoft Teams Rooms (fastest growing UC endpoint)
+- Hybrid work setups (100M+ remote workers)
+- Thin client deployments (VDI/DaaS)
+
+**This is a GAME-CHANGING product!** 🚀
+
+**KVM models will likely outsell standard models 2:1 in commercial deployments.**

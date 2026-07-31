@@ -157,6 +157,34 @@ python-socketio>=5.9.0  # Socket.IO (alternative to WebSockets)
 cairo>=1.0.0  # For rendering whiteboard annotations (requires system libcairo)
 # Install libcairo2-dev (Linux) or cairo (macOS)
 
+# === SIP Telephony (VoIP) ===
+# SIP/VoIP support
+# pjsua2>=2.13  # PJSIP library (requires system libpjsip, compile from source)
+# Install PJSIP: https://www.pjsip.org/
+# Alternative: linphone>=3.0.0  # Linphone SDK (easier but less features)
+
+# For simpler SIP integration:
+# aiortc>=1.5.0  # Already listed (WebRTC, can also handle SIP via SDP)
+
+# SIP signaling
+sippy>=1.0  # SIP protocol implementation (pure Python, simpler alternative)
+
+# === Doorbell Camera Integration ===
+# Ring API (unofficial)
+ring-doorbell>=0.8.0  # Ring doorbell API client
+
+# Nest API (Google)
+# google-nest-sdm>=2.0.0  # Nest SDM (Smart Device Management) API
+
+# Arlo API (unofficial)
+# arlo>=1.2.0  # Arlo camera API client
+
+# UniFi Protect API (unofficial)
+# pyunifiprotect>=4.0.0  # UniFi Protect API client
+
+# ONVIF (generic IP cameras)
+onvif-zeep>=0.2.12  # ONVIF protocol for IP cameras/doorbells
+
 # === Development & Testing ===
 # pytest>=7.4.0
 # pytest-asyncio>=0.21.0

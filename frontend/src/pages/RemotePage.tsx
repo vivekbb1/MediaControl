@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { useEffect, useMemo, useState } from "react";
+import { Link, useParams, useSearchParams } from "react-router-dom";
 import { api } from "@/lib/api";
 import type { DisplaySummary, DisplayStatus } from "@/lib/types";
 import { ChannelPad } from "@/components/ChannelPad";
@@ -20,13 +20,15 @@ type RoomFeatures = {
 
 export function RemotePage() {
   const { location = "", room = "" } = useParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [display, setDisplay] = useState<DisplaySummary | null>(null);
   const [status, setStatus] = useState<DisplayStatus | null>(null);
   const [features, setFeatures] = useState<RoomFeatures | null>(null);
-  const [tab, setTab] = useState<Tab>("remote");
   const [busy, setBusy] = useState<string | null>(null);
   const [toast, setToast] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  const requestedTab = (searchParams.get("tab") || "") as Tab | "";
 
   useEffect(() => {
     api
@@ -37,7 +39,7 @@ export function RemotePage() {
         );
         if (!match) throw new Error("Room not found");
         setDisplay(match);
-        const f = (match as DisplaySummary & { features?: RoomFeatures }).features;
+        const f = match.features as RoomFeatures | undefined;
         if (f) setFeatures(f);
       })
       .catch((e) => setError(e.message));
@@ -47,7 +49,13 @@ export function RemotePage() {
     if (!display) return;
     api
       .roomFeatures(display.id)
-      .then((f) => setFeatures(f))
+      .then((f) =>
+        setFeatures({
+          broadlink: f.broadlink as RoomFeatures["broadlink"],
+          epg: f.epg as RoomFeatures["epg"],
+          beacons: f.beacons as RoomFeatures["beacons"],
+        }),
+      )
       .catch(() => undefined);
   }, [display]);
 
@@ -70,6 +78,24 @@ export function RemotePage() {
     };
   }, [display]);
 
+  const hasChannels = Boolean(features?.broadlink?.configured);
+  const hasEpg = Boolean(features?.epg?.enabled);
+  const hasPresence = Boolean(features?.beacons?.enabled);
+
+  const tab: Tab = useMemo(() => {
+    const allowed: Tab[] = ["remote"];
+    if (hasChannels) allowed.push("channels");
+    if (hasEpg) allowed.push("epg");
+    if (hasPresence) allowed.push("presence");
+    if (requestedTab && allowed.includes(requestedTab)) return requestedTab;
+    if (hasChannels) return "channels";
+    return "remote";
+  }, [requestedTab, hasChannels, hasEpg, hasPresence]);
+
+  function setTab(next: Tab) {
+    setSearchParams({ tab: next }, { replace: true });
+  }
+
   async function send(command: string) {
     if (!display) return;
     setBusy(command);
@@ -78,7 +104,27 @@ export function RemotePage() {
       const useIr =
         features?.broadlink?.configured &&
         (command.startsWith("num_") ||
-          ["ch_up", "ch_down", "last", "guide", "up", "down", "left", "right", "ok", "back", "menu", "exit", "info", "play", "pause", "stop", "rewind", "forward", "record"].includes(command));
+          [
+            "ch_up",
+            "ch_down",
+            "last",
+            "guide",
+            "up",
+            "down",
+            "left",
+            "right",
+            "ok",
+            "back",
+            "menu",
+            "exit",
+            "info",
+            "play",
+            "pause",
+            "stop",
+            "rewind",
+            "forward",
+            "record",
+          ].includes(command));
       const result = useIr
         ? await api.sendIr(display.id, command)
         : await api.sendCommand(display.id, command);
@@ -105,9 +151,7 @@ export function RemotePage() {
         ir_command,
       });
       setToast(
-        result.dry_run
-          ? `Dry-run tune ${channel}`
-          : `Tuned to ${channel}`,
+        result.dry_run ? `Dry-run tune ${channel}` : `Tuned to ${channel}`,
       );
     } catch (e) {
       setError(e instanceof Error ? e.message : "Tune failed");
@@ -135,17 +179,9 @@ export function RemotePage() {
 
   const tabs: Array<{ id: Tab; label: string; show: boolean }> = [
     { id: "remote", label: "Remote", show: true },
-    {
-      id: "channels",
-      label: "Channels",
-      show: Boolean(features?.broadlink?.configured),
-    },
-    { id: "epg", label: "EPG", show: Boolean(features?.epg?.enabled) },
-    {
-      id: "presence",
-      label: "Presence",
-      show: Boolean(features?.beacons?.enabled),
-    },
+    { id: "channels", label: "Channels", show: hasChannels },
+    { id: "epg", label: "EPG", show: hasEpg },
+    { id: "presence", label: "Presence", show: hasPresence },
   ];
 
   return (
@@ -158,7 +194,10 @@ export function RemotePage() {
           <h2 className="text-xl font-semibold">{display.title}</h2>
           {status && (
             <p className="mt-1 text-sm text-muted">
-              Power: {status.power ?? "—"} · Input: {status.input ?? "—"}
+              Power: {status.power ?? "—"} · Input:{" "}
+              {(status as DisplayStatus & { input_label?: string }).input_label ??
+                status.input ??
+                "—"}
               {status.volume != null && ` · Vol ${status.volume}`}
             </p>
           )}
@@ -176,7 +215,7 @@ export function RemotePage() {
         </Link>
       </div>
 
-      <div className="flex flex-wrap gap-2">
+      <div className="sticky top-0 z-10 -mx-1 grid grid-cols-2 gap-2 bg-[color-mix(in_srgb,var(--color-bg)_92%,transparent)] p-1 backdrop-blur sm:grid-cols-4">
         {tabs
           .filter((t) => t.show)
           .map((t) => (
@@ -184,16 +223,23 @@ export function RemotePage() {
               key={t.id}
               type="button"
               onClick={() => setTab(t.id)}
-              className={`rounded-xl border px-3 py-2 text-sm min-h-11 ${
+              className={`min-h-12 rounded-xl border px-3 py-3 text-sm font-semibold ${
                 tab === t.id
                   ? "border-accent bg-accent text-white"
-                  : "border-border bg-panel-elevated"
+                  : "border-border bg-panel-elevated text-text"
               }`}
             >
               {t.label}
             </button>
           ))}
       </div>
+
+      {!hasChannels && (
+        <p className="rounded-xl border border-border bg-panel px-3 py-2 text-sm text-muted">
+          Channels tab appears when Broadlink is configured for this room.
+          Demo room: Billet.
+        </p>
+      )}
 
       {toast && (
         <p className="rounded-xl border border-border bg-panel px-3 py-2 text-sm text-muted">
@@ -213,12 +259,19 @@ export function RemotePage() {
         </p>
       )}
 
-      {tab === "channels" && (
-        <ChannelPad
-          busy={busy}
-          onSend={send}
-          onTune={(digits) => tune(digits)}
-        />
+      {(tab === "channels" || (tab === "remote" && hasChannels)) && (
+        <div className={tab === "remote" ? "opacity-95" : ""}>
+          {tab === "remote" && (
+            <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-accent">
+              Channel pad (also on Channels tab)
+            </p>
+          )}
+          <ChannelPad
+            busy={busy}
+            onSend={send}
+            onTune={(digits) => tune(digits)}
+          />
+        </div>
       )}
 
       {tab === "epg" && (
@@ -234,31 +287,33 @@ export function RemotePage() {
 
       {tab === "remote" &&
         (sections.length > 0 ? (
-          sections.map((section) => (
-            <section key={section.id ?? section.title} className="space-y-2">
-              {(section.label || section.title) && (
-                <h3 className="text-sm font-semibold text-muted">
-                  {section.label ?? section.title}
-                </h3>
-              )}
-              <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4">
-                {(section.buttons ?? []).map((btn) => {
-                  const cmd = btn.command ?? btn.id;
-                  return (
-                    <button
-                      key={btn.id ?? cmd}
-                      type="button"
-                      disabled={!cmd || busy === cmd}
-                      onClick={() => cmd && send(cmd)}
-                      className="min-h-[52px] rounded-xl border border-border bg-panel-elevated px-3 py-2 text-sm font-medium hover:border-accent disabled:opacity-50"
-                    >
-                      {btn.title ?? btn.id ?? cmd}
-                    </button>
-                  );
-                })}
-              </div>
-            </section>
-          ))
+          sections
+            .filter((section) => section.id !== "channels")
+            .map((section) => (
+              <section key={section.id ?? section.title} className="space-y-2">
+                {(section.label || section.title) && (
+                  <h3 className="text-sm font-semibold text-muted">
+                    {section.label ?? section.title}
+                  </h3>
+                )}
+                <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4">
+                  {(section.buttons ?? []).map((btn) => {
+                    const cmd = btn.command ?? btn.id;
+                    return (
+                      <button
+                        key={btn.id ?? cmd}
+                        type="button"
+                        disabled={!cmd || busy === cmd}
+                        onClick={() => cmd && send(cmd)}
+                        className="min-h-[52px] rounded-xl border border-border bg-panel-elevated px-3 py-2 text-sm font-medium hover:border-accent disabled:opacity-50"
+                      >
+                        {btn.title ?? btn.id ?? cmd}
+                      </button>
+                    );
+                  })}
+                </div>
+              </section>
+            ))
         ) : (
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
             {["POWER", "POWER_OFF", "VOLUME_UP", "VOLUME_DOWN", "MUTE"].map(

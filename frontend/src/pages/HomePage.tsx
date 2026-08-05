@@ -68,10 +68,10 @@ export function HomePage() {
             Open Features
           </Link>
           <Link
-            to="/d/conares/billet"
+            to="/d/conares/billet?tab=channels"
             className="rounded-xl border border-border bg-panel-elevated px-4 py-2.5 text-sm font-semibold no-underline min-h-11 inline-flex items-center"
           >
-            Open Billet remote
+            Open Channels (Billet)
           </Link>
         </div>
       </div>

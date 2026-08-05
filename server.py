@@ -174,12 +174,44 @@ def _send_code(display_id: str, code: str) -> dict:
 def _status(display_id: str) -> dict:
     ctx = _display_context(display_id)
     display = ctx["display"]
-    client = MdcClient(mdc_config(display))
-    commands = ctx["commands"]
-    power = client.send_raw(parse_hex(commands["query_power"]))
-    input_r = client.send_raw(parse_hex(commands["query_input"]))
-    mute = client.send_raw(parse_hex(commands["query_mute"]))
-    volume = client.send_raw(parse_hex(commands["query_volume"]))
+    host = str(display.get("ip") or "")
+    # Demo / unbound rooms should not hard-fail status polling
+    if host in ("", "0.0.0.0", "127.0.0.1", "dry-run"):
+        return {
+            "ok": True,
+            "display_id": display_id,
+            "title": display.get("title") or display_id,
+            "host": host or None,
+            "port": display.get("port", 1515),
+            "device_id": display.get("device_id", 0),
+            "power": "Demo",
+            "input_code": None,
+            "input_label": "No live display",
+            "muted": False,
+            "volume": None,
+            "demo": True,
+        }
+    try:
+        client = MdcClient(mdc_config(display))
+        commands = ctx["commands"]
+        power = client.send_raw(parse_hex(commands["query_power"]))
+        input_r = client.send_raw(parse_hex(commands["query_input"]))
+        mute = client.send_raw(parse_hex(commands["query_mute"]))
+        volume = client.send_raw(parse_hex(commands["query_volume"]))
+    except OSError as exc:
+        return {
+            "ok": True,
+            "display_id": display_id,
+            "title": display.get("title") or display_id,
+            "host": host,
+            "port": display.get("port", 1515),
+            "device_id": display.get("device_id", 0),
+            "power": "Offline",
+            "input_label": "Unreachable",
+            "muted": False,
+            "volume": None,
+            "error": str(exc),
+        }
 
     def val(resp: bytes | None, idx: int = 6):
         return resp[idx] if resp and len(resp) > idx else None

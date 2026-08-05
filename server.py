@@ -91,6 +91,15 @@ from discover import discover, parse_response, summary
 from mdc_client import MdcClient, format_hex, parse_hex
 from site_settings import default_remote_path, get_site_settings, save_site_settings
 
+# Import extended API features
+try:
+    from api_integration import handle_extended_api, EXTENDED_API_ROUTES
+    EXTENDED_API_AVAILABLE = True
+    print("[INFO] Extended API features loaded successfully")
+except ImportError as e:
+    EXTENDED_API_AVAILABLE = False
+    print(f"[WARNING] Extended API features not available: {e}")
+
 ROOT = Path(__file__).resolve().parent
 FRONTEND_DIST = ROOT / "frontend" / "dist"
 DISPLAY_ID_RE = re.compile(r"^[a-z0-9][a-z0-9_-]*$")
@@ -436,6 +445,16 @@ class RemoteHandler(SimpleHTTPRequestHandler):
     def do_GET(self):
         path = urlparse(self.path).path
 
+        # Try extended API first (new features)
+        if EXTENDED_API_AVAILABLE and path.startswith("/api/"):
+            query_params = parse_qs(urlparse(self.path).query)
+            # Flatten single-value lists
+            request_data = {k: v[0] if len(v) == 1 else v for k, v in query_params.items()}
+            extended_result = handle_extended_api(path, "GET", request_data)
+            if extended_result is not None:
+                self._json(200 if extended_result.get("ok") else 400, extended_result)
+                return
+
         if path == "/api/auth/me":
             user = self._session_user()
             if not user:
@@ -736,6 +755,13 @@ class RemoteHandler(SimpleHTTPRequestHandler):
     def do_POST(self):
         path = urlparse(self.path).path
         body = self._read_json()
+
+        # Try extended API first (new features)
+        if EXTENDED_API_AVAILABLE and path.startswith("/api/"):
+            extended_result = handle_extended_api(path, "POST", body or {})
+            if extended_result is not None:
+                self._json(200 if extended_result.get("ok") else 400, extended_result)
+                return
 
         if path == "/api/auth/login":
             username = str(body.get("username", "")).strip()

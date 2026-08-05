@@ -38,7 +38,7 @@ export const ThemeToggle: React.FC<ThemeToggleProps> = ({
         updateThemeInfo();
         
         // Listen for theme changes
-        const handleThemeChange = (e: CustomEvent) => {
+        const handleThemeChange = () => {
             updateThemeInfo();
         };
         

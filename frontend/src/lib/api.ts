@@ -69,6 +69,29 @@ export const api = {
       method: "PUT",
       body: JSON.stringify(settings),
     }),
+
+  featuresCatalog: () =>
+    request<{
+      ok: boolean;
+      summary: { total: number; available: number; unavailable: number };
+      features: Array<{
+        id: string;
+        name: string;
+        category: string;
+        description: string;
+        available: boolean;
+        error?: string | null;
+        docs?: string | null;
+        docs_exists?: boolean;
+        ui_path?: string;
+      }>;
+      version?: string;
+    }>("/api/features/catalog"),
+
+  featureDetail: (section: string) =>
+    request<Record<string, unknown>>(
+      `/api/features/${encodeURIComponent(section)}`,
+    ),
 };
 
 /** Map legacy /d/... paths to React Router paths under /app */

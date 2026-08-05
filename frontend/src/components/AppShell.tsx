@@ -16,6 +16,12 @@ export function AppShell() {
           </span>
         )}
         <nav className="flex items-center gap-2">
+          <a
+            href="/"
+            className="rounded-xl border border-border bg-panel-elevated px-3 py-2 text-sm font-medium min-h-11 inline-flex items-center text-text no-underline hover:bg-panel"
+          >
+            Classic
+          </a>
           <NavLink
             to="/"
             end
@@ -28,6 +34,18 @@ export function AppShell() {
             }
           >
             Rooms
+          </NavLink>
+          <NavLink
+            to="/features"
+            className={({ isActive }) =>
+              `rounded-xl border px-3 py-2 text-sm font-medium min-h-11 inline-flex items-center ${
+                isActive
+                  ? "border-accent bg-accent text-white"
+                  : "border-border bg-panel-elevated text-text hover:bg-panel"
+              }`
+            }
+          >
+            Features
           </NavLink>
           {(user?.is_master || user?.role === "location_admin") && (
             <NavLink

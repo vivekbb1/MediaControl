@@ -330,6 +330,19 @@
       </div>
     </header>
 
+    <div id="channelsJump" class="card" style="margin-bottom:12px;display:none;">
+      <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;">
+        <div>
+          <strong>Channels</strong>
+          <p style="margin:4px 0 0;color:var(--muted);font-size:.82rem;" id="channelsJumpHint">Number pad is in the Channels section below.</p>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <a class="btn primary" href="#channels-section" id="jumpChannelsBtn" style="text-decoration:none;">Jump to Channels</a>
+          <a class="btn" href="/app/d/conares/billet?tab=channels" id="appChannelsLink" style="text-decoration:none;display:none;">App Channels tab</a>
+        </div>
+      </div>
+    </div>
+
     <main class="grid" id="remoteGrid" aria-label="TV controls"></main>
 
     <div class="log" id="log" role="log" aria-live="polite">Ready.</div>
@@ -538,7 +551,8 @@
         </section>`;
       }
 
-      return `<section class="card" data-section="${section.id}">
+      const anchor = section.id === 'channels' ? ' id="channels-section"' : '';
+      return `<section class="card" data-section="${section.id}"${anchor}>
         <h2>${section.label}</h2>
         ${renderButtonGroup(buttons, grid, { mapFn: (b) => mkButton(b) })}
       </section>`;
@@ -607,6 +621,30 @@
       if (refreshBtn) refreshBtn.addEventListener('click', refreshStatus);
       updatePowerToggleButton(powerText.textContent);
       updateMuteToggleButton(mutedState);
+
+      const hasChannels = sections.some((s) => s.id === 'channels');
+      const feat = display.features || {};
+      const bl = feat.broadlink || {};
+      const jump = document.getElementById('channelsJump');
+      const hint = document.getElementById('channelsJumpHint');
+      const appLink = document.getElementById('appChannelsLink');
+      if (jump) {
+        jump.style.display = hasChannels || bl.configured ? 'block' : 'none';
+        if (bl.configured && bl.dry_run) {
+          hint.textContent = 'Broadlink dry-run is on — channel keys simulate IR (no hardware).';
+        } else if (bl.configured) {
+          hint.textContent = 'Broadlink IR is configured — channel keys send IR.';
+        } else {
+          hint.textContent = 'Number pad is in the Channels section below.';
+        }
+        if (appLink) {
+          appLink.style.display = bl.configured ? 'inline-flex' : 'none';
+          appLink.href = `/app/d/${locationId}/${displayId}?tab=channels`;
+        }
+      }
+      if (location.hash === '#channels-section' || new URLSearchParams(location.search).get('section') === 'channels') {
+        document.getElementById('channels-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
     }
 
     function formatPowerStatus(powerState) {

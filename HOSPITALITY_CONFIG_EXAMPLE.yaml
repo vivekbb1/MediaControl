@@ -1,0 +1,655 @@
+# MediaControl Hospitality & Luxury Residence Configuration
+# Complete configuration example for digital wallet keys, in-room dining,
+# household management, and staff communication
+
+# ============================================================
+# PROPERTY SETTINGS
+# ============================================================
+
+property:
+  # Type: "hotel" or "residence"
+  type: "hotel"  # or "residence"
+  
+  name: "Grand Luxury Hotel & Residences"
+  code: "GLH"
+  
+  address:
+    street: "123 Luxury Boulevard"
+    city: "Dubai"
+    state: "Dubai"
+    country: "UAE"
+    postal_code: "00000"
+  
+  contact:
+    phone: "+971-4-123-4567"
+    email: "info@grandluxuryhotel.com"
+    website: "https://grandluxuryhotel.com"
+
+
+# ============================================================
+# DIGITAL WALLET KEYS
+# ============================================================
+
+digital_keys:
+  enabled: true
+  
+  # Apple Wallet
+  apple_wallet:
+    enabled: true
+    
+    # Lock system integration
+    lock_system: "salto_space"  # salto_space, assa_abloy, dormakaba
+    
+    lock_config:
+      api_url: "https://api.saltospace.com"
+      api_key: "your_salto_api_key"
+      property_id: "prop_12345"
+    
+    # Key features
+    features:
+      express_mode: true  # Unlock without Face ID
+      power_reserve: true  # Works 5 hours after battery dies
+      multi_room: true  # Support multiple rooms per key
+      key_sharing: true  # Share via iMessage
+      auto_archive: true  # Auto-archive after check-out
+  
+  # Google Wallet
+  google_wallet:
+    enabled: true
+    
+    # Google Wallet Pass Class
+    pass_class_id: "hotel.room.key.GLH"
+    issuer_id: "3388000000012345678"
+    
+    # Gmail auto-import (for automatic key delivery)
+    gmail_auto_import:
+      enabled: true
+      structured_data: true  # Use schema.org markup
+  
+  # Samsung Wallet
+  samsung_wallet:
+    enabled: true
+    
+    # SmartThings integration (for residential)
+    smartthings:
+      enabled: false  # Only for residences
+      api_key: "your_smartthings_api_key"
+  
+  # Key lifecycle
+  lifecycle:
+    # Pre-arrival provisioning (hours before check-in)
+    pre_arrival_hours: 24
+    
+    # Auto-activation on check-in
+    auto_activate_on_checkin: true
+    
+    # Auto-deactivation on check-out
+    auto_deactivate_on_checkout: true
+    
+    # Grace period after check-out (hours)
+    post_checkout_grace_hours: 2
+
+
+# ============================================================
+# PROPERTY MANAGEMENT SYSTEM (PMS)
+# ============================================================
+
+pms:
+  # PMS type: "opera_cloud", "protel", "mews", "cloudbeds", "apaleo"
+  type: "opera_cloud"
+  
+  # OPERA Cloud configuration
+  opera_cloud:
+    api_url: "https://api.opera-cloud.com"
+    api_key: "your_opera_api_key"
+    tenant_code: "GLH"
+    hotel_id: "GLH"
+    
+    # Digital key integration
+    digital_keys:
+      outbound_type: "GUESTKEY_GENERIC"
+      dls_interface: "SALTO_SPACE"
+  
+  # Protel configuration (alternative)
+  protel:
+    enabled: false
+    api_url: "https://protel-air.com/api"
+    username: "protel_user"
+    password: "protel_pass"
+    
+    # Partner integration (e.g., FLEXIPASS)
+    partner: "flexipass"
+  
+  # Mews configuration (alternative)
+  mews:
+    enabled: false
+    api_url: "https://api.mews.com"
+    client_token: "your_mews_token"
+    access_token: "your_access_token"
+  
+  # Features
+  features:
+    # Guest verification
+    verify_checkin: true
+    
+    # Folio posting
+    auto_post_charges: true
+    revenue_centers:
+      in_room_dining: "IN_ROOM_DINING"
+      laundry: "LAUNDRY"
+      minibar: "MINIBAR"
+
+
+# ============================================================
+# IN-ROOM DINING
+# ============================================================
+
+in_room_dining:
+  enabled: true
+  
+  # QR Code Configuration
+  qr_codes:
+    # Generate unique QR per room
+    per_room: true
+    
+    # URL format
+    url_format: "https://dining.grandluxuryhotel.com/room/{room_number}"
+    
+    # QR design
+    design: "custom"  # custom or standard
+    logo: "/images/hotel_logo.png"
+    
+    # Placement locations
+    placement:
+      - "In-Room Folder"
+      - "Bedside Table Tent"
+      - "TV Welcome Screen"
+      - "Bathroom Mirror Sticker"
+  
+  # Menus
+  menus:
+    # Breakfast Menu
+    - id: "breakfast"
+      name: "Breakfast Menu"
+      description: "Fresh breakfast selections, served 6 AM - 11 AM"
+      
+      availability:
+        days: ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"]
+        start_time: "06:00"
+        end_time: "11:00"
+      
+      categories:
+        - name: "Continental"
+          items:
+            - id: "item_croissant"
+              name: "Butter Croissant"
+              description: "Freshly baked, flaky French croissant"
+              price: 8.00
+              image: "/images/menu/croissant.jpg"
+              dietary: ["vegetarian"]
+              allergens: ["gluten", "dairy"]
+            
+            - id: "item_fruit_plate"
+              name: "Fresh Fruit Plate"
+              description: "Seasonal fruits, Greek yogurt, honey drizzle"
+              price: 12.00
+              image: "/images/menu/fruit_plate.jpg"
+              dietary: ["vegetarian", "gluten-free"]
+        
+        - name: "Hot Breakfast"
+          items:
+            - id: "item_eggs_benedict"
+              name: "Eggs Benedict"
+              description: "Poached eggs, Canadian bacon, hollandaise, English muffin"
+              price: 18.00
+              dietary: []
+              allergens: ["gluten", "dairy", "eggs"]
+            
+            - id: "item_pancakes"
+              name: "Buttermilk Pancakes"
+              description: "Stack of 3, maple syrup, butter, berries"
+              price: 14.00
+              dietary: ["vegetarian"]
+              allergens: ["gluten", "dairy", "eggs"]
+    
+    # All Day Dining
+    - id: "all_day"
+      name: "All Day Dining"
+      description: "Appetizers, mains, desserts, beverages"
+      
+      availability:
+        start_time: "11:00"
+        end_time: "23:00"
+      
+      categories:
+        - name: "Appetizers"
+        - name: "Main Courses"
+        - name: "Desserts"
+        - name: "Beverages"
+  
+  # Payment Options
+  payment:
+    # Room charge
+    room_charge:
+      enabled: true
+      verification: "pms_checkin"  # Verify guest is checked in
+      require_signature: false  # Digital signature on delivery
+    
+    # Credit card
+    credit_card:
+      enabled: true
+      processor: "stripe"  # stripe, square, adyen
+      api_key: "sk_live_..."
+      publishable_key: "pk_live_..."
+    
+    # Digital wallets
+    digital_wallets:
+      apple_pay: true
+      google_pay: true
+      samsung_pay: true
+  
+  # Kitchen Integration
+  kitchen:
+    # Kitchen Display System (KDS)
+    kds:
+      enabled: true
+      type: "tablet"  # tablet, screen, printer
+      
+      # Kitchen stations
+      stations:
+        - name: "Hot Kitchen"
+          categories: ["Hot Breakfast", "Main Courses"]
+          ip: "192.168.1.100"
+        
+        - name: "Cold Kitchen"
+          categories: ["Continental", "Appetizers", "Desserts"]
+          ip: "192.168.1.101"
+        
+        - name: "Bar"
+          categories: ["Beverages"]
+          ip: "192.168.1.102"
+    
+    # Traditional ticket printer (alternative/backup)
+    printer:
+      enabled: false
+      ip: "192.168.1.200"
+      port: 9100
+    
+    # Email notifications (backup)
+    email:
+      enabled: true
+      to: "kitchen@grandluxuryhotel.com"
+      from: "orders@grandluxuryhotel.com"
+  
+  # Delivery
+  delivery:
+    # Estimated delivery time (minutes)
+    default_eta: 30
+    
+    # Delivery fee
+    fee: 5.00
+    
+    # Service charge percentage
+    service_charge: 0.18  # 18%
+    
+    # Tax percentage
+    tax: 0.05  # 5%
+  
+  # PMS Integration
+  pms_integration:
+    enabled: true
+    auto_post_to_folio: true
+    revenue_center: "IN_ROOM_DINING"
+
+
+# ============================================================
+# HOUSEHOLD MANAGEMENT (For Residences)
+# ============================================================
+
+household:
+  # Shopping Lists
+  shopping_lists:
+    enabled: true
+    
+    # Cloud sync
+    cloud_sync:
+      enabled: true
+      service: "icloud"  # icloud, google_drive, dropbox
+      api_key: "your_cloud_api_key"
+    
+    # Shared users
+    shared_users:
+      - name: "Family Members"
+        email: "family@example.com"
+        permissions: "edit"
+      
+      - name: "Household Staff"
+        email: "staff@example.com"
+        permissions: "view"
+    
+    # Categories (auto-sort items)
+    categories:
+      - "Produce"
+      - "Dairy"
+      - "Meat & Seafood"
+      - "Bakery"
+      - "Frozen"
+      - "Pantry"
+      - "Beverages"
+      - "Household"
+      - "Personal Care"
+    
+    # Store integrations
+    stores:
+      - type: "instacart"
+        enabled: true
+        api_key: "instacart_api_key"
+      
+      - type: "amazon_fresh"
+        enabled: true
+        api_key: "amazon_api_key"
+  
+  # Internet Browser
+  browser:
+    enabled: true
+    engine: "chromium"
+    
+    # Content filtering
+    content_filter:
+      enabled: true
+      mode: "family_safe"  # strict, moderate, family_safe, off
+      
+      blocked_categories:
+        - "adult"
+        - "gambling"
+        - "violence"
+        - "drugs"
+      
+      safe_search:
+        google: true
+        bing: true
+        youtube: "restricted"  # restricted, moderate, off
+    
+    # Bookmarks
+    bookmarks:
+      - name: "Hotel Website"
+        url: "https://grandluxuryhotel.com"
+        icon: "🏨"
+      
+      - name: "Local Attractions"
+        url: "https://visitdubai.com"
+        icon: "🌴"
+      
+      - name: "Weather"
+        url: "https://weather.com"
+        icon: "☀️"
+    
+    # Homepage
+    homepage: "https://grandluxuryhotel.com/guest-portal"
+
+
+# ============================================================
+# STAFF COMMUNICATION
+# ============================================================
+
+staff_communication:
+  enabled: true
+  
+  # Staff Roles
+  staff_roles:
+    # Butler
+    - id: "butler"
+      name: "Butler"
+      priority: "high"
+      icon: "🤵"
+      dispatch_method: "push"  # push, sms, call, pager
+      
+      contacts:
+        - name: "James (Head Butler)"
+          phone: "+971-50-123-4567"
+          email: "james@grandluxuryhotel.com"
+          available_hours:
+            start: "06:00"
+            end: "22:00"
+      
+      request_types:
+        - "Room Service"
+        - "Concierge Assistance"
+        - "Reservation Request"
+        - "Special Arrangement"
+        - "General Inquiry"
+    
+    # Housekeeping
+    - id: "housekeeping"
+      name: "Housekeeping"
+      priority: "normal"
+      icon: "🧹"
+      dispatch_method: "push"
+      
+      contacts:
+        - name: "Maria (Head Housekeeper)"
+          phone: "+971-50-234-5678"
+          email: "maria@grandluxuryhotel.com"
+      
+      request_types:
+        - "Room Cleaning"
+        - "Fresh Towels"
+        - "Extra Pillows/Blankets"
+        - "Laundry Pickup"
+        - "Turndown Service"
+    
+    # Nanny (for residences)
+    - id: "nanny"
+      name: "Nanny"
+      priority: "high"
+      icon: "👶"
+      dispatch_method: "call"  # Call immediately for urgent requests
+      
+      contacts:
+        - name: "Sarah (Nanny)"
+          phone: "+971-50-345-6789"
+          email: "sarah@household.com"
+      
+      request_types:
+        - "Urgent - Need Assistance"
+        - "Schedule Change"
+        - "Meal Request"
+        - "Activity Planning"
+    
+    # Driver
+    - id: "driver"
+      name: "Driver"
+      priority: "normal"
+      icon: "🚗"
+      dispatch_method: "push"
+      
+      contacts:
+        - name: "Michael (Driver)"
+          phone: "+971-50-456-7890"
+          email: "michael@grandluxuryhotel.com"
+      
+      request_types:
+        - "Airport Transfer"
+        - "City Tour"
+        - "Restaurant Reservation"
+        - "Schedule Pickup"
+    
+    # Private Chef (for residences)
+    - id: "chef"
+      name: "Private Chef"
+      priority: "normal"
+      icon: "👨‍🍳"
+      dispatch_method: "push"
+      
+      contacts:
+        - name: "Chef Pierre"
+          phone: "+971-50-567-8901"
+          email: "pierre@household.com"
+      
+      request_types:
+        - "Meal Planning"
+        - "Grocery List"
+        - "Special Dietary Requirements"
+        - "Catering Request"
+    
+    # Maintenance
+    - id: "maintenance"
+      name: "Maintenance"
+      priority: "normal"
+      icon: "🔧"
+      dispatch_method: "push"
+      
+      contacts:
+        - name: "Maintenance Team"
+          phone: "+971-50-678-9012"
+          email: "maintenance@grandluxuryhotel.com"
+      
+      request_types:
+        - "Repair Request"
+        - "Light Bulb Replacement"
+        - "Plumbing Issue"
+        - "HVAC Adjustment"
+        - "General Maintenance"
+  
+  # Laundry Service
+  laundry:
+    enabled: true
+    
+    # Pickup schedule
+    pickup_schedule:
+      days: ["MON", "WED", "FRI"]
+      times:
+        morning: "09:00"
+        afternoon: "14:00"
+        evening: "18:00"
+    
+    # Service types
+    services:
+      - id: "wash_dry_fold"
+        name: "Wash, Dry, Fold"
+        price_per_lb: 2.50
+        turnaround_hours: 24
+      
+      - id: "dry_clean"
+        name: "Dry Cleaning"
+        price_per_item: 8.00
+        turnaround_hours: 48
+      
+      - id: "press_only"
+        name: "Press Only"
+        price_per_item: 3.00
+        turnaround_hours: 12
+      
+      - id: "express"
+        name: "Express Service (Same Day)"
+        price_multiplier: 1.5
+        turnaround_hours: 6
+    
+    # Tracking
+    tracking:
+      enabled: true
+      sms_notifications: true
+      email_notifications: false
+    
+    # PMS integration
+    pms_integration:
+      enabled: true
+      revenue_center: "LAUNDRY"
+
+
+# ============================================================
+# MULTILINGUAL SUPPORT
+# ============================================================
+
+languages:
+  default: "en"
+  
+  supported:
+    - code: "en"
+      name: "English"
+    - code: "ar"
+      name: "العربية (Arabic)"
+    - code: "zh"
+      name: "中文 (Chinese)"
+    - code: "fr"
+      name: "Français (French)"
+    - code: "de"
+      name: "Deutsch (German)"
+    - code: "es"
+      name: "Español (Spanish)"
+    - code: "ja"
+      name: "日本語 (Japanese)"
+    - code: "ru"
+      name: "Русский (Russian)"
+  
+  # Auto-detect from guest profile
+  auto_detect: true
+
+
+# ============================================================
+# NOTIFICATIONS
+# ============================================================
+
+notifications:
+  # Push notifications (via Firebase/APNs)
+  push:
+    enabled: true
+    firebase_api_key: "your_firebase_api_key"
+  
+  # SMS notifications
+  sms:
+    enabled: true
+    provider: "twilio"  # twilio, aws_sns
+    api_key: "your_twilio_api_key"
+    from_number: "+971-4-123-4567"
+  
+  # Email notifications
+  email:
+    enabled: true
+    smtp:
+      host: "smtp.gmail.com"
+      port: 587
+      username: "noreply@grandluxuryhotel.com"
+      password: "your_email_password"
+      from: "Grand Luxury Hotel <noreply@grandluxuryhotel.com>"
+
+
+# ============================================================
+# ANALYTICS & REPORTING
+# ============================================================
+
+analytics:
+  enabled: true
+  
+  # Metrics to track
+  metrics:
+    - "Digital key usage"
+    - "Dining order volume"
+    - "Average order value"
+    - "Staff request response time"
+    - "Guest satisfaction ratings"
+  
+  # Reports
+  reports:
+    # Daily reports
+    daily:
+      enabled: true
+      recipients:
+        - "manager@grandluxuryhotel.com"
+      time: "08:00"
+    
+    # Weekly reports
+    weekly:
+      enabled: true
+      recipients:
+        - "director@grandluxuryhotel.com"
+      day: "MON"
+      time: "09:00"
+    
+    # Monthly reports
+    monthly:
+      enabled: true
+      recipients:
+        - "owner@grandluxuryhotel.com"
+      day: 1
+      time: "10:00"

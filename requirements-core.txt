@@ -1,0 +1,5 @@
+# Minimal deps to run the Flip / MediaControl web remote locally.
+# Full catalog extras live in requirements.txt (optional integrations).
+PyYAML>=6.0
+requests>=2.31.0
+broadlink>=0.19.0

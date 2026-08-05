@@ -69,6 +69,81 @@ export const api = {
       method: "PUT",
       body: JSON.stringify(settings),
     }),
+
+  featuresCatalog: () =>
+    request<{
+      ok: boolean;
+      summary: { total: number; available: number; unavailable: number };
+      features: Array<{
+        id: string;
+        name: string;
+        category: string;
+        description: string;
+        available: boolean;
+        error?: string | null;
+        docs?: string | null;
+        docs_exists?: boolean;
+        ui_path?: string;
+      }>;
+      version?: string;
+    }>("/api/features/catalog"),
+
+  featureDetail: (section: string) =>
+    request<Record<string, unknown>>(
+      `/api/features/${encodeURIComponent(section)}`,
+    ),
+
+  roomFeatures: (id: string) =>
+    request<{
+      ok: boolean;
+      display_id: string;
+      broadlink: Record<string, unknown>;
+      epg: Record<string, unknown>;
+      beacons: Record<string, unknown>;
+    }>(`/api/displays/${encodeURIComponent(id)}/features`),
+
+  roomEpg: (id: string, live = true) =>
+    request<{
+      ok: boolean;
+      mode?: string;
+      channels?: unknown[];
+      now?: unknown[];
+      programmes?: unknown[];
+      error?: string;
+    }>(`/api/displays/${encodeURIComponent(id)}/epg?live=${live ? "1" : "0"}`),
+
+  roomBeacons: (id: string) =>
+    request<{
+      ok: boolean;
+      occupied?: boolean;
+      occupants?: Array<Record<string, unknown>>;
+      beacon_id?: string;
+      enabled?: boolean;
+    }>(`/api/displays/${encodeURIComponent(id)}/beacons`),
+
+  reportBeacon: (
+    id: string,
+    body: { user_id: string; name?: string; zone: string; rssi?: number },
+  ) =>
+    request<Record<string, unknown>>(
+      `/api/displays/${encodeURIComponent(id)}/beacons`,
+      { method: "POST", body: JSON.stringify(body) },
+    ),
+
+  sendIr: (id: string, command: string) =>
+    request<{ ok: boolean; dry_run?: boolean; message?: string }>(
+      `/api/displays/${encodeURIComponent(id)}/ir`,
+      { method: "POST", body: JSON.stringify({ command }) },
+    ),
+
+  tuneChannel: (
+    id: string,
+    opts: { channel?: string | number; ir_command?: string },
+  ) =>
+    request<{ ok: boolean; dry_run?: boolean; sequence?: string[] }>(
+      `/api/displays/${encodeURIComponent(id)}/tune`,
+      { method: "POST", body: JSON.stringify(opts) },
+    ),
 };
 
 /** Map legacy /d/... paths to React Router paths under /app */

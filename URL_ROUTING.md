@@ -1,27 +1,35 @@
 # URL ROUTING STRUCTURE
 
-Complete URL schema for locations, rooms, and devices with friendly slugs
+Complete URL schema for organizations, locations, rooms, and devices with friendly slugs
 
 ## URL Structure
 
 ```
 / app.mediacontrol.com
-├── /location/{location_slug}                    # Location dashboard
-│   ├── /location/{location_slug}/room/{room_slug}       # Room control
-│   ├── /location/{location_slug}/devices                # All devices
-│   ├── /location/{location_slug}/settings               # Location settings
-│   ├── /location/{location_slug}/billing                # Subscription & billing
-│   └── /location/{location_slug}/users                  # User management
+├── /org/{org_slug}                              # Organization dashboard
+│   ├── /org/{org_slug}/location/{location_slug}         # Location dashboard
+│   │   ├── /org/{org_slug}/location/{location_slug}/room/{room_slug}  # Room control
+│   │   ├── /org/{org_slug}/location/{location_slug}/devices           # All devices
+│   │   └── /org/{org_slug}/location/{location_slug}/settings          # Location settings
+│   ├── /org/{org_slug}/billing                          # Subscription & billing
+│   ├── /org/{org_slug}/users                            # User management
+│   └── /org/{org_slug}/settings                         # Organization settings
 │
-├── /widget/{location_slug}/{room_slug}          # Embeddable widget
+├── /widget/{org_slug}/{location_slug}/{room_slug}  # Embeddable widget
 │
 └── /api/v1
-    ├── /locations
-    │   ├── GET    /locations                           # List all locations (admin)
-    │   ├── POST   /locations                           # Create location
-    │   ├── GET    /locations/{id}                      # Get location details
-    │   ├── GET    /locations/slug/{slug}               # Get by slug
-    │   └── PATCH  /locations/{id}                      # Update location
+    ├── /organizations
+    │   ├── GET    /organizations                        # List all organizations (super admin)
+    │   ├── POST   /organizations                        # Create organization
+    │   ├── GET    /organizations/{id}                   # Get organization details
+    │   ├── GET    /organizations/slug/{slug}            # Get by slug
+    │   └── PATCH  /organizations/{id}                   # Update organization
+    │
+    ├── /organizations/{org_id}/locations
+    │   ├── GET    /organizations/{org_id}/locations     # List locations
+    │   ├── POST   /organizations/{org_id}/locations     # Create location
+    │   ├── GET    /organizations/{org_id}/locations/{id}  # Get location details
+    │   └── PATCH  /organizations/{org_id}/locations/{id}  # Update location
     │
     ├── /locations/{location_id}/rooms
     │   ├── GET    /locations/{location_id}/rooms       # List rooms
@@ -53,29 +61,44 @@ Complete URL schema for locations, rooms, and devices with friendly slugs
 
 **Residential:**
 ```
-https://app.mediacontrol.com/location/john-smiths-home
-https://app.mediacontrol.com/location/john-smiths-home/room/living-room
-https://app.mediacontrol.com/location/john-smiths-home/room/bedroom
+Organization: John Smith Family
+Location: Home
+
+https://app.mediacontrol.com/org/john-smith-family
+https://app.mediacontrol.com/org/john-smith-family/location/home
+https://app.mediacontrol.com/org/john-smith-family/location/home/room/living-room
+https://app.mediacontrol.com/org/john-smith-family/location/home/room/bedroom
 ```
 
-**Hotel:**
+**Hotel Chain:**
 ```
-https://app.mediacontrol.com/location/grand-hotel-dubai
-https://app.mediacontrol.com/location/grand-hotel-dubai/room/suite-301
-https://app.mediacontrol.com/location/grand-hotel-dubai/room/conference-a
+Organization: Hilton Hotels International
+Locations: Dubai Marina, Mumbai Central, NYC Times Square
+
+https://app.mediacontrol.com/org/hilton-hotels
+https://app.mediacontrol.com/org/hilton-hotels/location/dubai-marina
+https://app.mediacontrol.com/org/hilton-hotels/location/dubai-marina/room/suite-301
+https://app.mediacontrol.com/org/hilton-hotels/location/mumbai-central/room/presidential-suite
+https://app.mediacontrol.com/org/hilton-hotels/location/nyc-times-square/room/conference-a
 ```
 
 **Corporate:**
 ```
-https://app.mediacontrol.com/location/acme-corp
-https://app.mediacontrol.com/location/acme-corp/room/boardroom
-https://app.mediacontrol.com/location/acme-corp/room/training-room-2
+Organization: Acme Corporation
+Locations: HQ Dubai, Regional Office Mumbai, Sales Office London
+
+https://app.mediacontrol.com/org/acme-corp
+https://app.mediacontrol.com/org/acme-corp/location/hq-dubai
+https://app.mediacontrol.com/org/acme-corp/location/hq-dubai/room/boardroom
+https://app.mediacontrol.com/org/acme-corp/location/mumbai-office/room/training-room-1
+https://app.mediacontrol.com/org/acme-corp/location/london-sales/room/demo-room
 ```
 
 **Embeddable Widgets (for KNX panels):**
 ```
-https://widget.mediacontrol.com/grand-hotel-dubai/suite-301?token=xyz123
-https://widget.mediacontrol.com/acme-corp/boardroom?token=abc456
+https://widget.mediacontrol.com/hilton-hotels/dubai-marina/suite-301?token=xyz123
+https://widget.mediacontrol.com/acme-corp/hq-dubai/boardroom?token=abc456
+https://widget.mediacontrol.com/john-smith-family/home/living-room?token=def789
 ```
 
 ## URL Slug Generation
@@ -104,40 +127,64 @@ If duplicate:
 
 ## API Request Examples
 
-### Get Location by Slug
+### Get Organization by Slug
 ```bash
-GET /api/v1/locations/slug/grand-hotel-dubai
+GET /api/v1/organizations/slug/hilton-hotels
 Authorization: Bearer {api_key}
 
 Response:
 {
-  "id": "loc_abc123",
-  "name": "Grand Hotel Dubai",
-  "url_slug": "grand-hotel-dubai",
-  "address": "123 Sheikh Zayed Road, Dubai",
-  "room_count": 150,
-  "device_count": 450,
+  "id": "org_abc123",
+  "name": "Hilton Hotels International",
+  "url_slug": "hilton-hotels",
+  "organization_type": "hotel_chain",
+  "location_count": 18,
+  "room_count": 450,
+  "device_count": 1350,
   "subscription": {
     "tier": "enterprise",
     "status": "active"
   },
   "urls": {
-    "dashboard": "https://app.mediacontrol.com/location/grand-hotel-dubai",
-    "rooms": "https://app.mediacontrol.com/location/grand-hotel-dubai/rooms",
-    "api": "https://api.mediacontrol.com/v1/locations/loc_abc123"
+    "dashboard": "https://app.mediacontrol.com/org/hilton-hotels",
+    "locations": "https://app.mediacontrol.com/org/hilton-hotels/locations",
+    "api": "https://api.mediacontrol.com/v1/organizations/org_abc123"
+  }
+}
+```
+
+### Get Location by Slug
+```bash
+GET /api/v1/locations/slug/dubai-marina
+Authorization: Bearer {api_key}
+
+Response:
+{
+  "id": "loc_xyz456",
+  "organization_id": "org_abc123",
+  "name": "Hilton Dubai Marina",
+  "url_slug": "dubai-marina",
+  "address": "123 Sheikh Zayed Road, Dubai",
+  "room_count": 150,
+  "device_count": 450,
+  "urls": {
+    "dashboard": "https://app.mediacontrol.com/org/hilton-hotels/location/dubai-marina",
+    "rooms": "https://app.mediacontrol.com/org/hilton-hotels/location/dubai-marina/rooms",
+    "api": "https://api.mediacontrol.com/v1/locations/loc_xyz456"
   }
 }
 ```
 
 ### Get Room by Slug
 ```bash
-GET /api/v1/locations/loc_abc123/rooms/slug/suite-301
+GET /api/v1/locations/loc_xyz456/rooms/slug/suite-301
 Authorization: Bearer {api_key}
 
 Response:
 {
-  "id": "room_xyz789",
-  "location_id": "loc_abc123",
+  "id": "room_def789",
+  "location_id": "loc_xyz456",
+  "organization_id": "org_abc123",
   "name": "Suite 301",
   "url_slug": "suite-301",
   "floor": "3",
@@ -162,16 +209,16 @@ Response:
     }
   ],
   "urls": {
-    "control": "https://app.mediacontrol.com/location/grand-hotel-dubai/room/suite-301",
-    "widget": "https://widget.mediacontrol.com/grand-hotel-dubai/suite-301",
-    "api": "https://api.mediacontrol.com/v1/rooms/room_xyz789"
+    "control": "https://app.mediacontrol.com/org/hilton-hotels/location/dubai-marina/room/suite-301",
+    "widget": "https://widget.mediacontrol.com/hilton-hotels/dubai-marina/suite-301",
+    "api": "https://api.mediacontrol.com/v1/rooms/room_def789"
   }
 }
 ```
 
 ### Control Room Device
 ```bash
-POST /api/v1/rooms/room_xyz789/control/source
+POST /api/v1/rooms/room_def789/control/source
 Authorization: Bearer {api_key}
 Content-Type: application/json
 

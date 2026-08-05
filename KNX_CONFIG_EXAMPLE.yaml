@@ -1,0 +1,285 @@
+# KNX Integration & Cloud Bridge Configuration Example
+# Complete configuration for KNX/IP, ETS import, cloud bridge
+
+knx:
+  # ========== Enable KNX Integration ==========
+  enabled: true
+  
+  # ========== KNX/IP Connection ==========
+  connection:
+    # Connection mode: "tunneling" (point-to-point, recommended) or "routing" (multicast)
+    mode: "tunneling"
+    
+    # KNX/IP Gateway settings
+    gateway_ip: "192.168.1.50"  # IP address of KNX/IP Gateway
+    gateway_port: 3671  # Default KNX/IP port (UDP)
+    
+    # Local network interface
+    local_ip: "192.168.1.100"  # MediaControl Gateway IP
+    
+    # KNX Secure (optional, requires hardware support)
+    secure:
+      enabled: false
+      user_id: 2
+      password: "your_knx_secure_password"
+      device_auth: "your_knx_device_auth_code"
+  
+  # ========== ETS Configuration Import ==========
+  ets_import:
+    # Enable automatic ETS import
+    enabled: true
+    
+    # Path to ETS configuration file (after import)
+    config_file: "/var/lib/mediacontrol/knx_config.json"
+    
+    # Auto-import on startup (if config file exists)
+    auto_import: true
+    
+    # Auto-sync with ETS on change detection
+    auto_sync: false
+  
+  # ========== Group Addresses (Manual Configuration) ==========
+  # Note: If using ETS import, group addresses will be auto-discovered
+  # This section is for manual configuration (if not using ETS)
+  
+  group_addresses:
+    # ===== Living Room =====
+    - address: "1/2/3"
+      name: "Living Room Light"
+      dpt: "1.001"  # Switch (on/off)
+      room: "Living Room"
+      floor: "Ground Floor"
+      read: true
+      write: true
+      subscribe: true
+      comment: "Main ceiling light"
+    
+    - address: "1/2/4"
+      name: "Living Room Dimmer"
+      dpt: "5.001"  # Scaling (0-100%)
+      room: "Living Room"
+      read: true
+      write: true
+      subscribe: true
+    
+    - address: "1/3/1"
+      name: "Living Room Blinds Position"
+      dpt: "5.001"  # Scaling (0-100%)
+      room: "Living Room"
+      read: true
+      write: true
+      subscribe: true
+    
+    - address: "2/1/1"
+      name: "Living Room Temperature"
+      dpt: "9.001"  # Temperature (°C)
+      room: "Living Room"
+      read: true
+      write: false  # Read-only sensor
+      subscribe: true
+    
+    # ===== Conference Room =====
+    - address: "1/4/1"
+      name: "Conference Room Lights"
+      dpt: "1.001"
+      room: "Conference Room"
+      read: true
+      write: true
+      subscribe: true
+    
+    - address: "1/4/2"
+      name: "Conference Room Dimmer"
+      dpt: "5.001"
+      room: "Conference Room"
+      read: true
+      write: true
+      subscribe: true
+    
+    - address: "1/5/1"
+      name: "Conference Room Blinds"
+      dpt: "5.001"
+      room: "Conference Room"
+      read: true
+      write: true
+      subscribe: true
+    
+    - address: "1/6/1"
+      name: "Conference Room HVAC Mode"
+      dpt: "20.102"  # HVAC mode (auto, comfort, standby, economy)
+      room: "Conference Room"
+      read: true
+      write: true
+      subscribe: true
+    
+    - address: "2/2/1"
+      name: "Conference Room Target Temperature"
+      dpt: "9.001"
+      room: "Conference Room"
+      read: true
+      write: true
+      subscribe: true
+  
+  # ========== KNX ↔ MediaControl Integration ==========
+  integration:
+    # KNX → MediaControl (KNX events trigger MediaControl actions)
+    knx_to_mc:
+      # Example: KNX switch → Turn on display
+      - knx_address: "1/1/1"
+        knx_value: true
+        mc_action: "turn_on_display"
+        mc_display_id: "display_living_room"
+      
+      # Example: KNX motion sensor → Turn on display
+      - knx_address: "1/1/5"
+        knx_value: true  # Motion detected
+        mc_action: "turn_on_display"
+        mc_display_id: "display_hallway"
+        delay: 0  # Immediate
+      
+      - knx_address: "1/1/5"
+        knx_value: false  # No motion
+        mc_action: "turn_off_display"
+        mc_display_id: "display_hallway"
+        delay: 600  # 10 minutes
+      
+      # Example: KNX scene button → Activate MediaControl preset
+      - knx_address: "1/1/10"
+        knx_value: 1  # Scene 1 activated
+        mc_action: "activate_preset"
+        mc_preset_id: "movie_mode"
+      
+      # Example: KNX temperature → Update MediaControl display
+      - knx_address: "2/1/1"
+        mc_action: "update_display_text"
+        mc_display_id: "display_living_room"
+        mc_text_template: "Living Room: {value}°C"
+    
+    # MediaControl → KNX (MediaControl events control KNX devices)
+    mc_to_knx:
+      # Example: Meeting started → Dim lights, close blinds
+      - mc_event: "meeting_started"
+        mc_room: "conference_room"
+        knx_actions:
+          - address: "1/4/2"  # Lights dimmer
+            value: 30  # 30%
+            dpt: "5.001"
+          
+          - address: "1/5/1"  # Blinds position
+            value: 100  # Fully closed
+            dpt: "5.001"
+      
+      # Example: Presentation mode → Set lights
+      - mc_event: "preset_activated"
+        mc_preset_id: "presentation_mode"
+        knx_actions:
+          - address: "1/4/2"  # Lights brightness
+            value: 10  # 10%
+            dpt: "5.001"
+      
+      # Example: Doorbell pressed → Turn on porch light
+      - mc_event: "doorbell_pressed"
+        mc_doorbell_id: "front_door"
+        knx_actions:
+          - address: "1/7/1"  # Porch light
+            value: true
+            dpt: "1.001"
+      
+      # Example: Display turned on → Turn on KNX outlet (TV power)
+      - mc_event: "display_turned_on"
+        mc_display_id: "display_living_room"
+        knx_actions:
+          - address: "1/8/1"  # TV outlet
+            value: true
+            dpt: "1.001"
+  
+  # ========== KNX ↔ Smart Home Platforms ==========
+  smart_home_bridge:
+    # Expose KNX devices to Apple HomeKit, Google Home, Alexa, etc.
+    expose_to_platforms:
+      # Apple HomeKit
+      homekit:
+        enabled: true
+        devices:
+          - knx_address: "1/2/3"
+            name: "Living Room Lights"
+            type: "light"
+            room: "Living Room"
+          
+          - knx_address: "1/2/4"
+            name: "Living Room Dimmer"
+            type: "light_brightness"
+            parent: "Living Room Lights"  # Associate with main light
+          
+          - knx_address: "1/3/1"
+            name: "Living Room Blinds"
+            type: "blind"
+            room: "Living Room"
+      
+      # Google Home
+      google_home:
+        enabled: true
+        devices:
+          - knx_address: "1/2/3"
+            name: "Living Room Lights"
+            type: "light"
+            room: "Living Room"
+          
+          - knx_address: "1/3/1"
+            name: "Living Room Blinds"
+            type: "blind"
+            room: "Living Room"
+      
+      # Amazon Alexa
+      alexa:
+        enabled: true
+        devices:
+          - knx_address: "1/2/3"
+            name: "Living Room Lights"
+            type: "light"
+            room: "Living Room"
+  
+  # ========== Cloud Bridge ==========
+  cloud:
+    # Enable cloud bridge (remote access)
+    enabled: true
+    
+    # Cloud server URL
+    server_url: "https://cloud.mediacontrol.com"
+    
+    # Gateway credentials (auto-generated on first boot)
+    # Do not edit manually
+    gateway_id: "abc123def456"
+    api_key: "your_api_key_here"
+    api_secret: "your_api_secret_here"
+    
+    # Public URL (auto-assigned by cloud)
+    public_url: "https://abc123.mediacontrol.cloud"
+    
+    # Connection settings
+    reconnect:
+      enabled: true
+      max_retries: -1  # -1 = infinite retries
+      backoff: "exponential"  # exponential, linear, constant
+      initial_delay: 1  # seconds
+      max_delay: 300  # seconds (5 minutes)
+    
+    # Heartbeat (keep-alive)
+    heartbeat:
+      enabled: true
+      interval: 30  # seconds
+    
+    # Local cache (for offline mode)
+    cache:
+      enabled: true
+      ttl: 3600  # 1 hour (seconds)
+      path: "/var/lib/mediacontrol/cloud_cache"
+    
+    # Push updates to cloud
+    push_updates:
+      enabled: true
+      # Only push updates for subscribed addresses
+      only_subscribed: true
+      # Throttle updates (avoid spamming)
+      throttle:
+        enabled: true
+        max_rate: 10  # Max 10 updates per second per address

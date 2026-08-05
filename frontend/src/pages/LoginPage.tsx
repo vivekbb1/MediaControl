@@ -1,5 +1,5 @@
 import { FormEvent, useState } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { api, legacyPathToApp } from "@/lib/api";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -77,13 +77,7 @@ export function LoginPage() {
           </button>
         </form>
         <p className="mt-4 text-center text-xs text-muted">
-          <Link to="/" className="text-accent">
-            ← Back to preview
-          </Link>
-          {" · "}
-          <a href="/" className="text-accent">
-            Legacy UI
-          </a>
+          Default admin: <code>admin</code> / <code>changeme</code>
         </p>
       </div>
     </div>

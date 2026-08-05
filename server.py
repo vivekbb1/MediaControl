@@ -91,6 +91,15 @@ from discover import discover, parse_response, summary
 from mdc_client import MdcClient, format_hex, parse_hex
 from site_settings import default_remote_path, get_site_settings, save_site_settings
 
+# Import extended API features
+try:
+    from api_integration import handle_extended_api, EXTENDED_API_ROUTES
+    EXTENDED_API_AVAILABLE = True
+    print("[INFO] Extended API features loaded successfully")
+except ImportError as e:
+    EXTENDED_API_AVAILABLE = False
+    print(f"[WARNING] Extended API features not available: {e}")
+
 ROOT = Path(__file__).resolve().parent
 FRONTEND_DIST = ROOT / "frontend" / "dist"
 DISPLAY_ID_RE = re.compile(r"^[a-z0-9][a-z0-9_-]*$")
@@ -165,12 +174,44 @@ def _send_code(display_id: str, code: str) -> dict:
 def _status(display_id: str) -> dict:
     ctx = _display_context(display_id)
     display = ctx["display"]
-    client = MdcClient(mdc_config(display))
-    commands = ctx["commands"]
-    power = client.send_raw(parse_hex(commands["query_power"]))
-    input_r = client.send_raw(parse_hex(commands["query_input"]))
-    mute = client.send_raw(parse_hex(commands["query_mute"]))
-    volume = client.send_raw(parse_hex(commands["query_volume"]))
+    host = str(display.get("ip") or "")
+    # Demo / unbound rooms should not hard-fail status polling
+    if host in ("", "0.0.0.0", "127.0.0.1", "dry-run"):
+        return {
+            "ok": True,
+            "display_id": display_id,
+            "title": display.get("title") or display_id,
+            "host": host or None,
+            "port": display.get("port", 1515),
+            "device_id": display.get("device_id", 0),
+            "power": "Demo",
+            "input_code": None,
+            "input_label": "No live display",
+            "muted": False,
+            "volume": None,
+            "demo": True,
+        }
+    try:
+        client = MdcClient(mdc_config(display))
+        commands = ctx["commands"]
+        power = client.send_raw(parse_hex(commands["query_power"]))
+        input_r = client.send_raw(parse_hex(commands["query_input"]))
+        mute = client.send_raw(parse_hex(commands["query_mute"]))
+        volume = client.send_raw(parse_hex(commands["query_volume"]))
+    except OSError as exc:
+        return {
+            "ok": True,
+            "display_id": display_id,
+            "title": display.get("title") or display_id,
+            "host": host,
+            "port": display.get("port", 1515),
+            "device_id": display.get("device_id", 0),
+            "power": "Offline",
+            "input_label": "Unreachable",
+            "muted": False,
+            "volume": None,
+            "error": str(exc),
+        }
 
     def val(resp: bytes | None, idx: int = 6):
         return resp[idx] if resp and len(resp) > idx else None
@@ -436,6 +477,16 @@ class RemoteHandler(SimpleHTTPRequestHandler):
     def do_GET(self):
         path = urlparse(self.path).path
 
+        # Try extended API first (new features)
+        if EXTENDED_API_AVAILABLE and path.startswith("/api/"):
+            query_params = parse_qs(urlparse(self.path).query)
+            # Flatten single-value lists
+            request_data = {k: v[0] if len(v) == 1 else v for k, v in query_params.items()}
+            extended_result = handle_extended_api(path, "GET", request_data)
+            if extended_result is not None:
+                self._json(200 if extended_result.get("ok") else 400, extended_result)
+                return
+
         if path == "/api/auth/me":
             user = self._session_user()
             if not user:
@@ -667,6 +718,27 @@ class RemoteHandler(SimpleHTTPRequestHandler):
                 if action == "status":
                     self._json(200, _status(display_id))
                     return
+                if action == "features":
+                    from room_features import room_feature_summary
+
+                    display = get_display(display_id)
+                    if not display:
+                        self._json(404, {"ok": False, "error": "Not found"})
+                        return
+                    self._json(200, {"ok": True, "display_id": display_id, **room_feature_summary(display)})
+                    return
+                if action == "epg":
+                    from room_features import fetch_epg_guide
+
+                    qs = parse_qs(urlparse(self.path).query)
+                    use_live = str(qs.get("live", ["1"])[0]).lower() not in ("0", "false", "no")
+                    self._json(200, fetch_epg_guide(display_id, use_live=use_live))
+                    return
+                if action == "beacons":
+                    from room_features import get_beacon_presence
+
+                    self._json(200, get_beacon_presence(display_id))
+                    return
                 if action == "map":
                     discovered = load_display_map(display_id)
                     if not discovered:
@@ -682,6 +754,8 @@ class RemoteHandler(SimpleHTTPRequestHandler):
                 return
 
         if path in ("/", "/index.html"):
+            # Classic HTML remote is the default day-to-day UI.
+            # React lives at /app/ (Channels tabs, Features catalog).
             if not self._check_page_auth(path):
                 return self._redirect("/login")
             self.path = "/index.html"
@@ -737,6 +811,13 @@ class RemoteHandler(SimpleHTTPRequestHandler):
         path = urlparse(self.path).path
         body = self._read_json()
 
+        # Try extended API first (new features)
+        if EXTENDED_API_AVAILABLE and path.startswith("/api/"):
+            extended_result = handle_extended_api(path, "POST", body or {})
+            if extended_result is not None:
+                self._json(200 if extended_result.get("ok") else 400, extended_result)
+                return
+
         if path == "/api/auth/login":
             username = str(body.get("username", "")).strip()
             password = str(body.get("password", ""))
@@ -768,6 +849,41 @@ class RemoteHandler(SimpleHTTPRequestHandler):
                         self._json(400, {"ok": False, "error": "Missing command"})
                         return
                     self._json(200, _send(display_id, str(cmd)))
+                    return
+                if action == "ir":
+                    from room_features import send_ir
+
+                    cmd = body.get("command") or body.get("cmd")
+                    if not cmd:
+                        self._json(400, {"ok": False, "error": "Missing command"})
+                        return
+                    self._json(200, send_ir(display_id, str(cmd)))
+                    return
+                if action == "tune":
+                    from room_features import tune_channel
+
+                    channel = body.get("channel") or body.get("channel_number")
+                    ir_seq = body.get("ir_command") or body.get("ir_sequence")
+                    if channel is None and not ir_seq:
+                        self._json(400, {"ok": False, "error": "Missing channel or ir_command"})
+                        return
+                    self._json(200, tune_channel(display_id, channel if channel is not None else "", ir_seq))
+                    return
+                if action == "beacons":
+                    from room_features import report_beacon_scan
+
+                    user_id = str(body.get("user_id") or "anonymous")
+                    zone = str(body.get("zone") or "near")
+                    self._json(
+                        200,
+                        report_beacon_scan(
+                            display_id,
+                            user_id=user_id,
+                            zone=zone,
+                            rssi=body.get("rssi"),
+                            name=body.get("name"),
+                        ),
+                    )
                     return
                 if action == "send-code":
                     code = body.get("code")

@@ -1,5 +1,17 @@
 #!/usr/bin/env python3
-"""EPG (Electronic Program Guide) integration for IPTV channels with timezone support."""
+"""
+EPG (Electronic Program Guide) integration for IPTV channels with timezone support.
+
+⚖️ LEGAL COMPLIANCE NOTICE:
+- EPG data shows TV schedules only, NOT content access
+- Users MUST have valid cable/satellite/IPTV subscriptions
+- EPG sources: public broadcasters, open-source projects, user's STB provider
+- Does NOT provide pirated IPTV streams or unauthorized content links
+- For use with legally subscribed channels only
+- See LEGAL_COMPLIANCE.md for full requirements
+
+EPG data ≠ Content access. Users need legal STB/cable subscription.
+"""
 
 from __future__ import annotations
 

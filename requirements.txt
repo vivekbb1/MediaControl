@@ -1,22 +1,415 @@
-# Multi-Device Control Requirements
+# Media Control System - Complete Requirements
 
-# Core device abstraction
-# (no new dependencies needed)
+# === Core Dependencies ===
+requests>=2.31.0
+pyyaml>=6.0
+aiohttp>=3.8.0  # Async HTTP client
+asyncio-mqtt>=0.16.0  # For MQTT notifications (optional)
 
-# Apple TV control
+# === Device Control ===
+
+# Apple TV & AirPlay
 pyatv>=0.14.0
 
-# Android TV control uses 'adb' command-line tool
+# Android TV control (requires 'adb' command-line tool)
 # Install Android SDK Platform Tools separately:
 # - macOS: brew install android-platform-tools
 # - Linux: sudo apt-get install android-tools-adb
 # - Windows: Download from https://developer.android.com/studio/releases/platform-tools
-
-# Optional: Pure Python ADB (alternative to command-line adb)
+# Optional pure Python alternatives:
 # adb-shell>=0.4.0
 # pure-python-adb>=0.3.0
 
-# Existing requirements
+# Audio devices
+soco>=0.30.0  # Sonos control
+
+# IR/RF control
 broadlink>=0.19.0
-requests>=2.31.0
-pyyaml>=6.0
+
+# RS232/Serial communication (for legacy devices)
+pyserial>=3.5
+
+# === Media Services Integration ===
+
+# Spotify
+spotipy>=2.23.0
+
+# Apple Music (MusicKit)
+# Requires JWT token generation (see docs)
+# musickit>=1.0.0  # Optional library for Apple Music
+
+# YouTube
+google-api-python-client>=2.0.0
+google-auth-httplib2>=0.1.0
+google-auth-oauthlib>=1.0.0
+
+# Tidal
+tidalapi>=0.7.0
+
+# Amazon Music (unofficial)
+# amazon-music-api>=0.1.0  # Community library (experimental)
+
+# === Screen Recording & Video Streaming ===
+# Requires FFmpeg to be installed on system
+# - macOS: brew install ffmpeg
+# - Linux: sudo apt-get install ffmpeg
+# - Windows: Download from https://ffmpeg.org/download.html
+
+# === Notifications ===
+# Email
+aiosmtplib>=2.0.0
+
+# Push notifications
+firebase-admin>=6.0.0  # For Firebase Cloud Messaging
+
+# SMS (Twilio)
+twilio>=8.0.0
+
+# === Scheduling & Alarms ===
+croniter>=1.4.0  # For cron expression parsing
+pytz>=2023.3  # Timezone support
+
+# === Voice Control ===
+# Alexa Skills Kit SDK
+ask-sdk-core>=1.17.0
+ask-sdk-model>=1.35.0
+
+# Google Assistant (Actions on Google)
+actions-on-google>=1.0.0
+
+# === Audio DSP ===
+# For advanced audio processing
+# pydub>=0.25.1  # Audio manipulation
+# scipy>=1.11.0  # Signal processing
+# numpy>=1.24.0  # Numerical operations
+
+# === Database (Optional, for persistence) ===
+# sqlalchemy>=2.0.0  # SQL ORM
+# redis>=5.0.0  # For caching and real-time data
+
+# === Additional Features ===
+
+# KNX smart home integration
+xknx>=2.11.0
+
+# Video streaming
+# opencv-python>=4.8.0  # For video processing (optional)
+
+# Image processing (for artwork, thumbnails)
+pillow>=10.0.0
+
+# QR code generation (for widget sharing)
+qrcode>=7.4.0
+
+# Lyrics API
+# musixmatch>=0.5.0  # Lyrics provider
+
+# === Wireless Presentation ===
+# AirPlay receiver (requires system package: shairport-sync)
+# Install shairport-sync:
+# - macOS: brew install shairport-sync
+# - Linux: sudo apt-get install shairport-sync
+# Python integration via subprocess
+
+# mDNS/Bonjour for device discovery
+zeroconf>=0.100.0  # For mDNS/Bonjour (AirPlay/Chromecast discovery)
+
+# Chromecast receiver (Google Cast SDK)
+# Requires Cast Receiver SDK installation
+# pychromecast>=13.0.0  # For Chromecast integration (sender side)
+
+# WebRTC for browser-based screen sharing
+aiortc>=1.5.0  # WebRTC implementation (optional, for web-based sharing)
+
+# === Universal RTC (Video Conferencing) ===
+# Microsoft Graph API for Teams/Calendar
+msal>=1.24.0  # Microsoft Authentication Library
+msgraph-sdk>=1.0.0  # Microsoft Graph SDK
+
+# Zoom API
+# zoom-python>=1.0.0  # Zoom SDK (unofficial, community)
+
+# Cisco Webex API
+webexteamssdk>=1.6.0  # Webex Teams SDK
+
+# Google Meet/Calendar API (uses google-api-python-client above)
+# google-api-python-client>=2.0.0  # Already listed
+
+# === Native Apps & Android Runtime ===
+# Android app control (requires Android Debug Bridge - adb)
+# Already listed under Device Control
+
+# === Video Wall & Digital Signage ===
+# Content management
+Flask>=2.3.0  # For CMS web interface
+Flask-SQLAlchemy>=3.0.0  # Database for content library
+
+# Video processing (for video wall bezel correction)
+# opencv-python>=4.8.0  # Already listed as optional
+
+# === Multi-User Frontend ===
+# WebSocket for real-time multi-user sync
+websockets>=11.0.0  # WebSocket server/client
+python-socketio>=5.9.0  # Socket.IO (alternative to WebSockets)
+
+# === Whiteboard & Collaboration ===
+# Drawing libraries
+cairo>=1.0.0  # For rendering whiteboard annotations (requires system libcairo)
+# Install libcairo2-dev (Linux) or cairo (macOS)
+
+# === SIP Telephony (VoIP) ===
+# SIP/VoIP support
+# pjsua2>=2.13  # PJSIP library (requires system libpjsip, compile from source)
+# Install PJSIP: https://www.pjsip.org/
+# Alternative: linphone>=3.0.0  # Linphone SDK (easier but less features)
+
+# For simpler SIP integration:
+# aiortc>=1.5.0  # Already listed (WebRTC, can also handle SIP via SDP)
+
+# SIP signaling
+sippy>=1.0  # SIP protocol implementation (pure Python, simpler alternative)
+
+# === Doorbell Camera Integration ===
+# Ring API (unofficial)
+ring-doorbell>=0.8.0  # Ring doorbell API client
+
+# Nest API (Google)
+# google-nest-sdm>=2.0.0  # Nest SDM (Smart Device Management) API
+
+# Arlo API (unofficial)
+# arlo>=1.2.0  # Arlo camera API client
+
+# UniFi Protect API (unofficial)
+# pyunifiprotect>=4.0.0  # UniFi Protect API client
+
+# ONVIF (generic IP cameras)
+onvif-zeep>=0.2.12  # ONVIF protocol for IP cameras/doorbells
+
+# === AI Studio Effects (Video & Audio) ===
+
+# AI/ML Frameworks
+# ONNX Runtime (recommended - cross-platform, GPU/NPU support)
+onnxruntime>=1.16.0  # CPU version
+# onnxruntime-gpu>=1.16.0  # GPU version (NVIDIA CUDA)
+# onnxruntime-directml>=1.16.0  # DirectML version (Windows GPU - NVIDIA/AMD/Intel)
+
+# TensorFlow Lite (for edge devices, NPU support)
+# tflite-runtime>=2.14.0  # Lightweight TensorFlow for inference
+
+# PyTorch (alternative, research-grade models)
+# torch>=2.0.0  # CPU version
+# torchvision>=0.15.0  # Computer vision models
+
+# OpenCV (video processing, background segmentation)
+opencv-python>=4.8.0  # Computer vision library
+opencv-contrib-python>=4.8.0  # Additional modules (tracking, segmentation)
+
+# Image processing
+numpy>=1.24.0  # Numerical operations (required by OpenCV, TensorFlow)
+scipy>=1.11.0  # Scientific computing (signal processing)
+scikit-image>=0.21.0  # Image processing algorithms
+
+# AI Models & Pretrained Weights
+# mediapipe>=0.10.0  # Google MediaPipe (face detection, pose estimation, segmentation)
+# face-recognition>=1.3.0  # Face detection and recognition
+# dlib>=19.24.0  # Face landmarks, eye gaze (requires CMake to build)
+
+# Background Segmentation (pre-trained models)
+# rembg>=2.0.0  # Background removal using U2-Net
+# backgroundremover>=0.2.0  # Alternative background removal
+
+# Audio AI
+# noisereduce>=3.0.0  # Spectral gating noise reduction
+# speechbrain>=0.5.0  # Speech processing (enhancement, separation, recognition)
+# demucs>=4.0.0  # Music/speech source separation (Meta's Demucs)
+
+# Speech Recognition & Transcription
+# faster-whisper>=0.9.0  # OpenAI Whisper (optimized for CPU/GPU)
+# vosk>=0.3.45  # Offline speech recognition (40+ languages)
+# deepgram-sdk>=3.0.0  # Deepgram API (real-time transcription, commercial)
+
+# Azure Cognitive Services (Microsoft Teams Premium integration)
+# azure-cognitiveservices-speech>=1.31.0  # Azure Speech Services (transcription, translation)
+# azure-ai-textanalytics>=5.3.0  # Text Analytics (sentiment, key phrases, action items)
+
+# Translation
+# googletrans>=4.0.0  # Google Translate (unofficial)
+# deep-translator>=1.11.0  # Multi-provider translation (Google, Microsoft, etc.)
+
+# Natural Language Processing (for meeting recap)
+# transformers>=4.35.0  # Hugging Face Transformers (BERT, GPT, summarization)
+# openai>=1.0.0  # OpenAI API (GPT-4 for intelligent recap)
+# anthropic>=0.5.0  # Anthropic Claude API (alternative to GPT-4)
+
+# === Hardware Acceleration ===
+
+# Intel OpenVINO (for Intel CPUs, GPUs, NPUs)
+# openvino>=2023.0.0  # Intel AI inference toolkit
+
+# NVIDIA TensorRT (for NVIDIA GPUs)
+# tensorrt>=8.6.0  # Requires NVIDIA TensorRT SDK
+
+# DirectML (Windows GPU - NVIDIA/AMD/Intel)
+# Already handled by onnxruntime-directml above
+
+# Coral TPU (Google Edge TPU)
+# pycoral>=2.0.0  # Edge TPU runtime (requires Edge TPU hardware)
+
+# === Smart Home Ecosystem Integration ===
+
+# Home Assistant
+homeassistant>=2024.1.0  # Home Assistant Core (for integration)
+# aiohttp>=3.9.0  # Already included above
+# paho-mqtt>=1.6.1  # Already included above
+
+# Matter Protocol
+python-matter-server>=5.0.0  # Matter protocol server
+# chip-tool  # Matter CLI tool (install separately via package manager)
+
+# Zigbee (Zigbee2MQTT)
+# paho-mqtt>=1.6.1  # Already included above
+# pyserial>=3.5  # Already included above (for Zigbee USB coordinator)
+
+# Ubiquiti UniFi API
+aiounifi>=55  # UniFi Controller API client
+pyunifiprotect>=4.0.0  # UniFi Protect API client (for cameras, doorbells)
+
+# Nuki
+# Uses HTTP REST API (aiohttp already included)
+
+# Aqara
+# Uses MQTT (paho-mqtt already included)
+# python-miio>=0.5.12  # For Xiaomi/Aqara devices (alternative to MQTT)
+
+# === Consumer Smart Home Platforms ===
+
+# Apple HomeKit (HAP - HomeKit Accessory Protocol)
+HAP-python>=4.9.0  # HomeKit Accessory Protocol implementation
+# pyqrcode>=1.2.1  # QR code generation for HomeKit pairing
+# pypng>=0.20220715.0  # PNG backend for QR codes
+
+# Google Home
+# aiohttp>=3.9.0  # Already included above (for Google Home API)
+# zeroconf>=0.131.0  # Already included above (for mDNS discovery)
+# google-auth>=2.23.0  # Google OAuth authentication
+# google-auth-oauthlib>=1.1.0  # OAuth 2.0 flow
+
+# Xiaomi Mi Home
+python-miio>=0.5.12  # Xiaomi & Aqara device control
+# yeelight>=0.7.13  # Yeelight bulb control (alternative to python-miio)
+
+# Amazon Alexa
+# boto3>=1.28.0  # AWS SDK (for Alexa Smart Home Skill Lambda)
+# ask-sdk-core>=1.19.0  # Already included above (for Alexa Skills)
+
+# Samsung SmartThings
+pysmartthings>=0.7.8  # SmartThings API client
+
+# IKEA Home smart
+aiocoap>=0.4.7  # CoAP client for DIRIGERA hub (local control)
+# pytradfri>=9.0.0  # Alternative library for IKEA TRÅDFRI (via CoAP)
+
+# === KNX Integration & Cloud Bridge ===
+
+# KNX/IP Protocol
+xknx>=2.12.0  # KNX/IP library (Tunneling, Routing, Group Address R/W)
+# knxdclient>=0.4.0  # Alternative KNX library (simpler API)
+
+# WebSocket (Cloud Bridge)
+websockets>=12.0  # WebSocket client/server for cloud connection
+# aiohttp>=3.9.0  # Already included above (for HTTP API)
+
+# XML parsing (ETS import)
+# xml.etree.ElementTree (built-in Python module)
+
+# === Home Automation & Security Devices ===
+
+# ONVIF (IP Cameras)
+onvif-zeep>=0.2.12  # Already included above (ONVIF protocol for IP cameras/doorbells)
+# Used for: Dahua, Hikvision, Ubiquiti, Axis, Reolink, Amcrest cameras
+
+# MQTT (Elevator, Pool, General IoT)
+# paho-mqtt>=1.6.1  # Already included above (MQTT client)
+# Used for: Elevator control, pool automation, generic IoT devices
+
+# HTTP/REST API
+# aiohttp>=3.9.0  # Already included above (async HTTP client/server)
+# Used for: Tailwind, Rachio, UniFi Access, Hayward, Pentair cloud APIs
+
+# WebSocket (Pool automation - Pentair IntelliCenter)
+# websockets>=12.0  # Already included above
+# Used for: Pentair IntelliCenter local WebSocket API
+
+# RS-485 / Serial (Pool automation)
+# pyserial>=3.5  # Already included above (serial port communication)
+# Used for: Pentair IntelliTouch, Hayward ProLogic via RS-485
+
+# === Hospitality & Luxury Residence Management ===
+
+# Digital Wallet Keys
+# No additional dependencies - uses HTTP APIs
+# - Apple Wallet (PassKit)
+# - Google Wallet (Google Pay API)
+# - Samsung Wallet (Samsung Wallet SDK)
+
+# PMS Integration
+# aiohttp>=3.9.0  # Already included above (async HTTP client)
+# Used for: OPERA Cloud, Protel, Mews, Cloudbeds, Apaleo APIs
+
+# In-Room Dining
+# aiohttp>=3.9.0  # Already included above
+# QR code generation (optional)
+qrcode>=7.4.2  # QR code generation for menu QR codes
+Pillow>=10.0.0  # Image processing for QR code customization
+
+# Payment Processing
+stripe>=7.0.0  # Stripe payment processing for credit card payments
+# square>=29.0.0  # Alternative: Square payment processing
+# adyen>=9.0.0  # Alternative: Adyen payment processing
+
+# === Door Access Control (Multi-Factor Authentication) ===
+
+# NFC/RFID Readers
+nfcpy>=1.0.4  # NFC library for ACR122U and similar readers
+# pyscard>=2.0.0  # Smart card library (alternative for NFC/RFID)
+
+# Face Recognition
+# opencv-python>=4.8.0  # Already included above (for camera access)
+# numpy>=1.24.0  # Already included above
+face-recognition>=1.3.0  # Face recognition library (based on dlib)
+# deepface>=0.0.79  # Alternative: DeepFace library (supports multiple models)
+# facenet-pytorch>=2.5.3  # Alternative: PyTorch implementation of FaceNet
+
+# Liveness Detection
+# opencv-contrib-python>=4.8.0  # OpenCV with contrib modules (for liveness detection)
+
+# Fingerprint Recognition
+# pyfingerprint>=2.0.0  # Fingerprint scanner library (ZKTeco, etc.)
+
+# Pin Pad / Keypad
+# RPi.GPIO>=0.7.1  # Raspberry Pi GPIO (for physical keypads)
+# adafruit-circuitpython-matrixkeypad>=1.2.0  # Matrix keypad library
+
+# Access Control Protocols
+# wiegand>=0.1.0  # Wiegand protocol for card readers
+# osdp>=2.3.0  # OSDP (Open Supervised Device Protocol)
+
+# Cryptography (for credential encryption)
+# cryptography>=41.0.0  # Already included above
+
+# === Bluetooth Beacon Proximity & Presence Detection ===
+
+# Bluetooth Low Energy (BLE) Scanning
+bleak>=0.21.1  # Cross-platform async BLE library (Windows, macOS, Linux)
+# bluepy>=1.3.0  # Raspberry Pi BLE library (Linux only)
+# pybluez>=0.22  # Python Bluetooth library (Linux, macOS)
+
+# iBeacon/Eddystone/AltBeacon Parsing
+# struct (built-in)  # For parsing beacon advertisement packets
+# uuid (built-in)  # For UUID handling
+
+# === Development & Testing ===
+# pytest>=7.4.0
+# pytest-asyncio>=0.21.0
+# black>=23.0.0
+# flake8>=6.0.0

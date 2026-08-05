@@ -49,6 +49,11 @@ export interface DisplaySummary {
   sources?: RemoteSource[];
   remote_sections?: unknown[];
   icon_catalog?: unknown[];
+  features?: {
+    broadlink?: Record<string, unknown>;
+    epg?: Record<string, unknown>;
+    beacons?: Record<string, unknown>;
+  };
 }
 
 export interface DisplaysResponse {

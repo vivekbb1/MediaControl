@@ -1,0 +1,399 @@
+# Home Automation & Security Devices Configuration Example
+# Complete configuration for garage, irrigation, pool, elevator, access control, and CCTV
+
+# ========== Garage Door Controllers ==========
+garage:
+  - id: "garage_main"
+    name: "Main Garage"
+    type: "tailwind"  # Tailwind iQ3
+    
+    connection:
+      ip: "192.168.1.50"
+      port: 80
+      local_control_key: "123456"  # 6-digit key from Tailwind web portal
+    
+    doors:
+      - door_index: 0
+        name: "Left Garage Door"
+        auto_close_delay: 300  # Auto-close after 5 minutes (optional)
+      
+      - door_index: 1
+        name: "Right Garage Door"
+        auto_close_delay: 300
+
+# ========== Irrigation Systems ==========
+irrigation:
+  - id: "irrigation_front"
+    name: "Front Yard Irrigation"
+    type: "rachio"
+    
+    connection:
+      api_key: "a1b2c3d4-e5f6-7890-abcd-1234567890ab"  # From app.rach.io
+    
+    # Optional: Webhook for real-time updates
+    webhook:
+      enabled: true
+      url: "https://gateway-id.mediacontrol.cloud/api/irrigation/webhook"
+      events:
+        - "ZONE_STARTED"
+        - "ZONE_STOPPED"
+        - "ZONE_COMPLETED"
+        - "DEVICE_OFFLINE"
+    
+    # Optional: Smart watering rules
+    rules:
+      - name: "Skip if raining"
+        condition: "weather.precipitation > 0"
+        action: "skip_schedule"
+      
+      - name: "Extend duration if hot"
+        condition: "weather.temperature > 95"
+        action: "extend_duration"
+        percent: 25  # Extend by 25%
+
+  - id: "irrigation_back"
+    name: "Backyard Irrigation"
+    type: "rachio"
+    connection:
+      api_key: "b2c3d4e5-f6g7-8901-bcde-2345678901bc"
+
+# ========== Swimming Pool Automation ==========
+pool:
+  - id: "pool_main"
+    name: "Main Pool"
+    type: "pentair_intellicenter"  # or "pentair_intelliconnect", "hayward_omnilogic", "hayward_aquarite"
+    
+    # Option 1: Local WebSocket (IntelliCenter only, recommended)
+    connection_type: "websocket"
+    connection:
+      ip: "192.168.1.60"
+      port: 6680  # IntelliCenter JSON WebSocket API port
+      # No authentication required for local connection!
+    
+    # Option 2: Cloud API (IntelliConnect, Hayward)
+    # connection_type: "cloud"
+    # connection:
+    #   username: "your_pentair_username"
+    #   password: "your_pentair_password"
+    
+    features:
+      - type: "pool"
+        name: "Pool"
+        circuit_id: 500
+      
+      - type: "spa"
+        name: "Spa"
+        circuit_id: 501
+      
+      - type: "pump"
+        name: "Pool Pump"
+        pump_id: 1
+        speed_presets:
+          low: 1200  # RPM
+          medium: 2400
+          high: 3450
+      
+      - type: "heater"
+        name: "Pool Heater"
+        circuit_id: 502
+        default_setpoint: 84  # °F
+      
+      - type: "heater"
+        name: "Spa Heater"
+        circuit_id: 503
+        default_setpoint: 102  # °F
+      
+      - type: "light"
+        name: "Pool Lights"
+        circuit_id: 505
+        light_type: "intellibrite"  # IntelliBrite, MagicStream
+        color_effects:
+          - "Caribbean"
+          - "Party"
+          - "Romance"
+          - "Royal"
+      
+      - type: "chlorinator"
+        name: "Salt Chlorinator"
+        device_id: 1
+        target_output: 50  # % (0-100)
+    
+    # Optional: Automation schedules
+    schedules:
+      - name: "Morning Filter"
+        time: "06:00"
+        duration: 240  # minutes (4 hours)
+        devices:
+          - "Pool Pump"
+      
+      - name: "Evening Filter"
+        time: "18:00"
+        duration: 180  # 3 hours
+        devices:
+          - "Pool Pump"
+
+# ========== Elevator/Lift Control ==========
+elevator:
+  - id: "elevator_main"
+    name: "Home Elevator"
+    type: "mqtt"  # or "tk_elevator", "schindler"
+    
+    # Option 1: MQTT (Generic, Custom, Residential)
+    connection_type: "mqtt"
+    mqtt:
+      broker: "192.168.1.100"
+      port: 1883
+      username: "mediacontrol"
+      password: "your_mqtt_password"
+      
+      # MQTT Topics
+      topics:
+        call: "elevator/call"  # Publish call commands
+        status: "elevator/status"  # Subscribe to status updates
+        floor: "elevator/floor"  # Current floor
+        moving: "elevator/moving"  # Moving status
+    
+    # Option 2: Commercial API (TK Elevator, Schindler)
+    # connection_type: "rest_api"
+    # connection:
+    #   api_url: "https://api.tkelevator.com/v1"
+    #   api_key: "your_tk_elevator_api_key"
+    #   building_id: "building_123"
+    
+    floors:
+      - floor_id: 0
+        name: "Ground Floor"
+        aliases: ["G", "Lobby"]
+      
+      - floor_id: 1
+        name: "First Floor"
+      
+      - floor_id: 2
+        name: "Second Floor"
+    
+    # Optional: Integration with MediaControl
+    integration:
+      # Auto-call elevator when arriving home (via geofence)
+      auto_call:
+        enabled: true
+        trigger: "geofence_enter"
+        default_floor: 0
+      
+      # Voice control
+      voice_control:
+        enabled: true
+        wake_word: "elevator"
+
+# ========== Door Access Control ==========
+access_control:
+  - id: "access_main"
+    name: "Building Access Control"
+    type: "ubiquiti_access"
+    
+    connection:
+      host: "192.168.1.70"  # UniFi Access controller IP
+      port: 443
+      token: "wHFmHRuX4I7sB2oDkD6wHg"  # Bearer token from UniFi Access
+      verify_ssl: true
+    
+    # Webhook for real-time events
+    webhook:
+      enabled: true
+      url: "https://gateway-id.mediacontrol.cloud/api/access/webhook"
+      secret: "your_webhook_secret"
+      events:
+        - "access.door.unlock"
+        - "access.door.lock"
+        - "access.doorbell.incoming"
+        - "access.remote_view"
+    
+    doors:
+      - door_id: "e4978b83-203d-4015-97df-b86efc91cb0c"
+        name: "Front Door"
+        auto_lock_delay: 5  # seconds
+        unlock_duration: 5  # seconds (momentary unlock pulse)
+      
+      - door_id: "f5a89c94-314e-5126-a8eg-c97fgd02dc1d"
+        name: "Back Door"
+        auto_lock_delay: 3
+      
+      - door_id: "a1b2c3d4-425f-6237-b9fh-d08ghf13ed2e"
+        name: "Garage Entry Door"
+        auto_lock_delay: 10
+    
+    # Optional: Integration with MediaControl
+    integration:
+      # Auto-unlock when arriving home
+      auto_unlock:
+        enabled: true
+        trigger: "geofence_enter"
+        doors:
+          - "Front Door"
+      
+      # Doorbell → Display camera on TV
+      doorbell_popup:
+        enabled: true
+        camera: "camera_front"
+        display: "living_room_tv"
+        duration: 30  # seconds
+
+# ========== CCTV Cameras ==========
+cctv:
+  - id: "camera_front"
+    name: "Front Door Camera"
+    type: "onvif"  # Universal ONVIF standard
+    brand: "dahua"  # dahua, hikvision, ubiquiti, axis, reolink, amcrest
+    
+    connection:
+      ip: "192.168.1.80"
+      port: 80  # ONVIF port (HTTP)
+      username: "onvif"
+      password: "password123"
+      onvif_profile: "profile_s"  # profile_s or profile_t
+    
+    stream:
+      rtsp_port: 554
+      # Auto-discovered via ONVIF, or manually specify:
+      main_stream_uri: "rtsp://onvif:password123@192.168.1.80:554/cam/realmonitor?channel=1&subtype=0"
+      sub_stream_uri: "rtsp://onvif:password123@192.168.1.80:554/cam/realmonitor?channel=1&subtype=1"
+    
+    features:
+      motion_detection: true
+      ptz: false  # Pan-Tilt-Zoom
+      two_way_audio: false
+      snapshot: true
+    
+    # Optional: Recording
+    recording:
+      enabled: true
+      destination: "nas"  # or "nvr", "cloud"
+      nas_path: "/mnt/nas/cctv/front"
+      retention_days: 30
+      motion_only: true  # Only record when motion detected
+  
+  - id: "camera_back"
+    name: "Backyard Camera"
+    type: "onvif"
+    brand: "hikvision"
+    connection:
+      ip: "192.168.1.81"
+      port: 80
+      username: "onvif"
+      password: "password123"
+    stream:
+      rtsp_port: 554
+      main_stream_uri: "rtsp://onvif:password123@192.168.1.81:554/Streaming/channels/101"
+      sub_stream_uri: "rtsp://onvif:password123@192.168.1.81:554/Streaming/channels/102"
+    features:
+      motion_detection: true
+      ptz: true  # PTZ camera
+      two_way_audio: false
+  
+  - id: "camera_garage"
+    name: "Garage Camera"
+    type: "onvif"
+    brand: "ubiquiti"
+    connection:
+      ip: "192.168.1.82"
+      port: 80
+      username: "ubnt"  # UniFi Protect credentials
+      password: "password123"
+    stream:
+      rtsp_port: 7447
+      main_stream_uri: "rtsp://ubnt:password123@192.168.1.82:7447/camera_id_here"
+
+# ========== Automation Rules ==========
+automations:
+  # Garage opened → Turn on driveway lights (via KNX)
+  - name: "Garage opened - lights on"
+    trigger:
+      type: "garage_opened"
+      device: "garage_main"
+      door_index: 0
+    action:
+      knx_write:
+        address: "1/6/1"  # Driveway lights KNX address
+        value: true
+        dpt: "1.001"
+  
+  # Garage closed → Turn off driveway lights after 2 minutes
+  - name: "Garage closed - lights off"
+    trigger:
+      type: "garage_closed"
+      device: "garage_main"
+      door_index: 0
+    action:
+      delay: 120  # seconds
+      knx_write:
+        address: "1/6/1"
+        value: false
+  
+  # Pool heater on → Notify on display
+  - name: "Pool heater notification"
+    trigger:
+      type: "pool_heater_on"
+      device: "pool_main"
+    action:
+      display_notification:
+        display: "kitchen_display"
+        message: "Pool heater is ON"
+        duration: 10
+  
+  # Doorbell pressed → Show camera on TV
+  - name: "Doorbell camera popup"
+    trigger:
+      type: "doorbell_pressed"
+      device: "camera_front"
+    action:
+      display_show_camera:
+        display: "living_room_tv"
+        camera: "camera_front"
+        layout: "picture_in_picture"
+        duration: 30
+  
+  # Motion detected at night → Turn on porch light
+  - name: "Motion detection - light on"
+    trigger:
+      type: "motion_detected"
+      device: "camera_front"
+    condition:
+      time_range:
+        start: "sunset"
+        end: "sunrise"
+    action:
+      knx_write:
+        address: "1/5/1"  # Porch light
+        value: true
+  
+  # Start irrigation after sunset (avoid evaporation)
+  - name: "Evening irrigation"
+    trigger:
+      type: "schedule"
+      time: "sunset+30"  # 30 minutes after sunset
+    condition:
+      weather:
+        no_rain: true
+    action:
+      irrigation_start_schedule:
+        device: "irrigation_front"
+        schedule_id: "evening_schedule"
+  
+  # Emergency: Lock all doors on alarm
+  - name: "Emergency lockdown"
+    trigger:
+      type: "alarm_triggered"
+      alarm_type: "security"
+    action:
+      access_control_emergency:
+        device: "access_main"
+        mode: "lockdown"
+  
+  # Fire alarm: Unlock all doors for evacuation
+  - name: "Fire evacuation"
+    trigger:
+      type: "alarm_triggered"
+      alarm_type: "fire"
+    action:
+      access_control_emergency:
+        device: "access_main"
+        mode: "evacuation"

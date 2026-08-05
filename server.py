@@ -686,6 +686,27 @@ class RemoteHandler(SimpleHTTPRequestHandler):
                 if action == "status":
                     self._json(200, _status(display_id))
                     return
+                if action == "features":
+                    from room_features import room_feature_summary
+
+                    display = get_display(display_id)
+                    if not display:
+                        self._json(404, {"ok": False, "error": "Not found"})
+                        return
+                    self._json(200, {"ok": True, "display_id": display_id, **room_feature_summary(display)})
+                    return
+                if action == "epg":
+                    from room_features import fetch_epg_guide
+
+                    qs = parse_qs(urlparse(self.path).query)
+                    use_live = str(qs.get("live", ["1"])[0]).lower() not in ("0", "false", "no")
+                    self._json(200, fetch_epg_guide(display_id, use_live=use_live))
+                    return
+                if action == "beacons":
+                    from room_features import get_beacon_presence
+
+                    self._json(200, get_beacon_presence(display_id))
+                    return
                 if action == "map":
                     discovered = load_display_map(display_id)
                     if not discovered:
@@ -794,6 +815,41 @@ class RemoteHandler(SimpleHTTPRequestHandler):
                         self._json(400, {"ok": False, "error": "Missing command"})
                         return
                     self._json(200, _send(display_id, str(cmd)))
+                    return
+                if action == "ir":
+                    from room_features import send_ir
+
+                    cmd = body.get("command") or body.get("cmd")
+                    if not cmd:
+                        self._json(400, {"ok": False, "error": "Missing command"})
+                        return
+                    self._json(200, send_ir(display_id, str(cmd)))
+                    return
+                if action == "tune":
+                    from room_features import tune_channel
+
+                    channel = body.get("channel") or body.get("channel_number")
+                    ir_seq = body.get("ir_command") or body.get("ir_sequence")
+                    if channel is None and not ir_seq:
+                        self._json(400, {"ok": False, "error": "Missing channel or ir_command"})
+                        return
+                    self._json(200, tune_channel(display_id, channel if channel is not None else "", ir_seq))
+                    return
+                if action == "beacons":
+                    from room_features import report_beacon_scan
+
+                    user_id = str(body.get("user_id") or "anonymous")
+                    zone = str(body.get("zone") or "near")
+                    self._json(
+                        200,
+                        report_beacon_scan(
+                            display_id,
+                            user_id=user_id,
+                            zone=zone,
+                            rssi=body.get("rssi"),
+                            name=body.get("name"),
+                        ),
+                    )
                     return
                 if action == "send-code":
                     code = body.get("code")

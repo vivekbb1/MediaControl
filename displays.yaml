@@ -225,11 +225,52 @@ displays:
     location: conares
   billet:
     title: Billet
-    model: WM55B
+    model: WM55B + STB (demo)
     ip: 0.0.0.0
     port: 1515
     device_id: 0
     location: conares
+    # Demo Broadlink + EPG + Beacons (dry-run until real hardware configured)
+    broadlink:
+      host: dry-run
+      port: 80
+      mac: "00:00:00:00:00:00"
+      device_type: 0x61A2
+      dry_run: true
+    ir_codes_file: ir_codes/demo_stb.yaml
+    epg:
+      enabled: true
+      country_code: us
+      timezone: America/New_York
+      sources:
+      - url: https://iptv-org.github.io/epg/guides/us/tvpassport.com.xml
+        priority: 1
+      channels:
+      - name: CNN
+        epg_id: CNN.us
+        channel_number: 202
+        ir_command: num_2,num_0,num_2
+      - name: ESPN
+        epg_id: ESPN.us
+        channel_number: 206
+        ir_command: num_2,num_0,num_6
+      - name: HBO
+        epg_id: HBO.us
+        channel_number: 300
+        ir_command: num_3,num_0,num_0
+      - name: Discovery
+        epg_id: DiscoveryChannel.us
+        channel_number: 278
+        ir_command: num_2,num_7,num_8
+      - name: Nat Geo
+        epg_id: NationalGeographic.us
+        channel_number: 265
+        ir_command: num_2,num_6,num_5
+    beacons:
+      enabled: true
+      beacon_id: room_billet_beacon
+      protocols:
+      - ibeacon
     sources:
     - id: touchscreen
       code: '0x64'
@@ -268,6 +309,7 @@ displays:
       - master
       - sources
       - wireless
+      - channels
       - volume
       - navigation
       - picture
@@ -285,6 +327,21 @@ displays:
         - mute_toggle
         - vol_down
         - vol_up
+        channels:
+        - num_1
+        - num_2
+        - num_3
+        - num_4
+        - num_5
+        - num_6
+        - num_7
+        - num_8
+        - num_9
+        - ch_down
+        - num_0
+        - ch_up
+        - last
+        - guide
         power:
         - reboot
         - power_on
@@ -332,6 +389,20 @@ displays:
         mute_toggle: Mute
         vol_down: "\u2212"
         vol_up: +
+        num_0: '0'
+        num_1: '1'
+        num_2: '2'
+        num_3: '3'
+        num_4: '4'
+        num_5: '5'
+        num_6: '6'
+        num_7: '7'
+        num_8: '8'
+        num_9: '9'
+        ch_up: CH+
+        ch_down: CH-
+        last: Last
+        guide: Guide
         vol_0: 0%
         vol_25: 25%
         vol_50: 50%

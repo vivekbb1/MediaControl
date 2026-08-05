@@ -40,6 +40,8 @@ DEFAULT_SECTION_ORDER = [
     "wireless",
     "builtin",
     "other",
+    "channels",
+    "transport",
     "volume",
     "navigation",
     "picture",
@@ -48,7 +50,9 @@ DEFAULT_SECTION_ORDER = [
 ]
 VALID_SECTIONS = frozenset(DEFAULT_SECTION_ORDER)
 VALID_BUTTON_SIZES = frozenset({"sm", "md", "lg"})
-STATIC_BUTTON_SECTIONS = frozenset({"master", "power", "volume", "navigation", "picture", "status"})
+STATIC_BUTTON_SECTIONS = frozenset(
+    {"master", "power", "volume", "navigation", "picture", "status", "channels", "transport"}
+)
 DEFAULT_GRID_SIZE: dict[str, dict[str, int]] = {
     "master": {"cols": 4, "rows": 1},
     "power": {"cols": 3, "rows": 1},
@@ -57,6 +61,8 @@ DEFAULT_GRID_SIZE: dict[str, dict[str, int]] = {
     "navigation_actions": {"cols": 5, "rows": 1},
     "picture": {"cols": 3, "rows": 1},
     "status": {"cols": 4, "rows": 1},
+    "channels": {"cols": 3, "rows": 5},
+    "transport": {"cols": 3, "rows": 2},
 }
 MAX_GRID_COLS = 6
 MAX_GRID_ROWS = 12
@@ -103,6 +109,30 @@ STATIC_BUTTON_CATALOG: dict[str, list[dict[str, Any]]] = {
         {"id": "reboot", "title": "Reboot"},
         {"id": "query_power", "title": "Query Power"},
         {"id": "query_input", "title": "Query Input"},
+    ],
+    "channels": [
+        {"id": "num_1", "title": "1"},
+        {"id": "num_2", "title": "2"},
+        {"id": "num_3", "title": "3"},
+        {"id": "num_4", "title": "4"},
+        {"id": "num_5", "title": "5"},
+        {"id": "num_6", "title": "6"},
+        {"id": "num_7", "title": "7"},
+        {"id": "num_8", "title": "8"},
+        {"id": "num_9", "title": "9"},
+        {"id": "ch_down", "title": "CH−"},
+        {"id": "num_0", "title": "0"},
+        {"id": "ch_up", "title": "CH+"},
+        {"id": "last", "title": "Last"},
+        {"id": "guide", "title": "Guide"},
+    ],
+    "transport": [
+        {"id": "rewind", "title": "Rew"},
+        {"id": "play", "title": "Play"},
+        {"id": "forward", "title": "FF"},
+        {"id": "stop", "title": "Stop"},
+        {"id": "pause", "title": "Pause"},
+        {"id": "record", "title": "Rec", "variant": "danger"},
     ],
 }
 
@@ -1018,6 +1048,8 @@ def section_labels() -> dict[str, str]:
         "navigation": "Navigation",
         "picture": "Picture",
         "status": "Status",
+        "channels": "Channels",
+        "transport": "Transport",
         **cats,
     }
 
@@ -1315,7 +1347,17 @@ def remote_payload(display: dict[str, Any], discovered: dict[str, Any] | None = 
         "icon_revision": icon_rev,
         "remote_url": room_path(loc_id, display["id"]),
         "setup_url": room_setup_path(loc_id, display["id"]),
+        "features": _room_features_safe(display),
     }
+
+
+def _room_features_safe(display: dict[str, Any]) -> dict[str, Any]:
+    try:
+        from room_features import room_feature_summary
+
+        return room_feature_summary(display)
+    except Exception:
+        return {"broadlink": {"configured": False}, "epg": {"enabled": False}, "beacons": {"enabled": False}}
 
 
 def setup_candidates(display: dict[str, Any], discovered: dict[str, Any] | None) -> list[dict[str, Any]]:
@@ -1541,12 +1583,29 @@ def send_room_command(display_id: str, cmd: str) -> dict[str, Any]:
     display = get_display(display_id)
     if not display:
         raise KeyError(f"Unknown display: {display_id}")
-    
-    # Check if this display uses Broadlink for IR/RF control
+
+    # Hybrid routing: IR codes go through Broadlink when configured; everything else uses MDC.
     bl_cfg = broadlink_config(display)
     if bl_cfg and BROADLINK_AVAILABLE:
-        return _send_broadlink_command(display_id, cmd, bl_cfg, display)
-    
+        ir_codes = dict(display.get("ir_codes") or {})
+        ir_codes_file = display.get("ir_codes_file")
+        if ir_codes_file:
+            external_codes = load_ir_codes(ROOT / ir_codes_file)
+            ir_codes = {**external_codes, **ir_codes}
+        if cmd in ir_codes:
+            # Dry-run hosts never hit the network
+            host = bl_cfg.host
+            if display.get("broadlink", {}).get("dry_run") or host in ("0.0.0.0", "127.0.0.1", "dry-run"):
+                return {
+                    "ok": True,
+                    "display_id": display_id,
+                    "command": cmd,
+                    "method": "broadlink_ir_dry_run",
+                    "dry_run": True,
+                    "message": f"Dry-run IR send: {cmd}",
+                }
+            return _send_broadlink_command(display_id, cmd, bl_cfg, display)
+
     # Original MDC-based logic for Samsung displays
     discovered = load_display_map(display_id)
     commands = build_commands_for_display(display, discovered)

@@ -209,14 +209,30 @@ class BroadlinkClient:
 
 
 def load_ir_codes(yaml_file: Path) -> dict[str, str]:
-    """Load IR codes from a YAML file."""
+    """Load IR codes from a YAML file.
+
+    Accepts either:
+      ir_codes:
+        num_1: "..."
+    or a flat map:
+      num_1: "..."
+    """
     if not yaml or not yaml_file.exists():
         return {}
-    
+
     try:
         with open(yaml_file, "r", encoding="utf-8") as f:
             data = yaml.safe_load(f)
-            return data.get("ir_codes", {}) if data else {}
+        if not data or not isinstance(data, dict):
+            return {}
+        if isinstance(data.get("ir_codes"), dict):
+            return {str(k): str(v) for k, v in data["ir_codes"].items()}
+        # Flat map of command -> code (ignore nested non-string values)
+        return {
+            str(k): str(v)
+            for k, v in data.items()
+            if not isinstance(v, (dict, list)) and v is not None
+        }
     except Exception as e:
         logging.error(f"Failed to load IR codes from {yaml_file}: {e}")
         return {}

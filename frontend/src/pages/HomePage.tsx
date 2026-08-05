@@ -54,6 +54,28 @@ export function HomePage() {
         <p className="mt-2 text-sm text-muted">{lead}</p>
       </div>
 
+      <div className="rounded-2xl border border-accent/40 bg-panel p-4">
+        <strong>Try the new UI</strong>
+        <p className="mt-1 text-sm text-muted">
+          Open <strong>Features</strong> in the top nav, or open room{" "}
+          <strong>Billet</strong> and use the Channels / EPG / Presence tabs.
+        </p>
+        <div className="mt-3 flex flex-wrap gap-2">
+          <Link
+            to="/features"
+            className="rounded-xl bg-accent px-4 py-2.5 text-sm font-semibold text-white no-underline min-h-11 inline-flex items-center"
+          >
+            Open Features
+          </Link>
+          <Link
+            to="/d/conares/billet"
+            className="rounded-xl border border-border bg-panel-elevated px-4 py-2.5 text-sm font-semibold no-underline min-h-11 inline-flex items-center"
+          >
+            Open Billet remote
+          </Link>
+        </div>
+      </div>
+
       {site.show_default_remote !== false && defaultRemotePath && (
         <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-border bg-panel p-4">
           <div>

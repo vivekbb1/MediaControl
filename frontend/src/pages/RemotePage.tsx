@@ -78,7 +78,12 @@ export function RemotePage() {
     };
   }, [display]);
 
-  const hasChannels = Boolean(features?.broadlink?.configured);
+  const sectionsPreview = (display?.remote_sections ?? []) as Array<{
+    id?: string;
+  }>;
+  const hasChannelSection = sectionsPreview.some((s) => s.id === "channels");
+  const hasChannels =
+    Boolean(features?.broadlink?.configured) || hasChannelSection;
   const hasEpg = Boolean(features?.epg?.enabled);
   const hasPresence = Boolean(features?.beacons?.enabled);
 
@@ -234,10 +239,17 @@ export function RemotePage() {
           ))}
       </div>
 
-      {!hasChannels && (
+      {features?.broadlink?.configured && (
         <p className="rounded-xl border border-border bg-panel px-3 py-2 text-sm text-muted">
-          Channels tab appears when Broadlink is configured for this room.
-          Demo room: Billet.
+          Broadlink IR path active
+          {features.broadlink.dry_run ? " (dry-run)" : ""}. Prefer classic?{" "}
+          <a
+            className="text-accent"
+            href={`/d/${location}/${room}?section=channels`}
+          >
+            Open classic Channels
+          </a>
+          .
         </p>
       )}
 
@@ -288,7 +300,9 @@ export function RemotePage() {
       {tab === "remote" &&
         (sections.length > 0 ? (
           sections
-            .filter((section) => section.id !== "channels")
+            .filter(
+              (section) => !(hasChannels && section.id === "channels"),
+            )
             .map((section) => (
               <section key={section.id ?? section.title} className="space-y-2">
                 {(section.label || section.title) && (

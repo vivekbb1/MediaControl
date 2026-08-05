@@ -90,10 +90,19 @@ export function FeaturesPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-semibold">Extended Features</h2>
+        <h2 className="text-2xl font-semibold">Features catalog</h2>
         <p className="mt-2 text-sm text-muted">
-          New MediaControl capabilities layered on the legacy Flip remote. Green =
-          module loaded; amber = needs optional dependency or hardware config.
+          This is a <strong className="text-text">status / docs catalog</strong>,
+          not a second remote. Day-to-day control stays on the{" "}
+          <a href="/" className="text-accent">
+            classic UI
+          </a>{" "}
+          or{" "}
+          <Link to="/" className="text-accent">
+            app remotes
+          </Link>
+          . Green = Python module imports; many items still need hardware config
+          and do not have full control screens yet.
         </p>
       </div>
 

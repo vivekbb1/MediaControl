@@ -16,6 +16,12 @@ export function AppShell() {
           </span>
         )}
         <nav className="flex items-center gap-2">
+          <a
+            href="/"
+            className="rounded-xl border border-border bg-panel-elevated px-3 py-2 text-sm font-medium min-h-11 inline-flex items-center text-text no-underline hover:bg-panel"
+          >
+            Classic
+          </a>
           <NavLink
             to="/"
             end

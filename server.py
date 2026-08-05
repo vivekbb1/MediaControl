@@ -509,9 +509,8 @@ class RemoteHandler(SimpleHTTPRequestHandler):
             return
 
         if path == "/login" or path == "/login.html":
-            qs = urlparse(self.path).query
-            target = "/app/login" + (f"?{qs}" if qs else "")
-            return self._redirect(target)
+            self.path = "/login.html"
+            return super().do_GET()
 
         if path == "/button_svgs.js":
             import button_svgs as button_svgs_module
@@ -755,20 +754,33 @@ class RemoteHandler(SimpleHTTPRequestHandler):
                 return
 
         if path in ("/", "/index.html"):
-            # Default to the new React UI (Features / Channels / EPG live here)
-            return self._redirect("/app/")
+            # Classic HTML remote is the default day-to-day UI.
+            # React lives at /app/ (Channels tabs, Features catalog).
+            if not self._check_page_auth(path):
+                return self._redirect("/login")
+            self.path = "/index.html"
+            return super().do_GET()
 
         if self._serve_frontend(path):
             return
 
         if path in ("/add", "/add.html"):
-            return self._redirect("/app/add")
+            if not self._check_page_auth(path):
+                return self._redirect("/login?next=/add")
+            self.path = "/add.html"
+            return super().do_GET()
 
         if path in ("/locations", "/locations.html"):
-            return self._redirect("/app/locations")
+            if not self._check_page_auth(path):
+                return self._redirect("/login?next=/locations")
+            self.path = "/locations.html"
+            return super().do_GET()
 
         if path in ("/settings", "/settings.html"):
-            return self._redirect("/app/settings")
+            if not self._check_page_auth(path):
+                return self._redirect("/login?next=/settings")
+            self.path = "/settings.html"
+            return super().do_GET()
 
         legacy = re.match(r"^/d/([a-z0-9][a-z0-9_-]*)(/setup)?$", path)
         if legacy:
@@ -776,9 +788,6 @@ class RemoteHandler(SimpleHTTPRequestHandler):
             setup = bool(legacy.group(2))
             target = legacy_room_redirect(display_id, setup=setup)
             if target:
-                # Prefer React routes under /app
-                if target.startswith("/d/"):
-                    return self._redirect(f"/app{target}")
                 return self._redirect(target)
 
         m = re.match(r"^/d/([a-z0-9][a-z0-9_-]*)/([a-z0-9][a-z0-9_-]*)(/setup)?$", path)
@@ -789,11 +798,13 @@ class RemoteHandler(SimpleHTTPRequestHandler):
             if not resolve_room_route(location_id, display_id):
                 self.send_error(404)
                 return
-            target = f"/app/d/{location_id}/{display_id}" + ("/setup" if setup else "")
-            return self._redirect(target)
+            if not self._check_page_auth(path, display_id, setup=setup):
+                return self._redirect(f"/login?next={path}")
+            self.path = "/setup.html" if setup else "/remote.html"
+            return super().do_GET()
 
         if not self._session_user() and path.endswith(".html"):
-            return self._redirect("/app/login")
+            return self._redirect("/login")
         return super().do_GET()
 
     def do_POST(self):

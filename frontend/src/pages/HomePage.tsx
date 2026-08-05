@@ -41,7 +41,7 @@ export function HomePage() {
   const title = site.homepage_title || "TV Remotes";
   const lead =
     site.homepage_lead ||
-    "Locations group rooms by site. Each room has its own display IP for local control.";
+    "New app UI. Classic remotes (often clearer) live at / on the same server.";
 
   const defaultRemotePath = defaultRemoteUrl?.startsWith("/d/")
     ? defaultRemoteUrl
@@ -54,25 +54,46 @@ export function HomePage() {
         <p className="mt-2 text-sm text-muted">{lead}</p>
       </div>
 
-      <div className="rounded-2xl border border-accent/40 bg-panel p-4">
-        <strong>Try the new UI</strong>
-        <p className="mt-1 text-sm text-muted">
-          Open <strong>Features</strong> in the top nav, or open room{" "}
-          <strong>Billet</strong> and use the Channels / EPG / Presence tabs.
-        </p>
+      <div className="rounded-2xl border border-border bg-panel p-4 text-sm leading-relaxed">
+        <strong>Three layers (same server)</strong>
+        <ol className="mt-2 list-decimal space-y-2 pl-5 text-muted">
+          <li>
+            <a href="/" className="font-semibold text-accent">
+              Classic remote
+            </a>{" "}
+            — default day-to-day UI. Open a room and use the Channels pad.
+          </li>
+          <li>
+            <strong className="text-text">This /app UI</strong> — React remotes
+            with Channels / EPG / Presence tabs (demo room: Billet).
+          </li>
+          <li>
+            <Link to="/features" className="font-semibold text-accent">
+              Features catalog
+            </Link>{" "}
+            — status/docs for IR gateways, hospitality, access, etc. Not every
+            module has a full control screen yet.
+          </li>
+        </ol>
         <div className="mt-3 flex flex-wrap gap-2">
-          <Link
-            to="/features"
-            className="rounded-xl bg-accent px-4 py-2.5 text-sm font-semibold text-white no-underline min-h-11 inline-flex items-center"
+          <a
+            href="/"
+            className="inline-flex min-h-11 items-center rounded-xl bg-accent px-4 py-2.5 text-sm font-semibold text-white no-underline"
           >
-            Open Features
-          </Link>
+            Open classic home
+          </a>
           <Link
             to="/d/conares/billet?tab=channels"
-            className="rounded-xl border border-border bg-panel-elevated px-4 py-2.5 text-sm font-semibold no-underline min-h-11 inline-flex items-center"
+            className="inline-flex min-h-11 items-center rounded-xl border border-border bg-panel-elevated px-4 py-2.5 text-sm font-semibold no-underline"
           >
-            Open Channels (Billet)
+            App: Billet Channels
           </Link>
+          <a
+            href="/d/conares/billet?section=channels"
+            className="inline-flex min-h-11 items-center rounded-xl border border-border bg-panel-elevated px-4 py-2.5 text-sm font-semibold no-underline"
+          >
+            Classic: Billet Channels
+          </a>
         </div>
       </div>
 
@@ -82,17 +103,19 @@ export function HomePage() {
             <strong>Default remote</strong>
             <p className="text-sm text-muted">Open your primary room remote.</p>
           </div>
-          <Link
-            to={defaultRemotePath}
-            className="rounded-xl bg-accent px-4 py-2.5 text-sm font-semibold text-white no-underline min-h-11 inline-flex items-center"
+          <a
+            href={defaultRemotePath}
+            className="inline-flex min-h-11 items-center rounded-xl bg-accent px-4 py-2.5 text-sm font-semibold text-white no-underline"
           >
-            Open remote
-          </Link>
+            Classic remote
+          </a>
         </div>
       )}
 
       {error && (
-        <p className="rounded-xl bg-danger/15 px-4 py-3 text-sm text-danger">{error}</p>
+        <p className="rounded-xl bg-danger/15 px-4 py-3 text-sm text-danger">
+          {error}
+        </p>
       )}
 
       {locations.map((loc) => {
@@ -105,35 +128,52 @@ export function HomePage() {
               <span className="text-xs text-muted">{loc.id}</span>
             </div>
             <div className="grid gap-3">
-              {rooms.map((room) => (
-                <article
-                  key={room.id}
-                  className="flex flex-col gap-3 rounded-2xl border border-border bg-panel p-4 sm:flex-row sm:items-center sm:justify-between"
-                >
-                  <div>
-                    <h4 className="font-semibold">{room.title}</h4>
-                    <p className="text-xs text-muted">
-                      {room.ip ? `${room.ip}:${room.port ?? 1515}` : room.id}
-                    </p>
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    <Link
-                      to={roomAppPath(room.location, room.id)}
-                      className="rounded-xl bg-accent px-4 py-2.5 text-sm font-semibold text-white no-underline min-h-11 inline-flex items-center"
-                    >
-                      Remote
-                    </Link>
-                    {(user?.is_master || user?.role === "location_admin") && (
-                      <Link
-                        to={roomAppPath(room.location, room.id, true)}
-                        className="rounded-xl border border-border bg-panel-elevated px-4 py-2.5 text-sm font-semibold no-underline min-h-11 inline-flex items-center"
+              {rooms.map((room) => {
+                const hasBl = Boolean(
+                  (room.features as { broadlink?: { configured?: boolean } } | undefined)
+                    ?.broadlink?.configured,
+                );
+                return (
+                  <article
+                    key={room.id}
+                    className="flex flex-col gap-3 rounded-2xl border border-border bg-panel p-4 sm:flex-row sm:items-center sm:justify-between"
+                  >
+                    <div>
+                      <h4 className="font-semibold">{room.title}</h4>
+                      <p className="text-xs text-muted">
+                        {room.ip ? `${room.ip}:${room.port ?? 1515}` : room.id}
+                        {hasBl ? " · Broadlink / Channels" : ""}
+                      </p>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      <a
+                        href={`/d/${room.location}/${room.id}${hasBl ? "?section=channels" : ""}`}
+                        className="inline-flex min-h-11 items-center rounded-xl bg-accent px-4 py-2.5 text-sm font-semibold text-white no-underline"
                       >
-                        Setup
+                        Classic
+                      </a>
+                      <Link
+                        to={
+                          hasBl
+                            ? `${roomAppPath(room.location, room.id)}?tab=channels`
+                            : roomAppPath(room.location, room.id)
+                        }
+                        className="inline-flex min-h-11 items-center rounded-xl border border-border bg-panel-elevated px-4 py-2.5 text-sm font-semibold no-underline"
+                      >
+                        App remote
                       </Link>
-                    )}
-                  </div>
-                </article>
-              ))}
+                      {(user?.is_master || user?.role === "location_admin") && (
+                        <a
+                          href={`/d/${room.location}/${room.id}/setup`}
+                          className="inline-flex min-h-11 items-center rounded-xl border border-border bg-panel-elevated px-4 py-2.5 text-sm font-semibold no-underline"
+                        >
+                          Setup
+                        </a>
+                      )}
+                    </div>
+                  </article>
+                );
+              })}
             </div>
           </section>
         );
@@ -143,21 +183,12 @@ export function HomePage() {
         <p className="rounded-2xl border border-dashed border-border py-12 text-center text-muted">
           No rooms yet.{" "}
           {(user?.is_master || user?.role === "location_admin") && (
-            <Link to="/add" className="text-accent">
+            <a href="/add" className="text-accent">
               Add a room
-            </Link>
+            </a>
           )}
         </p>
       )}
-
-      <div className="rounded-xl border border-accent/30 bg-accent/5 p-4 text-sm">
-        <strong className="text-accent">Lovable handoff</strong>
-        <p className="mt-1 text-muted">
-          This scaffold is wired to the Python API. Import{" "}
-          <code className="text-text">frontend/</code> into Lovable and redesign
-          using <code className="text-text">docs/LOVABLE_UI_SCOPE.md</code>.
-        </p>
-      </div>
     </div>
   );
 }
